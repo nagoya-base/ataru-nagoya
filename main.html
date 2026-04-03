@@ -333,9 +333,63 @@
       margin-left: 0.4rem;
     }
 
+    /* ── FAQ ── */
+    .faq-list { display: grid; gap: 0.75rem; margin-top: 2rem; }
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .faq-item[open] { border-color: rgba(91, 143, 212, 0.4); }
+    .faq-q {
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 1.1rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style: none;
+      user-select: none;
+    }
+    .faq-q::-webkit-details-marker { display: none; }
+    .faq-q::after {
+      content: '+';
+      font-size: 1.2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-left: 1rem;
+      line-height: 1;
+    }
+    .faq-item[open] .faq-q::after { content: '−'; }
+    .faq-a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.85;
+      padding: 0 1.5rem 1.2rem;
+    }
+
     /* ── Contact ── */
     .contact-wrap { text-align: center; }
     .contact-wrap h2 { text-align: center; }
+    .contact-channels { display: grid; gap: 0.9rem; margin: 2rem auto 0; max-width: 480px; }
+    .contact-channel {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.1rem 1.5rem;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .contact-channel:hover { border-color: var(--accent); background: var(--bg-card2); color: var(--text); }
+    .contact-channel-icon { font-size: 1.25rem; flex-shrink: 0; }
+    .contact-channel-text { text-align: left; }
+    .contact-channel-label { font-size: 0.88rem; font-weight: 700; display: block; color: var(--text); }
+    .contact-channel-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; display: block; }
     .contact-desc {
       font-size: 0.9rem;
       color: var(--text-muted);
