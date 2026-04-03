@@ -973,7 +973,13 @@
 
 <script>
   function openModal(src) {
-    document.getElementById('modal-img').src = src;
+    var modalImg = document.getElementById('modal-img');
+    modalImg.src = src;
+    var srcAbsolute = new URL(src, document.baseURI).href;
+    var thumbImg = Array.from(document.querySelectorAll('.gallery-item img')).find(function (img) {
+      return img.src === srcAbsolute;
+    });
+    modalImg.alt = thumbImg ? thumbImg.alt : '';
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -997,6 +1003,21 @@
       hamburger.setAttribute('aria-expanded', 'false');
     })
   );
+
+  document.querySelectorAll('.gallery-item').forEach(function (item) {
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    var img = item.querySelector('img');
+    if (img) {
+      item.setAttribute('aria-label', (img.alt || '画像') + 'を開く');
+    }
+    item.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        item.click();
+      }
+    });
+  });
 </script>
 </body>
 </html>
