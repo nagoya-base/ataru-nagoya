@@ -177,11 +177,27 @@
     @media (max-width: 480px) {
       .card { padding: 2.25rem 1.5rem; }
     }
+
+    .noscript-notice {
+      background: rgba(239, 68, 68, 0.07);
+      border: 1px solid rgba(239, 68, 68, 0.22);
+      border-radius: 6px;
+      padding: 0.9rem 1.25rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.84rem;
+      color: #f87171;
+      line-height: 1.7;
+    }
   </style>
 </head>
 <body>
 
 <div class="card">
+  <noscript>
+    <div class="noscript-notice">
+      このサイトの年齢確認および画像ギャラリーにはJavaScriptが必要です。ブラウザの設定でJavaScriptを有効にしてください。
+    </div>
+  </noscript>
   <p class="brand">ATARU</p>
   <h1 class="title">コンテンツの確認</h1>
 

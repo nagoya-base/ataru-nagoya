@@ -508,6 +508,7 @@
     }
   })();
   </script>
+  <noscript><meta http-equiv="refresh" content="0; url=./"></noscript>
 </head>
 <body>
 
@@ -954,7 +955,7 @@
 </section>
 
 <!-- ── Modal ── -->
-<div id="modal" class="modal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeModal()">
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="画像プレビュー" onclick="if(event.target===this)closeModal()">
   <button class="modal-close" onclick="closeModal()" aria-label="閉じる">&times;</button>
   <img id="modal-img" class="modal-img" src="" alt="">
 </div>
@@ -972,14 +973,24 @@
 </footer>
 
 <script>
+  var lastFocused;
   function openModal(src) {
-    document.getElementById('modal-img').src = src;
+    lastFocused = document.activeElement;
+    var galleryImg = null;
+    document.querySelectorAll('.gallery-item img').forEach(function(img) {
+      if (img.getAttribute('src') === src) galleryImg = img;
+    });
+    var modalImg = document.getElementById('modal-img');
+    modalImg.src = src;
+    modalImg.alt = galleryImg ? galleryImg.alt : '';
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.querySelector('.modal-close').focus();
   }
   function closeModal() {
     document.getElementById('modal').classList.remove('open');
     document.body.style.overflow = '';
+    if (lastFocused) lastFocused.focus();
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
