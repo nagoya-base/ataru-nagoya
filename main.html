@@ -955,7 +955,7 @@
 </section>
 
 <!-- ── Modal ── -->
-<div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="画像プレビュー" onclick="if(event.target===this)closeModal()">
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="画像プレビュー" tabindex="-1" onclick="if(event.target===this)closeModal()">
   <button class="modal-close" onclick="closeModal()" aria-label="閉じる">&times;</button>
   <img id="modal-img" class="modal-img" src="" alt="">
 </div>
@@ -974,6 +974,8 @@
 
 <script>
   var lastFocused;
+  const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
   function openModal(src) {
     lastFocused = document.activeElement;
     var galleryImg = null;
@@ -983,16 +985,39 @@
     var modalImg = document.getElementById('modal-img');
     modalImg.src = src;
     modalImg.alt = galleryImg ? galleryImg.alt : '';
-    document.getElementById('modal').classList.add('open');
+    var modal = document.getElementById('modal');
+    modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.querySelectorAll('body > *:not(#modal)').forEach(function(el) {
+      el.inert = true;
+    });
     document.querySelector('.modal-close').focus();
   }
+
   function closeModal() {
-    document.getElementById('modal').classList.remove('open');
+    var modal = document.getElementById('modal');
+    modal.classList.remove('open');
     document.body.style.overflow = '';
+    document.querySelectorAll('body > *:not(#modal)').forEach(function(el) {
+      el.inert = false;
+    });
     if (lastFocused) lastFocused.focus();
   }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeModal(); return; }
+    var modal = document.getElementById('modal');
+    if (e.key === 'Tab' && modal.classList.contains('open')) {
+      var focusable = Array.from(modal.querySelectorAll(FOCUSABLE));
+      if (focusable.length === 0) { e.preventDefault(); modal.focus(); return; }
+      var activeInList = focusable.indexOf(document.activeElement);
+      if (e.shiftKey) {
+        if (activeInList <= 0) { e.preventDefault(); focusable[focusable.length - 1].focus(); }
+      } else {
+        if (activeInList === -1 || activeInList === focusable.length - 1) { e.preventDefault(); focusable[0].focus(); }
+      }
+    }
+  });
 
   const hamburger = document.querySelector('.hamburger');
   const navLinks = document.querySelector('.nav-links');
