@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>スタジオ見学会｜アタル</title>
+  <style>
+    :root {
+      --bg: #f9f9fb;
+      --card-bg: #ffffff;
+      --accent: #2563eb;
+      --accent-sub: #7c3aed;
+      --text: #1a1a2e;
+      --subtext: #6b7280;
+      --border: #e5e7eb;
+      --section-bg: #f3f4f6;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Hiragino Sans', 'Noto Sans JP', 'Meiryo', sans-serif;
+      line-height: 1.8;
+    }
+
+    .container {
+      width: min(100%, 1040px);
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    section { padding: 2.5rem 0; }
+    .section-alt { background: var(--section-bg); }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h2 {
+      font-size: clamp(1.4rem, 3.2vw, 2rem);
+      margin-bottom: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .lead {
+      color: var(--subtext);
+      margin-bottom: 1.1rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+    }
+
+    .hero {
+      padding: 3rem 0 2.2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.9rem, 6vw, 2.8rem);
+      line-height: 1.35;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-copy {
+      color: var(--subtext);
+      margin-bottom: 1.3rem;
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+    }
+
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+      border-radius: var(--radius);
+      padding: 0.78rem 1rem;
+      font-weight: 700;
+      border: 1px solid var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--accent);
+    }
+
+    .banner {
+      background: #eff6ff;
+      border-left: 4px solid var(--accent);
+    }
+
+    .banner h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .concept-grid,
+    .equipment-grid,
+    .faq-grid,
+    .contact-grid,
+    .example-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+    }
+
+    .concept-card h3,
+    .equipment-card h3,
+    .faq-card h3,
+    .contact-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .concept-card p,
+    .equipment-card p,
+    .faq-card p,
+    .contact-card p {
+      margin: 0;
+      color: var(--subtext);
+    }
+
+    .example-grid { margin-top: 1rem; }
+
+    .example-grid img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: block;
+    }
+
+    .equipment-card ul {
+      margin: 0 0 0.7rem;
+      padding-left: 1.15rem;
+      color: var(--text);
+    }
+
+    .equipment-card li { margin-bottom: 0.25rem; }
+
+    .equipment-note {
+      color: var(--accent-sub);
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .mail-link,
+    .x-link {
+      color: var(--accent);
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    footer {
+      padding: 1.5rem 0 2.2rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      color: var(--subtext);
+      font-size: 0.92rem;
+    }
+
+    .footer-links {
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .footer-links a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (min-width: 768px) {
+      .container { padding: 0 1.25rem; }
+      section { padding: 3.1rem 0; }
+
+      .hero-actions {
+        grid-template-columns: repeat(2, max-content);
+        justify-content: start;
+      }
+
+      .concept-grid,
+      .example-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .equipment-grid,
+      .contact-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .faq-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <h1>照明が変わると、あなたが変わる。</h1>
+      <p class="hero-copy">スタジオ撮影がはじめての男性へ。完全個室・無人・匿名OK。まずは無料見学から。</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">無料見学を問い合わせる</a>
+        <a href="#equipment" class="btn btn-secondary">機材を見る</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="container">
+        <div class="card banner">
+          <h2>📅 スタジオ無料見学会 開催中</h2>
+          <p>平日夜（火・木・金　20:00〜）<br>休日　応相談</p>
+          <p>照明・機材をその場で触って確認できます。<br>質問だけでもOK。予約不要。</p>
+          <p>完全個室・名古屋上前津エリア</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-alt">
+      <div class="container">
+        <h2>💡 照明が違うとこう変わる</h2>
+        <div class="concept-grid">
+          <article class="card concept-card">
+            <h3>💡 体のラインが意図通り出る</h3>
+            <p>屋外の自然光と違い、光の方向・強さを完全にコントロールできます。</p>
+          </article>
+          <article class="card concept-card">
+            <h3>🎨 背景を白・黒・カラーで選べる</h3>
+            <p>同じ衣装でも背景と照明の組み合わせで全く別の仕上がりになります。</p>
+          </article>
+          <article class="card concept-card">
+            <h3>🔒 完全個室・無人で使える</h3>
+            <p>スタッフ常駐なし。予約時間は貸し切りです。</p>
+          </article>
+        </div>
+
+        <div class="example-grid">
+          <img src="https://nagoya-base.github.io/ataru-nagoya/images/224A3133.jpeg" loading="lazy" alt="ユニフォーム撮影作例">
+          <img src="https://nagoya-base.github.io/ataru-nagoya/images/IMG_7264.jpeg" loading="lazy" alt="野球ユニフォーム撮影作例">
+          <img src="https://nagoya-base.github.io/ataru-nagoya/images/IMG_7278.jpeg" loading="lazy" alt="コスプレ撮影作例">
+        </div>
+      </div>
+    </section>
+
+    <section id="equipment">
+      <div class="container">
+        <h2>📸 機材リスト</h2>
+        <div class="equipment-grid">
+          <article class="card equipment-card">
+            <h3>① 💡 ライティング機材</h3>
+            <ul>
+              <li>Godox AD200Pro（高出力ストロボ）</li>
+              <li>Godox SK400II（メインストロボ）</li>
+              <li>NEEWER FS150B（高出力COB定常光）</li>
+              <li>NEEWER FS150C（高出力フルカラーCOB定常光）</li>
+              <li>NEEWER 660 Pro II RGB（フルカラーLED）</li>
+              <li>NEEWER 660 LED（補助定常光）</li>
+            </ul>
+            <p class="equipment-note">ストロボ2灯＋定常光の同時使用で、体のラインと表情を別々にコントロールできます。</p>
+          </article>
+
+          <article class="card equipment-card">
+            <h3>② 🔲 光質コントロール</h3>
+            <ul>
+              <li>ストリップソフトボックス 60×90cm</li>
+              <li>ストリップソフトボックス 30×120cm</li>
+              <li>UL-BOX-60（クイック展開ソフトボックス）</li>
+              <li>カラーフィルター各種</li>
+            </ul>
+            <p class="equipment-note">光を柔らかくしたり、縦に伸びたハイライトを作ったり、用途に合わせて組み替えます。</p>
+          </article>
+
+          <article class="card equipment-card">
+            <h3>③ 🖼️ 撮影環境</h3>
+            <ul>
+              <li>天井設置 背景ローラーシステム</li>
+              <li>白・黒背景紙常設</li>
+              <li>背景スタンド（可搬型）</li>
+            </ul>
+            <p class="equipment-note">背景切り替えはワンアクション。白→黒→カラーバックへの変更も撮影中に対応できます。</p>
+          </article>
+
+          <article class="card equipment-card">
+            <h3>④ 🛠️ サポート機材</h3>
+            <ul>
+              <li>エアクッションライトスタンド複数</li>
+              <li>レフ板（5in1）</li>
+            </ul>
+            <p class="equipment-note">スタンドは安定性重視のエアクッション式。レフ板で影の入り方を微調整できます。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-alt">
+      <div class="container">
+        <h2>🟣 よくある不安</h2>
+        <div class="faq-grid">
+          <article class="card faq-card">
+            <h3>Q1：スタジオを使ったことがないのですが大丈夫ですか？</h3>
+            <p>A：はじめての方がほとんどです。見学会では照明の触り方・背景の使い方を実際に確認していただけます。</p>
+          </article>
+          <article class="card faq-card">
+            <h3>Q2：匿名で問い合わせできますか？個人情報はどうなりますか？</h3>
+            <p>A：ニックネームやイニシャルで構いません。いただいた情報はご案内のみに使用し、第三者への共有・無断公開は一切行いません。</p>
+          </article>
+          <article class="card faq-card">
+            <h3>Q3：一人で行っても大丈夫ですか？</h3>
+            <p>A：はい。おひとりでのご利用が大半です。見学は完全個室で行います。</p>
+          </article>
+          <article class="card faq-card">
+            <h3>Q4：見学だけでも来られますか？予約は必要ですか？</h3>
+            <p>A：見学のみで構いません。事前にメールでご連絡いただければ日程を調整します。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="container">
+        <h2>📩 まずは見学から。気軽に連絡してください。</h2>
+        <p class="lead">質問だけでも、ニックネームでも構いません。</p>
+        <div class="contact-grid">
+          <article class="card contact-card">
+            <h3>📧 メールで問い合わせる<br>nagoyabase2023@gmail.com</h3>
+            <p>件名：スタジオ見学会お問い合わせ</p>
+            <p>希望日・時間帯・質問内容を書いて送るだけ。<br>返信は通常24時間以内。</p>
+            <p><a class="mail-link" href="mailto:nagoyabase2023@gmail.com?subject=スタジオ見学会お問い合わせ">メールを開く</a></p>
+          </article>
+
+          <article class="card contact-card">
+            <h3>✉️ X（旧Twitter）のDMで連絡する<br>@ataru_nawa2020</h3>
+            <p>短い質問だけでもOK。</p>
+            <p><a class="x-link" href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener">Xで連絡する</a></p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>© 2026 アタル. All rights reserved.</div>
+    <div class="footer-links">
+      <a href="https://nagoya-base.github.io/ataru-nagoya/portrait.html">ポートレートページへ</a>
+      <a href="https://nagoya-base.github.io/ataru-nagoya/main.html">メインページへ</a>
+    </div>
+  </footer>
+</body>
+</html>
