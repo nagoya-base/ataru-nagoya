@@ -646,6 +646,61 @@
     }
     .modal-close:hover { background: rgba(255,255,255,0.18); }
 
+    /* ── Type cards ── */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .type-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.6rem 1.4rem;
+    }
+    .type-card.featured {
+      border-color: rgba(26, 53, 87, 0.4);
+      background: rgba(26, 53, 87, 0.03);
+    }
+    .type-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
+    .type-title { font-size: 1rem; font-weight: 800; color: var(--navy); margin-bottom: 0.3rem; }
+    .type-price {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 0.7rem;
+    }
+    .type-price small { font-size: 0.8rem; color: var(--text-muted); font-weight: 400; }
+    .type-list {
+      list-style: none;
+      display: grid;
+      gap: 0.3rem;
+      margin-bottom: 1.1rem;
+    }
+    .type-list li {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      padding-left: 1rem;
+      position: relative;
+    }
+    .type-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .type-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--bg-card2);
+      border-radius: 4px;
+      padding: 0.5rem 0.75rem;
+      margin-top: 0.5rem;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 640px) {
       .nav-links { display: none; }
@@ -670,6 +725,7 @@
       .hero-content { padding: 2.5rem 0 4rem; }
 
       .safety-grid { grid-template-columns: 1fr; }
+      .type-grid { grid-template-columns: 1fr; }
       .gallery-grid { grid-template-columns: repeat(2, 1fr); }
 
       .final-cta { padding: 4rem 0; }
@@ -721,6 +777,7 @@
         <span class="hero-spec">6/14のみ</span>
         <span class="hero-spec">名古屋・上前津</span>
         <span class="hero-spec">初心者歓迎</span>
+        <span class="hero-spec">10:00〜17:00</span>
       </div>
       <div class="hero-btns">
         <a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
@@ -729,6 +786,41 @@
         <a href="mailto:nagoyabase2023@gmail.com?subject=20260614撮影会お問い合わせ" class="btn btn-outline btn-lg">
           📋 メールで予約・相談する
         </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Participation type ── -->
+<section id="type">
+  <div class="container">
+    <p class="section-label">How to Join</p>
+    <h2>参加タイプを選んでください</h2>
+    <div class="type-grid">
+      <div class="type-card featured">
+        <div class="type-icon">📷</div>
+        <div class="type-title">被写体として参加</div>
+        <div class="type-price">¥3,000 <small>/ 90分</small></div>
+        <ul class="type-list">
+          <li>一眼レフ＋ストロボで撮ってもらう</li>
+          <li>スポユニ・コスプレ・フェチ衣装OK</li>
+          <li>白背景・カラー照明・学校机あり</li>
+          <li>撮影指示あり・初めてでも安心</li>
+          <li>データ当日お渡し</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary" style="display:block;text-align:center;width:100%;border-radius:6px;">予約する</a>
+      </div>
+      <div class="type-card">
+        <div class="type-icon">🎥</div>
+        <div class="type-title">撮影者として見学</div>
+        <div class="type-price">無料 <small>（事前連絡必須）</small></div>
+        <ul class="type-list">
+          <li>スタジオ機材・ライティングの解説</li>
+          <li>カメラ持参OK（実機で試せる）</li>
+          <li>ストロボ・照明の使い方を実際に確認</li>
+        </ul>
+        <div class="type-note">※ その日の被写体参加者を撮影することはできません。機材・環境の見学のみとなります。</div>
+        <a href="#contact" class="btn btn-outline" style="display:block;text-align:center;width:100%;border-radius:6px;margin-top:1rem;border-color:var(--border);color:var(--navy);">見学を申し込む</a>
       </div>
     </div>
   </div>
@@ -773,6 +865,13 @@
         <div>
           <strong>「一回だけ試してみたい」くらいの温度感</strong>
           <span>¥3,000だし一回くらい——という気持ちで来てください。それが一番正しいです。</span>
+        </div>
+      </div>
+      <div class="target-item">
+        <span class="ti-icon">🔦</span>
+        <div>
+          <strong>スタジオの機材やライティングを実際に見てみたい</strong>
+          <span>撮影者・カメラマン志望の方向けに見学会も実施。カメラ持参OK、参加無料。</span>
         </div>
       </div>
     </div>
@@ -886,6 +985,10 @@
       </div>
       <div class="price-box-body">
         <div class="price-row">
+          <span class="pr-label">受付時間帯</span>
+          <span class="pr-val">10:00〜17:00（第1・第2希望制）</span>
+        </div>
+        <div class="price-row">
           <span class="pr-label">撮影時間</span>
           <span class="pr-val">90分</span>
         </div>
@@ -909,7 +1012,7 @@
     </div>
     <div class="price-note">
       <strong style="color: var(--text);">作例掲載OK協力価格について</strong><br>
-      撮影した写真をポートフォリオ・SNS等への掲載にご協力いただける方には、同内容でさらにお得な「協力価格」でご案内します。詳細はDMまたはフォームにてお問い合わせください。<br><br>
+      撮影した写真をポートフォリオ・SNS等への掲載にご協力いただける方には、同内容でさらにお得な「協力価格」でご案内します。詳細はDMまたはメールにてお問い合わせください。<br><br>
       <span style="color: var(--accent); font-weight: 700;">この価格は6/14の試験開催のみ。次回開催は未定です。</span>
     </div>
   </div>
@@ -925,7 +1028,7 @@
         <div class="flow-num">1</div>
         <div class="flow-text">
           <strong>DMまたはメールで予約</strong>
-          <span>希望時間帯をお知らせください。匿名・ニックネームOK。返信は通常24時間以内。</span>
+          <span>希望時間帯（第1・第2希望）をお知らせください。10:00〜17:00の間で調整します。返信は通常24時間以内。</span>
         </div>
       </div>
       <div class="flow-step">
@@ -986,7 +1089,7 @@
       <details>
         <summary>予約のキャンセルはできますか？</summary>
         <div class="faq-body">
-          前日までのご連絡であればキャンセル可能です。当日のキャンセルはご遠慮ください。詳細はDMまたはフォームにてご確認ください。
+          前日までのご連絡であればキャンセル可能です。当日のキャンセルはご遠慮ください。詳細はDMまたはメールにてご確認ください。
         </div>
       </details>
     </div>
