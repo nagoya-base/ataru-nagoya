@@ -146,7 +146,15 @@
 
     .example-grid { margin-top: 1rem; }
 
-    .example-grid img {
+    .example-item {
+      margin: 0;
+    }
+
+    .example-img-wrap {
+      position: relative;
+    }
+
+    .example-img-wrap img {
       width: 100%;
       height: 280px;
       object-fit: cover;
@@ -154,6 +162,35 @@
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
       display: block;
+    }
+
+    .example-badge {
+      position: absolute;
+      top: 0.6rem;
+      left: 0.6rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.22rem 0.6rem;
+      border-radius: 4px;
+      line-height: 1;
+    }
+
+    .example-badge.before {
+      background: rgba(0, 0, 0, 0.55);
+      color: #fff;
+    }
+
+    .example-badge.after {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .example-item figcaption {
+      font-size: 0.88rem;
+      color: var(--subtext);
+      margin-top: 0.45rem;
+      text-align: center;
     }
 
     .equipment-card ul {
@@ -266,9 +303,27 @@
         </div>
 
         <div class="example-grid">
-          <img src="https://nagoya-base.github.io/ataru-nagoya/images/224A3133.jpeg" loading="lazy" alt="ユニフォーム撮影作例">
-          <img src="https://nagoya-base.github.io/ataru-nagoya/images/IMG_7264.jpeg" loading="lazy" alt="野球ユニフォーム撮影作例">
-          <img src="https://nagoya-base.github.io/ataru-nagoya/images/IMG_7278.jpeg" loading="lazy" alt="コスプレ撮影作例">
+          <figure class="example-item">
+            <div class="example-img-wrap">
+              <img src="https://nagoya-base.github.io/ataru-nagoya/images/224A3133.jpeg" loading="lazy" alt="作例：部屋の照明のみ">
+              <span class="example-badge before">BEFORE</span>
+            </div>
+            <figcaption>部屋の照明のみ</figcaption>
+          </figure>
+          <figure class="example-item">
+            <div class="example-img-wrap">
+              <img src="https://nagoya-base.github.io/ataru-nagoya/images/IMG_7264.jpeg" loading="lazy" alt="作例：ストロボ＋黒背景">
+              <span class="example-badge after">AFTER</span>
+            </div>
+            <figcaption>ストロボ＋黒背景</figcaption>
+          </figure>
+          <figure class="example-item">
+            <div class="example-img-wrap">
+              <img src="https://nagoya-base.github.io/ataru-nagoya/images/IMG_7278.jpeg" loading="lazy" alt="作例：ストロボ＋白背景">
+              <span class="example-badge after">AFTER</span>
+            </div>
+            <figcaption>ストロボ＋白背景</figcaption>
+          </figure>
         </div>
       </div>
     </section>
