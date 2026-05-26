@@ -64,6 +64,75 @@
     @media (max-width: 640px) {
       .type-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Visual / Concept ── */
+    .visual-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .concept-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.1rem 1.2rem;
+    }
+    .concept-card h3 { font-size: 0.95rem; font-weight: 800; color: var(--navy); margin-bottom: 0.4rem; }
+    .concept-card p { font-size: 0.88rem; color: var(--text-muted); margin: 0; }
+
+    /* ── Gallery (before/after) ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .gallery-item { margin: 0; }
+    .gallery-img-wrap { position: relative; }
+    .gallery-img-wrap img {
+      width: 100%; height: 230px; object-fit: cover;
+      border-radius: 8px; border: 1px solid var(--border); display: block;
+    }
+    .gallery-badge {
+      position: absolute; top: 0.5rem; left: 0.5rem;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+      padding: 0.2rem 0.55rem; border-radius: 4px; line-height: 1;
+    }
+    .gallery-badge.before { background: rgba(0,0,0,0.55); color: #fff; }
+    .gallery-badge.after  { background: var(--accent); color: #fff; }
+    .gallery-item figcaption {
+      font-size: 0.82rem; color: var(--text-muted); margin-top: 0.4rem; text-align: center;
+    }
+
+    /* ── FAQ ── */
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .faq-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.1rem 1.2rem;
+    }
+    .faq-card h3 { font-size: 0.95rem; font-weight: 800; color: var(--navy); margin-bottom: 0.5rem; line-height: 1.5; }
+    .faq-card p { font-size: 0.88rem; color: var(--text-muted); margin: 0; }
+
+    /* ── Schedule note ── */
+    .schedule-note {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      margin-top: 1.5rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.9;
+    }
+    .schedule-note strong { color: var(--navy); font-weight: 800; }
   </style>
 </head>
 <body>
@@ -130,6 +199,53 @@
       <div class="type-cta-wrap">
         <a href="#contact" class="btn btn-primary">見学 or 体験を申し込む →</a>
       </div>
+      <div class="schedule-note">
+        <strong>開催日時：</strong>平日夜（火・木・金　20:00〜）／ 休日 応相談<br>
+        どちらも事前予約制。名古屋・上前津エリア。
+      </div>
+    </section>
+
+    <!-- ── Gallery ── -->
+    <section id="gallery">
+      <p class="section-label">Visual Proof</p>
+      <h2>ライティングで変わる、写真の世界</h2>
+      <div class="visual-grid">
+        <div class="concept-card">
+          <h3>💡 体のラインが意図通り出る</h3>
+          <p>屋外の自然光と違い、光の方向・強さを完全にコントロールできます。</p>
+        </div>
+        <div class="concept-card">
+          <h3>🎨 背景を白・黒・カラーで選べる</h3>
+          <p>同じ衣装でも背景と照明の組み合わせで全く別の仕上がりになります。</p>
+        </div>
+        <div class="concept-card">
+          <h3>🔒 完全個室・貸し切りで使える</h3>
+          <p>スタッフ常駐なし。予約時間は貸し切り。自分のペースで試せます。</p>
+        </div>
+      </div>
+      <div class="gallery-grid">
+        <figure class="gallery-item">
+          <div class="gallery-img-wrap">
+            <img src="../images/224A3133.jpeg" loading="lazy" alt="作例：部屋の照明のみ">
+            <span class="gallery-badge before">BEFORE</span>
+          </div>
+          <figcaption>部屋の照明のみ</figcaption>
+        </figure>
+        <figure class="gallery-item">
+          <div class="gallery-img-wrap">
+            <img src="../images/IMG_7264.jpeg" loading="lazy" alt="作例：ストロボ＋黒背景">
+            <span class="gallery-badge after">AFTER</span>
+          </div>
+          <figcaption>ストロボ＋黒背景</figcaption>
+        </figure>
+        <figure class="gallery-item">
+          <div class="gallery-img-wrap">
+            <img src="../images/IMG_7278.jpeg" loading="lazy" alt="作例：ストロボ＋白背景">
+            <span class="gallery-badge after">AFTER</span>
+          </div>
+          <figcaption>ストロボ＋白背景</figcaption>
+        </figure>
+      </div>
     </section>
 
     <!-- ── Equipment ── -->
@@ -185,6 +301,30 @@
             <strong>コアユーザーへのステップアップ</strong>
             <p>見学 → お試し体験 → 定期利用と、自分のペースで関わり方を深められます。常連ユーザー向けの相談も随時受け付けています。</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FAQ ── -->
+    <section id="faq">
+      <p class="section-label">FAQ</p>
+      <h2>よくある不安</h2>
+      <div class="faq-grid">
+        <div class="faq-card">
+          <h3>Q1：自分の機材と一緒に使えますか？</h3>
+          <p>A：はい。持ち込み機材とスタジオ常設機材の併用が可能です。ストロボとカメラの同調設定などは見学時にその場で確認できます。Canon・SONYに対応しています。</p>
+        </div>
+        <div class="faq-card">
+          <h3>Q2：ライティングをあまり組んだことがないのですが大丈夫ですか？</h3>
+          <p>A：見学会では実際に光を当てながら確認できます。「こういう写真を撮りたい」というイメージを持ってきていただければ、セッティングの参考になります。</p>
+        </div>
+        <div class="faq-card">
+          <h3>Q3：撮影相手と一緒に見学できますか？</h3>
+          <p>A：はい。被写体の方と一緒にお越しいただいても構いません。空間の広さ・動線・照明の雰囲気を事前に確認しておくと当日の撮影がスムーズです。</p>
+        </div>
+        <div class="faq-card">
+          <h3>Q4：匿名で問い合わせできますか？</h3>
+          <p>A：ニックネームやイニシャルで構いません。いただいた情報はご案内のみに使用し、第三者への共有・無断公開は一切行いません。</p>
         </div>
       </div>
     </section>
