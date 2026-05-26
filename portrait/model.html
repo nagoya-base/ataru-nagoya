@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>モデル向け ポートレート体験コース｜アタル 名古屋・上前津</title>
+  <meta name="description" content="被写体（モデル）として参加するポートレート体験。90分¥3,000のキャンペーンプランほか。スポーツユニフォーム・コスプレ・ポートレート歓迎。完全貸切・初心者OK。">
+  <meta name="robots" content="index, follow">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8K1TJG0S9Y"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8K1TJG0S9Y');
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── model.html 固有スタイル ── */
+
+    .campaign-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 0.28rem 0.9rem;
+      border-radius: 20px;
+      margin-bottom: 1.25rem;
+    }
+
+    .plan-featured {
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .plan-featured::after {
+      content: 'CAMPAIGN';
+      position: absolute;
+      top: 16px; right: -22px;
+      background: var(--accent); color: #fff;
+      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.12em;
+      padding: 0.22rem 2rem;
+      transform: rotate(30deg);
+    }
+    .plan-featured-header {
+      display: flex; align-items: baseline; flex-wrap: wrap;
+      gap: 0.75rem 1.25rem; margin-bottom: 1rem;
+    }
+    .plan-featured-name { font-size: 1.2rem; font-weight: 800; color: var(--navy); }
+    .plan-featured-price { font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .plan-featured-price small { font-size: 0.88rem; font-weight: 400; color: var(--text-muted); }
+    .plan-featured-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0.3rem; margin-bottom: 1.2rem;
+    }
+    .plan-featured-list li {
+      font-size: 0.88rem; padding-left: 1.2em; position: relative; color: var(--text-muted);
+    }
+    .plan-featured-list li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+    .plan-featured-note {
+      font-size: 0.82rem; color: var(--text-muted);
+      background: var(--bg-card2); padding: 0.6rem 0.9rem; border-radius: 6px;
+    }
+
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem; margin-bottom: 1.2rem;
+    }
+    .plan-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+    .plan-name { margin: 0 0 0.55rem; font-size: 1rem; font-weight: 700; }
+    .plan-desc { margin: 0 0 0.6rem; font-size: 0.88rem; color: var(--text-muted); }
+    .price-row {
+      display: flex; justify-content: space-between; gap: 0.8rem;
+      font-size: 0.94rem; border-top: 1px dashed var(--border); padding-top: 0.65rem;
+    }
+    .price-value { font-weight: 800; color: var(--accent); white-space: nowrap; }
+
+    .photo-features { list-style: none; margin: 0 0 1rem; }
+    .photo-features li { padding: 0.25rem 0 0.25rem 1.3em; position: relative; font-size: 0.88rem; }
+    .photo-features li::before { content: '›'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
+    .session-note {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-left: 4px solid var(--accent); border-radius: 8px;
+      padding: 0.8rem 1rem; margin-bottom: 1.4rem;
+      font-size: 0.88rem; color: var(--text-muted);
+    }
+
+    .gallery-label { margin: 0 0 0.6rem; font-weight: 700; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.75rem; }
+    .gallery img {
+      width: 100%; height: 100%; min-height: 230px;
+      object-fit: cover; border-radius: 10px; border: 1px solid var(--border); display: block;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav>
+  <span class="nav-brand"><span>●</span> ATARU</span>
+  <ul class="nav-links-sub">
+    <li><a href="index.html">← ポートレートトップ</a></li>
+    <li><a href="photographer.html">撮影者向け</a></li>
+    <li><a href="../main.html">メインページ</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">予約する</a>
+</nav>
+
+<!-- ── Header ── -->
+<header>
+  <div class="container">
+    <p class="hero-tag">Portrait Session · Model Course</p>
+    <h1>📸 モデルとして参加する</h1>
+    <p class="hero-lead">一眼レフ＋ストロボで、あなたを本格的に撮影します。ポーズ指示あり、スタジオ未経験でも安心。</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn btn-primary">予約・相談する</a>
+      <a href="index.html" class="btn btn-white">コース一覧へ戻る</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- ── Campaign plan ── -->
+    <section id="campaign">
+      <p class="section-label">Campaign</p>
+      <h2>体験プラン</h2>
+      <span class="campaign-badge">🎉 今回限り・キャンペーン価格</span>
+      <div class="plan-featured">
+        <div class="plan-featured-header">
+          <span class="plan-featured-name">ポートレート体験ライトコース</span>
+          <span class="plan-featured-price">¥3,000 <small>/ 90分</small></span>
+        </div>
+        <ul class="plan-featured-list">
+          <li>一眼レフ＋ストロボで本格撮影</li>
+          <li>白背景・カラー照明・学校机あり</li>
+          <li>ポーズ・撮影指示あり</li>
+          <li>スタジオ未経験OK</li>
+          <li>データ5枚 当日渡し（撮って出し）</li>
+          <li>スポユニ・コスプレ・ポートレートOK</li>
+        </ul>
+        <p class="plan-featured-note">※ 今回限りのキャンペーン価格です。通常の体験プランは¥5,000となります。</p>
+      </div>
+    </section>
+
+    <!-- ── Regular plans ── -->
+    <section id="plans">
+      <p class="section-label">Photography Plans</p>
+      <h2>通常プラン</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">しっかり作品を作りたい方向けの定番コースです。</p>
+
+      <div class="plans">
+        <article class="plan-card">
+          <h3 class="plan-name">🟡 体験プラン 90分</h3>
+          <p class="plan-desc">パネルライト＋Hueで雰囲気を楽しむライトな体験。</p>
+          <div class="price-row">
+            <span>納品5枚（撮って出し）</span>
+            <span class="price-value">¥5,000</span>
+          </div>
+        </article>
+
+        <article class="plan-card">
+          <h3 class="plan-name">🔵 スタンダード 2時間</h3>
+          <p class="plan-desc">ストロボ1灯で、しっかりしたポートレートに。</p>
+          <div class="price-row">
+            <span>納品15枚（軽調整込み）</span>
+            <span class="price-value">¥10,000</span>
+          </div>
+        </article>
+
+        <article class="plan-card">
+          <h3 class="plan-name">🟣 作品撮り 2時間</h3>
+          <p class="plan-desc">ストロボ複数 or COBでライティング込みの作品制作。</p>
+          <div class="price-row">
+            <span>納品15枚＋一部レタッチ</span>
+            <span class="price-value">¥15,000</span>
+          </div>
+        </article>
+      </div>
+
+      <ul class="photo-features">
+        <li>1組貸切（完全プライベート）</li>
+        <li>初心者OK・ポージング／撮影サポートあり</li>
+        <li>白背景・黒背景どちらも対応</li>
+      </ul>
+
+      <div class="session-note">
+        スタンダード以上は白背景をより明るく仕上げることも可能。黒背景はサイド光などアレンジにも対応します。
+      </div>
+    </section>
+
+    <!-- ── Gallery ── -->
+    <section id="gallery">
+      <p class="section-label">Gallery</p>
+      <h2>作例</h2>
+      <p class="gallery-label">📷 コスプレ・ユニフォーム</p>
+      <div class="gallery">
+        <img src="../images/IMG_7278.jpeg" alt="コスプレ作例" loading="lazy">
+        <img src="../images/224A3133.jpeg" alt="ユニフォーム作例" loading="lazy">
+        <img src="../images/IMG_7264.jpeg" alt="野球ユニフォーム作例" loading="lazy">
+      </div>
+    </section>
+
+    <!-- ── Contact ── -->
+    <section id="contact">
+      <p class="section-label">Contact</p>
+      <h2>ご予約・お問い合わせ</h2>
+      <p>ご質問だけでも、匿名でも構いません。希望日程・内容をお知らせください。</p>
+      <div class="contact-links">
+        <a href="mailto:nagoyabase2023@gmail.com?subject=ポートレート体験お問い合わせ" class="contact-link">
+          メールで相談・予約する
+          <span class="contact-note">nagoyabase2023@gmail.com　返信は通常24時間以内。</span>
+        </a>
+        <a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener" class="contact-link">
+          X（旧Twitter）のDMで相談する
+          <span class="contact-note">フォームより気軽に。短い質問だけでもOKです。</span>
+        </a>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div>
+    <a href="index.html">ポートレートトップ</a> ／
+    <a href="photographer.html">撮影者向け</a> ／
+    <a href="../main.html">メインページ</a>
+  </div>
+  <p class="footer-copy">© 2026 アタル. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
