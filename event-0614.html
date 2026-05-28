@@ -35,6 +35,7 @@
       --bg-card:    #FDFCF9;
       --bg-card2:   #E8EDF4;
       --accent:     #1D3557;
+      --accent-rgb: 29, 53, 87;
       --accent-lt:  #1D3557;
       --navy:       #1D3557;
       --navy-lt:    #1D3557;
@@ -201,9 +202,9 @@
       inset: 0;
       background: linear-gradient(
         to bottom,
-        rgba(29, 53, 87, 0.1) 0%,
-        rgba(29, 53, 87, 0.5) 58%,
-        rgba(29, 53, 87, 0.97) 100%
+        rgba(var(--accent-rgb), 0.1) 0%,
+        rgba(var(--accent-rgb), 0.5) 58%,
+        rgba(var(--accent-rgb), 0.97) 100%
       );
     }
     .hero-content {
@@ -332,7 +333,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(transparent, rgba(29, 53, 87, 0.85));
+      background: linear-gradient(transparent, rgba(var(--accent-rgb), 0.85));
       padding: 1.4rem 0.9rem 0.7rem;
       font-size: 0.75rem;
       color: rgba(242, 239, 233, 0.86);
