@@ -31,18 +31,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:         #F8F8F6;
-      --bg-card:    #FFFFFF;
-      --bg-card2:   #F2F2F0;
-      --accent:     #C8102E;
-      --accent-lt:  #e03050;
-      --navy:       #1A3557;
-      --navy-lt:    #2a5580;
-      --text:       #1C1C1C;
-      --text-muted: #666666;
-      --border:     #E0E0E0;
-      --limit:      #C8102E;
-      --limit-bg:   rgba(200, 16, 46, 0.08);
+      --bg:         #F2EFE9;
+      --bg-card:    #FDFCF9;
+      --bg-card2:   #E8EDF4;
+      --accent:     #1D3557;
+      --accent-rgb: 29, 53, 87;
+      --accent-lt:  #1D3557;
+      --navy:       #1D3557;
+      --navy-lt:    #1D3557;
+      --text:       #1C1A17;
+      --text-muted: #6A6258;
+      --border:     #DDD8CF;
+      --limit:      #1D3557;
+      --limit-bg:   #E8EDF4;
     }
 
     html { scroll-behavior: smooth; }
@@ -55,7 +56,7 @@
       -webkit-font-smoothing: antialiased;
     }
     a { color: var(--navy); text-decoration: none; }
-    a:hover { color: var(--accent); }
+    a:hover { color: var(--text); }
 
     /* ── Layout ── */
     .container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; }
@@ -85,7 +86,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255, 255, 255, 0.96);
+      background: rgba(253, 252, 249, 0.96);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--border);
       padding: 0.9rem 1.5rem;
@@ -107,7 +108,7 @@
     .nav-links a {
       font-size: 0.78rem;
       letter-spacing: 0.04em;
-      color: #555;
+      color: #6A6258;
       transition: color 0.15s;
     }
     .nav-links a:hover { color: var(--navy); }
@@ -115,13 +116,13 @@
       font-size: 0.78rem;
       font-weight: 700;
       background: var(--accent);
-      color: #fff;
+      color: #F2EFE9;
       padding: 0.45rem 1.1rem;
       border-radius: 3px;
       letter-spacing: 0.04em;
       transition: background 0.15s;
     }
-    .nav-cta:hover { background: var(--accent-lt); color: #fff; }
+    .nav-cta:hover { background: #E8EDF4; color: var(--accent); }
 
     /* hamburger */
     .hamburger {
@@ -147,7 +148,7 @@
       align-items: center;
       gap: 0.4rem;
       background: var(--limit-bg);
-      border: 1px solid rgba(200, 16, 46, 0.35);
+      border: 1px solid var(--border);
       color: var(--accent);
       font-size: 0.72rem;
       letter-spacing: 0.18em;
@@ -157,9 +158,9 @@
       margin-bottom: 1.75rem;
     }
     .hero .limit-badge {
-      background: rgba(200, 16, 46, 0.2);
-      border-color: rgba(255, 160, 160, 0.5);
-      color: #ffb0b0;
+      background: rgba(242, 239, 233, 0.14);
+      border-color: rgba(242, 239, 233, 0.32);
+      color: #F2EFE9;
     }
     .limit-dot {
       width: 6px;
@@ -168,7 +169,7 @@
       background: var(--limit);
       animation: pulse 1.6s infinite;
     }
-    .hero .limit-dot { background: #ffb0b0; }
+    .hero .limit-dot { background: #F2EFE9; }
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
@@ -201,9 +202,9 @@
       inset: 0;
       background: linear-gradient(
         to bottom,
-        rgba(26, 53, 87, 0.1) 0%,
-        rgba(26, 53, 87, 0.5) 58%,
-        rgba(26, 53, 87, 0.97) 100%
+        rgba(var(--accent-rgb), 0.1) 0%,
+        rgba(var(--accent-rgb), 0.5) 58%,
+        rgba(var(--accent-rgb), 0.97) 100%
       );
     }
     .hero-content {
@@ -215,15 +216,15 @@
       letter-spacing: 0.03em;
       line-height: 1.3;
       margin-bottom: 1.2rem;
-      color: #fff;
+      color: #F2EFE9;
       display: block;
       border-bottom: none;
       padding-bottom: 0;
     }
-    .hero h1 em { font-style: normal; color: #ffd97a; }
+    .hero h1 em { font-style: normal; color: #E8EDF4; }
     .hero-sub {
       font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.75);
+      color: rgba(242, 239, 233, 0.78);
       line-height: 2;
       margin-bottom: 2.25rem;
     }
@@ -234,9 +235,9 @@
       margin-bottom: 2.5rem;
     }
     .hero-spec {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: rgba(255, 255, 255, 0.9);
+      background: rgba(242, 239, 233, 0.14);
+      border: 1px solid rgba(242, 239, 233, 0.24);
+      color: rgba(242, 239, 233, 0.92);
       font-size: 0.82rem;
       font-weight: 700;
       padding: 0.4rem 1rem;
@@ -246,9 +247,9 @@
     .hero-spec.big {
       font-size: 1rem;
       padding: 0.5rem 1.25rem;
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.4);
-      color: #fff;
+      background: rgba(242, 239, 233, 0.2);
+      border-color: rgba(242, 239, 233, 0.42);
+      color: #F2EFE9;
     }
     .hero-btns { display: flex; flex-wrap: wrap; gap: 0.8rem; }
 
@@ -265,20 +266,20 @@
     }
     .btn-primary {
       background: var(--accent);
-      color: #fff;
+      color: #F2EFE9;
     }
     .btn-primary:hover {
-      background: var(--accent-lt);
-      color: #fff;
+      background: #E8EDF4;
+      color: var(--accent);
       transform: translateY(-1px);
     }
     .btn-outline {
-      border: 1.5px solid rgba(255, 255, 255, 0.5);
-      color: #fff;
+      border: 1.5px solid rgba(242, 239, 233, 0.5);
+      color: #F2EFE9;
     }
     .btn-outline:hover {
-      border-color: #fff;
-      color: #fff;
+      border-color: #F2EFE9;
+      color: #F2EFE9;
     }
     .btn-lg { padding: 1.05rem 2.5rem; font-size: 0.98rem; }
 
@@ -332,10 +333,10 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(transparent, rgba(26, 53, 87, 0.85));
+      background: linear-gradient(transparent, rgba(var(--accent-rgb), 0.85));
       padding: 1.4rem 0.9rem 0.7rem;
       font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.85);
+      color: rgba(242, 239, 233, 0.86);
       letter-spacing: 0.04em;
     }
 
@@ -364,8 +365,8 @@
       margin-top: 1.5rem;
     }
     .equip-tag {
-      background: rgba(26, 53, 87, 0.07);
-      border: 1px solid rgba(26, 53, 87, 0.2);
+      background: #E8EDF4;
+      border: 1px solid var(--border);
       color: var(--navy);
       font-size: 0.83rem;
       padding: 0.4rem 1rem;
@@ -376,13 +377,13 @@
     .price-box {
       margin-top: 2rem;
       background: var(--bg-card);
-      border: 1px solid rgba(200, 16, 46, 0.3);
+      border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
     }
     .price-box-header {
-      background: rgba(200, 16, 46, 0.05);
-      border-bottom: 1px solid rgba(200, 16, 46, 0.15);
+      background: #E8EDF4;
+      border-bottom: 1px solid var(--border);
       padding: 1.2rem 1.75rem;
       display: flex;
       align-items: center;
@@ -402,7 +403,7 @@
       letter-spacing: 0.02em;
     }
     .price-main sup { font-size: 1.1rem; }
-    .price-main sub { font-size: 0.95rem; color: var(--accent-lt); }
+    .price-main sub { font-size: 0.95rem; color: var(--accent); }
     .price-box-body { padding: 1.5rem 1.75rem; }
     .price-row {
       display: flex;
@@ -429,7 +430,7 @@
     .limit-inline {
       display: inline-block;
       background: var(--limit-bg);
-      border: 1px solid rgba(200, 16, 46, 0.3);
+      border: 1px solid var(--border);
       color: var(--accent);
       font-size: 0.72rem;
       font-weight: 700;
@@ -457,8 +458,8 @@
       width: 2rem;
       height: 2rem;
       border-radius: 50%;
-      background: rgba(200, 16, 46, 0.08);
-      border: 1.5px solid rgba(200, 16, 46, 0.35);
+      background: #E8EDF4;
+      border: 1.5px solid var(--border);
       color: var(--accent);
       font-size: 0.85rem;
       font-weight: 800;
@@ -478,7 +479,7 @@
       border-radius: 6px;
       overflow: hidden;
     }
-    details[open] { border-color: rgba(200, 16, 46, 0.3); }
+    details[open] { border-color: var(--accent); }
     summary {
       padding: 1.2rem 1.5rem;
       font-size: 0.9rem;
@@ -517,7 +518,7 @@
     .final-cta {
       text-align: center;
       padding: 6rem 0;
-      background: #EEF2F7;
+      background: #E8EDF4;
     }
     .final-cta h2 {
       font-size: clamp(1.5rem, 4vw, 2.2rem);
@@ -554,7 +555,7 @@
     }
     .cta-channel:hover {
       border-color: var(--accent);
-      background: rgba(200, 16, 46, 0.03);
+      background: #E8EDF4;
       color: var(--text);
     }
     .cta-channel-icon { font-size: 1.3rem; flex-shrink: 0; }
@@ -580,7 +581,7 @@
     /* ── Footer ── */
     footer {
       background: var(--navy);
-      color: #fff;
+      color: #F2EFE9;
       padding: 3rem 0;
       text-align: center;
     }
@@ -589,24 +590,24 @@
       font-weight: 800;
       letter-spacing: 0.1em;
       margin-bottom: 0.75rem;
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(242, 239, 233, 0.78);
     }
     .footer-note {
       font-size: 0.78rem;
-      color: rgba(255, 255, 255, 0.55);
+      color: rgba(242, 239, 233, 0.62);
       line-height: 1.9;
       margin-bottom: 1rem;
     }
     .footer-link {
       font-size: 0.78rem;
-      color: rgba(255, 255, 255, 0.55);
+      color: rgba(242, 239, 233, 0.62);
       margin-bottom: 1.25rem;
       display: block;
     }
-    .footer-link a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+    .footer-link a { color: #F2EFE9; text-decoration: underline; text-underline-offset: 2px; }
     .footer-copy {
       font-size: 0.72rem;
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(242, 239, 233, 0.42);
     }
 
     /* ── Modal ── */
@@ -615,7 +616,7 @@
       position: fixed;
       inset: 0;
       z-index: 999;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(28, 26, 23, 0.88);
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
@@ -631,9 +632,9 @@
       position: fixed;
       top: 1.2rem;
       right: 1.4rem;
-      background: rgba(255,255,255,0.08);
+      background: rgba(242, 239, 233, 0.14);
       border: none;
-      color: #fff;
+      color: #F2EFE9;
       font-size: 1.5rem;
       width: 2.4rem;
       height: 2.4rem;
@@ -644,7 +645,7 @@
       justify-content: center;
       transition: background 0.15s;
     }
-    .modal-close:hover { background: rgba(255,255,255,0.18); }
+    .modal-close:hover { background: rgba(242, 239, 233, 0.24); }
 
     /* ── Type cards ── */
     .type-grid {
@@ -660,8 +661,8 @@
       padding: 1.6rem 1.4rem;
     }
     .type-card.featured {
-      border-color: rgba(26, 53, 87, 0.4);
-      background: rgba(26, 53, 87, 0.03);
+      border-color: var(--accent);
+      background: #E8EDF4;
     }
     .type-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
     .type-title { font-size: 1rem; font-weight: 800; color: var(--navy); margin-bottom: 0.3rem; }
@@ -711,7 +712,7 @@
         top: 100%;
         left: 0;
         right: 0;
-        background: #fff;
+        background: #FDFCF9;
         border-bottom: 1px solid var(--border);
         padding: 1rem 1.5rem;
         gap: 1rem;
