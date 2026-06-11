@@ -20,15 +20,15 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #080d17;
-      --bg-card:     #0f1724;
-      --bg-card2:    #162035;
-      --accent:      #5b8fd4;
-      --accent-lt:   #7baae0;
-      --gold:        #c8a030;
-      --text:        #e4e8f0;
-      --text-muted:  #7a8ba8;
-      --border:      #1c2a3f;
+      --bg:          #F2EFE9;
+      --bg-card:     #FDFCF9;
+      --bg-card2:    #E8EDF4;
+      --accent:      #1D3557;
+      --accent-lt:   #1D3557;
+      --gold:        #1D3557;
+      --text:        #1C1A17;
+      --text-muted:  #6A6258;
+      --border:      #DDD8CF;
     }
 
     html { scroll-behavior: smooth; }
@@ -40,8 +40,8 @@
       line-height: 1.8;
       -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--accent-lt); text-decoration: none; }
-    a:hover { color: #fff; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--text); }
 
     /* ── Layout ── */
     .container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; }
@@ -74,7 +74,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(8, 13, 23, 0.92);
+      background: rgba(253, 252, 249, 0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 0.9rem 1.5rem;
@@ -98,19 +98,19 @@
       transition: all 0.18s;
       cursor: pointer;
     }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: var(--accent-lt); color: #fff; transform: translateY(-1px); }
+    .btn-primary { background: var(--accent); color: #F2EFE9; }
+    .btn-primary:hover { background: #E8EDF4; color: var(--accent); transform: translateY(-1px); }
     .btn-outline { border: 1px solid var(--border); color: var(--text-muted); margin-left: 0.8rem; }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent-lt); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: #E8EDF4; }
     .btn-lg { padding: 1.1rem 2.75rem; font-size: 1rem; }
 
     /* ── Hero ── */
     .hero { padding: 7rem 0 6rem; border-bottom: 1px solid var(--border); }
     .hero-tag {
       display: inline-block;
-      background: rgba(91, 143, 212, 0.1);
-      border: 1px solid rgba(91, 143, 212, 0.28);
-      color: var(--accent-lt);
+      background: #E8EDF4;
+      border: 1px solid var(--border);
+      color: var(--accent);
       font-size: 0.7rem;
       letter-spacing: 0.22em;
       padding: 0.3rem 1rem;
@@ -124,7 +124,7 @@
       line-height: 1.25;
       margin-bottom: 1.4rem;
     }
-    .hero h1 em { font-style: normal; color: var(--accent-lt); }
+    .hero h1 em { font-style: normal; color: var(--accent); }
     .hero-sub {
       font-size: 0.95rem;
       color: var(--text-muted);
@@ -176,9 +176,9 @@
     .session-lead { font-size: 0.88rem; color: var(--text-muted); line-height: 1.9; margin-bottom: 1.25rem; }
     .session-tags { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.5rem; }
     .session-tag {
-      background: rgba(91, 143, 212, 0.09);
-      border: 1px solid rgba(91, 143, 212, 0.22);
-      color: var(--accent-lt);
+      background: #E8EDF4;
+      border: 1px solid var(--border);
+      color: var(--accent);
       font-size: 0.82rem;
       padding: 0.35rem 0.9rem;
       border-radius: 3px;
@@ -201,7 +201,7 @@
       border-radius: 8px;
       overflow: hidden;
     }
-    .plan-card.featured { border-color: rgba(91, 143, 212, 0.5); }
+    .plan-card.featured { border-color: var(--accent); }
     .plan-header {
       padding: 1.1rem 1.5rem;
       border-bottom: 1px solid var(--border);
@@ -212,9 +212,9 @@
     .plan-name { font-size: 0.95rem; font-weight: 700; }
     .plan-badge {
       font-size: 0.68rem;
-      background: rgba(200, 160, 48, 0.12);
-      color: var(--gold);
-      border: 1px solid rgba(200, 160, 48, 0.28);
+      background: #E8EDF4;
+      color: var(--accent);
+      border: 1px solid var(--border);
       padding: 0.2rem 0.6rem;
       border-radius: 2px;
       letter-spacing: 0.05em;
@@ -242,7 +242,7 @@
       padding: 1.25rem 1.5rem;
     }
     .option-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem; }
-    .option-price { font-size: 1.1rem; font-weight: 800; color: var(--accent-lt); }
+    .option-price { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
     .option-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.3rem; }
 
     /* ── Rental table ── */
@@ -332,9 +332,9 @@
     .notice-list li::before { content: '—'; position: absolute; left: 0; color: var(--border); }
     .ng-badge {
       display: inline-block;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      color: #f87171;
+      background: #E8EDF4;
+      border: 1px solid var(--border);
+      color: var(--accent);
       font-size: 0.7rem;
       padding: 0.15rem 0.55rem;
       border-radius: 2px;
@@ -351,7 +351,7 @@
       border-radius: 6px;
       overflow: hidden;
     }
-    .faq-item[open] { border-color: rgba(91, 143, 212, 0.4); }
+    .faq-item[open] { border-color: var(--accent); }
     .faq-q {
       font-size: 0.9rem;
       font-weight: 700;
@@ -505,7 +505,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.92);
+      background: rgba(28, 26, 23, 0.82);
       z-index: 200;
       align-items: center;
       justify-content: center;
@@ -523,7 +523,7 @@
       right: 1.5rem;
       background: none;
       border: none;
-      color: #fff;
+      color: #F2EFE9;
       font-size: 2.25rem;
       cursor: pointer;
       line-height: 1;
@@ -552,7 +552,7 @@
         top: 100%;
         left: 0;
         right: 0;
-        background: rgba(8, 13, 23, 0.97);
+        background: rgba(253, 252, 249, 0.97);
         backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border);
         flex-direction: column;
@@ -564,6 +564,8 @@
       .nav-links li:last-child { border-bottom: none; }
       .nav-links a { padding: 0.85rem 0; font-size: 0.92rem; display: block; }
     }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   </style>
   <script>
   (function () {
@@ -572,6 +574,7 @@
     }
   })();
   </script>
+  <noscript><meta http-equiv="refresh" content="0;url=./"></noscript>
 </head>
 <body>
 
@@ -592,6 +595,8 @@
   </button>
 </nav>
 
+<main>
+
 <!-- ── Hero ── -->
 <section class="hero" id="top">
   <div class="container">
@@ -608,12 +613,12 @@
       <div class="option-card">
         <div class="option-title">📸 作品撮りコース</div>
         <p class="option-note" style="margin-top: 0.4rem;">ポートレート・コスプレ・ユニフォームを本格的な一枚に。撮影が目的の方へ。</p>
-        <a href="portrait/" class="btn btn-outline" style="margin-top: 0.75rem; display: inline-block; font-size: 0.82rem; padding: 0.55rem 1.1rem;">詳しくはこちら →</a>
+        <a href="portrait/" class="btn btn-outline" style="margin-top: 0.75rem; display: inline-block; font-size: 0.82rem; padding: 0.75rem 1.2rem;">詳しくはこちら →</a>
       </div>
       <div class="option-card">
         <div class="option-title">🪢 ロープセッション</div>
         <p class="option-note" style="margin-top: 0.4rem;">体験・緊縛・感覚を楽しみたい方へ。撮影なしでも参加できます。</p>
-        <a href="#pricing" class="btn btn-outline" style="margin-top: 0.75rem; display: inline-block; font-size: 0.82rem; padding: 0.55rem 1.1rem;">詳しくはこちら →</a>
+        <a href="#pricing" class="btn btn-outline" style="margin-top: 0.75rem; display: inline-block; font-size: 0.82rem; padding: 0.75rem 1.2rem;">詳しくはこちら →</a>
       </div>
     </div>
   </div>
@@ -625,7 +630,7 @@
     <p class="section-label">Philosophy</p>
     <h2>3つのこだわり</h2>
     <div style="margin-bottom: 2rem; border-radius: 8px; overflow: hidden; max-height: 420px;">
-      <img src="images/IMG_3771.jpeg" alt="アタル｜ロープと向き合う" style="width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block;">
+      <img src="images/IMG_3771.webp" alt="アタル｜ロープと向き合う" width="3024" height="3024" style="width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block;">
     </div>
     <div class="values-grid">
       <div class="value-card">
@@ -752,15 +757,15 @@
     <!-- 縛り作例ミニギャラリー（スタンダード直後） -->
     <p class="gallery-mini-label">🔵 縛り・作例</p>
     <div class="gallery-mini gallery-mini-lg">
-      <div class="gallery-item" onclick="openModal('images/IMG_5723.jpeg')"><img src="images/IMG_5723.jpeg" alt="縛り作例" loading="lazy"></div>
-      <div class="gallery-item" onclick="openModal('images/IMG_3149.jpeg')"><img src="images/IMG_3149.jpeg" alt="縛り作例" loading="lazy"></div>
-      <div class="gallery-item" onclick="openModal('images/DSC03598.jpeg')"><img src="images/DSC03598.jpeg" alt="フルカラー縛り作例（赤）" loading="lazy"></div>
+      <div class="gallery-item" onclick="openModal('images/IMG_5723.webp')"><img src="images/IMG_5723.webp" alt="縛り作例" loading="lazy"></div>
+      <div class="gallery-item" onclick="openModal('images/IMG_3149.webp')"><img src="images/IMG_3149.webp" alt="縛り作例" loading="lazy"></div>
+      <div class="gallery-item" onclick="openModal('images/DSC03598.webp')"><img src="images/DSC03598.webp" alt="フルカラー縛り作例（赤）" loading="lazy"></div>
       <div class="gallery-item" onclick="openModal('images/DSC03600.webp')"><img src="images/DSC03600.webp" alt="フルカラー縛り作例（青）" loading="lazy"></div>
-      <div class="gallery-item" onclick="openModal('images/224A3035.jpeg')"><img src="images/224A3035.jpeg" alt="縛り作例" loading="lazy"></div>
+      <div class="gallery-item" onclick="openModal('images/224A3035.webp')"><img src="images/224A3035.webp" alt="縛り作例" loading="lazy"></div>
       <div class="gallery-item" onclick="openModal('images/224A3124.webp')"><img src="images/224A3124.webp" alt="縛り作例" loading="lazy"></div>
       <div class="gallery-item" onclick="openModal('images/224A3127.webp')"><img src="images/224A3127.webp" alt="縛り作例" loading="lazy"></div>
       <div class="gallery-item" onclick="openModal('images/224A3130.webp')"><img src="images/224A3130.webp" alt="縛り作例" loading="lazy"></div>
-      <div class="gallery-item" onclick="openModal('images/IMG_7269.jpeg')"><img src="images/IMG_7269.jpeg" alt="縛り作例" loading="lazy"></div>
+      <div class="gallery-item" onclick="openModal('images/IMG_7269.webp')"><img src="images/IMG_7269.webp" alt="縛り作例" loading="lazy"></div>
     </div>
 
     <div class="pricing-plans">
@@ -798,9 +803,9 @@
     <p class="gallery-mini-label">🔴 吊り・作例</p>
     <div class="gallery-mini">
       <div class="gallery-item" onclick="openModal('images/224A2715.jpeg')"><img src="images/224A2715.jpeg" alt="吊り作例" loading="lazy"></div>
-      <div class="gallery-item" onclick="openModal('images/224A2815.jpeg')"><img src="images/224A2815.jpeg" alt="吊り作例" loading="lazy"></div>
-      <div class="gallery-item" onclick="openModal('images/IMG_7268.jpeg')"><img src="images/IMG_7268.jpeg" alt="吊り作例" loading="lazy"></div>
-      <div class="gallery-item" onclick="openModal('images/IMG_7276.jpeg')"><img src="images/IMG_7276.jpeg" alt="吊り作例" loading="lazy"></div>
+      <div class="gallery-item" onclick="openModal('images/224A2815.webp')"><img src="images/224A2815.webp" alt="吊り作例" loading="lazy"></div>
+      <div class="gallery-item" onclick="openModal('images/IMG_7268.webp')"><img src="images/IMG_7268.webp" alt="吊り作例" loading="lazy"></div>
+      <div class="gallery-item" onclick="openModal('images/IMG_7276.webp')"><img src="images/IMG_7276.webp" alt="吊り作例" loading="lazy"></div>
     </div>
 
     <!-- オプション -->
@@ -820,6 +825,7 @@
 
     <!-- ユニフォーム貸出 -->
     <h3 style="margin-top: 3rem;">👕 ユニフォーム貸出</h3>
+    <div style="overflow-x: auto;">
     <table class="rental-table">
       <thead>
         <tr>
@@ -846,6 +852,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
     <ul class="rental-notes">
       <li>全て洗濯・消毒済み</li>
       <li>サイズは事前にご相談ください</li>
@@ -990,7 +997,7 @@
           <span class="contact-channel-note">nagoyabase2023@gmail.com　返信は通常24時間以内。</span>
         </span>
       </a>
-      <a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener" class="contact-channel">
+      <a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener noreferrer" class="contact-channel">
         <span class="contact-channel-icon">✉️</span>
         <span class="contact-channel-text">
           <span class="contact-channel-label">X（旧Twitter）のDMで相談する</span>
@@ -1000,6 +1007,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- ── Modal ── -->
 <div id="modal" class="modal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeModal()">
@@ -1020,7 +1029,10 @@
 </footer>
 
 <script>
+  var _modalLastFocused = null;
+
   function openModal(src) {
+    _modalLastFocused = document.activeElement;
     var modalImg = document.getElementById('modal-img');
     modalImg.src = src;
     var srcAbsolute = new URL(src, document.baseURI).href;
@@ -1030,12 +1042,17 @@
     modalImg.alt = thumbImg ? thumbImg.alt : '';
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
+    setTimeout(function () { document.querySelector('.modal-close').focus(); }, 50);
   }
   function closeModal() {
     document.getElementById('modal').classList.remove('open');
     document.body.style.overflow = '';
+    if (_modalLastFocused) { _modalLastFocused.focus(); _modalLastFocused = null; }
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.getElementById('modal').addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') { e.preventDefault(); document.querySelector('.modal-close').focus(); }
+  });
 
   const hamburger = document.querySelector('.hamburger');
   const navLinks = document.querySelector('.nav-links');

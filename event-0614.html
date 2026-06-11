@@ -11,11 +11,11 @@
   <meta property="og:title" content="6/14限定｜スタジオ撮影体験会 in 名古屋">
   <meta property="og:description" content="90分¥3,000・完全個室・スタジオ未経験歓迎。スポユニ・フェチ・コスプレOK。名古屋・上前津にて6/14(日)限定開催。">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="images/IMG_7278.jpeg">
+  <meta property="og:image" content="https://nagoya-base.github.io/ataru-nagoya/images/IMG_7278.webp">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="6/14限定｜スタジオ撮影体験会 in 名古屋">
   <meta name="twitter:description" content="90分¥3,000・完全個室・スタジオ未経験歓迎。スポユニ・フェチ・コスプレOK。6/14(日)限定開催。">
-  <meta name="twitter:image" content="images/IMG_7278.jpeg">
+  <meta name="twitter:image" content="https://nagoya-base.github.io/ataru-nagoya/images/IMG_7278.webp">
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-8K1TJG0S9Y"></script>
@@ -30,18 +30,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:         #F8F8F6;
-      --bg-card:    #FFFFFF;
-      --bg-card2:   #F2F2F0;
-      --accent:     #C8102E;
-      --accent-lt:  #e03050;
-      --navy:       #1A3557;
-      --navy-lt:    #2a5580;
-      --text:       #1C1C1C;
-      --text-muted: #666666;
-      --border:     #E0E0E0;
-      --limit:      #C8102E;
-      --limit-bg:   rgba(200, 16, 46, 0.08);
+      --bg:         #F2EFE9;
+      --bg-card:    #FDFCF9;
+      --bg-card2:   #E8EDF4;
+      --accent:     #1D3557;
+      --accent-rgb: 29, 53, 87;
+      --accent-lt:  #1D3557;
+      --navy:       #1D3557;
+      --navy-lt:    #1D3557;
+      --text:       #1C1A17;
+      --text-muted: #6A6258;
+      --border:     #DDD8CF;
+      --limit:      #1D3557;
+      --limit-bg:   #E8EDF4;
     }
 
     html { scroll-behavior: smooth; }
@@ -54,7 +55,7 @@
       -webkit-font-smoothing: antialiased;
     }
     a { color: var(--navy); text-decoration: none; }
-    a:hover { color: var(--accent); }
+    a:hover { color: var(--text); }
 
     /* ── Layout ── */
     .container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; }
@@ -84,7 +85,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255, 255, 255, 0.96);
+      background: rgba(253, 252, 249, 0.96);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--border);
       padding: 0.9rem 1.5rem;
@@ -106,7 +107,7 @@
     .nav-links a {
       font-size: 0.78rem;
       letter-spacing: 0.04em;
-      color: #555;
+      color: #6A6258;
       transition: color 0.15s;
     }
     .nav-links a:hover { color: var(--navy); }
@@ -114,13 +115,13 @@
       font-size: 0.78rem;
       font-weight: 700;
       background: var(--accent);
-      color: #fff;
+      color: #F2EFE9;
       padding: 0.45rem 1.1rem;
       border-radius: 3px;
       letter-spacing: 0.04em;
       transition: background 0.15s;
     }
-    .nav-cta:hover { background: var(--accent-lt); color: #fff; }
+    .nav-cta:hover { background: #E8EDF4; color: var(--accent); }
 
     /* hamburger */
     .hamburger {
@@ -146,7 +147,7 @@
       align-items: center;
       gap: 0.4rem;
       background: var(--limit-bg);
-      border: 1px solid rgba(200, 16, 46, 0.35);
+      border: 1px solid var(--border);
       color: var(--accent);
       font-size: 0.72rem;
       letter-spacing: 0.18em;
@@ -156,9 +157,9 @@
       margin-bottom: 1.75rem;
     }
     .hero .limit-badge {
-      background: rgba(200, 16, 46, 0.2);
-      border-color: rgba(255, 160, 160, 0.5);
-      color: #ffb0b0;
+      background: rgba(242, 239, 233, 0.14);
+      border-color: rgba(242, 239, 233, 0.32);
+      color: #F2EFE9;
     }
     .limit-dot {
       width: 6px;
@@ -167,7 +168,7 @@
       background: var(--limit);
       animation: pulse 1.6s infinite;
     }
-    .hero .limit-dot { background: #ffb0b0; }
+    .hero .limit-dot { background: #F2EFE9; }
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
@@ -200,9 +201,9 @@
       inset: 0;
       background: linear-gradient(
         to bottom,
-        rgba(26, 53, 87, 0.1) 0%,
-        rgba(26, 53, 87, 0.5) 58%,
-        rgba(26, 53, 87, 0.97) 100%
+        rgba(var(--accent-rgb), 0.1) 0%,
+        rgba(var(--accent-rgb), 0.5) 58%,
+        rgba(var(--accent-rgb), 0.97) 100%
       );
     }
     .hero-content {
@@ -214,15 +215,15 @@
       letter-spacing: 0.03em;
       line-height: 1.3;
       margin-bottom: 1.2rem;
-      color: #fff;
+      color: #F2EFE9;
       display: block;
       border-bottom: none;
       padding-bottom: 0;
     }
-    .hero h1 em { font-style: normal; color: #ffd97a; }
+    .hero h1 em { font-style: normal; color: #E8EDF4; }
     .hero-sub {
       font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.75);
+      color: rgba(242, 239, 233, 0.78);
       line-height: 2;
       margin-bottom: 2.25rem;
     }
@@ -233,9 +234,9 @@
       margin-bottom: 2.5rem;
     }
     .hero-spec {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: rgba(255, 255, 255, 0.9);
+      background: rgba(242, 239, 233, 0.14);
+      border: 1px solid rgba(242, 239, 233, 0.24);
+      color: rgba(242, 239, 233, 0.92);
       font-size: 0.82rem;
       font-weight: 700;
       padding: 0.4rem 1rem;
@@ -245,9 +246,9 @@
     .hero-spec.big {
       font-size: 1rem;
       padding: 0.5rem 1.25rem;
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.4);
-      color: #fff;
+      background: rgba(242, 239, 233, 0.2);
+      border-color: rgba(242, 239, 233, 0.42);
+      color: #F2EFE9;
     }
     .hero-btns { display: flex; flex-wrap: wrap; gap: 0.8rem; }
 
@@ -264,20 +265,20 @@
     }
     .btn-primary {
       background: var(--accent);
-      color: #fff;
+      color: #F2EFE9;
     }
     .btn-primary:hover {
-      background: var(--accent-lt);
-      color: #fff;
+      background: #E8EDF4;
+      color: var(--accent);
       transform: translateY(-1px);
     }
     .btn-outline {
-      border: 1.5px solid rgba(255, 255, 255, 0.5);
-      color: #fff;
+      border: 1.5px solid rgba(242, 239, 233, 0.5);
+      color: #F2EFE9;
     }
     .btn-outline:hover {
-      border-color: #fff;
-      color: #fff;
+      border-color: #F2EFE9;
+      color: #F2EFE9;
     }
     .btn-lg { padding: 1.05rem 2.5rem; font-size: 0.98rem; }
 
@@ -331,10 +332,10 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(transparent, rgba(26, 53, 87, 0.85));
+      background: linear-gradient(transparent, rgba(var(--accent-rgb), 0.85));
       padding: 1.4rem 0.9rem 0.7rem;
       font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.85);
+      color: rgba(242, 239, 233, 0.86);
       letter-spacing: 0.04em;
     }
 
@@ -363,8 +364,8 @@
       margin-top: 1.5rem;
     }
     .equip-tag {
-      background: rgba(26, 53, 87, 0.07);
-      border: 1px solid rgba(26, 53, 87, 0.2);
+      background: #E8EDF4;
+      border: 1px solid var(--border);
       color: var(--navy);
       font-size: 0.83rem;
       padding: 0.4rem 1rem;
@@ -375,13 +376,13 @@
     .price-box {
       margin-top: 2rem;
       background: var(--bg-card);
-      border: 1px solid rgba(200, 16, 46, 0.3);
+      border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
     }
     .price-box-header {
-      background: rgba(200, 16, 46, 0.05);
-      border-bottom: 1px solid rgba(200, 16, 46, 0.15);
+      background: #E8EDF4;
+      border-bottom: 1px solid var(--border);
       padding: 1.2rem 1.75rem;
       display: flex;
       align-items: center;
@@ -401,7 +402,7 @@
       letter-spacing: 0.02em;
     }
     .price-main sup { font-size: 1.1rem; }
-    .price-main sub { font-size: 0.95rem; color: var(--accent-lt); }
+    .price-main sub { font-size: 0.95rem; color: var(--accent); }
     .price-box-body { padding: 1.5rem 1.75rem; }
     .price-row {
       display: flex;
@@ -428,7 +429,7 @@
     .limit-inline {
       display: inline-block;
       background: var(--limit-bg);
-      border: 1px solid rgba(200, 16, 46, 0.3);
+      border: 1px solid var(--border);
       color: var(--accent);
       font-size: 0.72rem;
       font-weight: 700;
@@ -456,8 +457,8 @@
       width: 2rem;
       height: 2rem;
       border-radius: 50%;
-      background: rgba(200, 16, 46, 0.08);
-      border: 1.5px solid rgba(200, 16, 46, 0.35);
+      background: #E8EDF4;
+      border: 1.5px solid var(--border);
       color: var(--accent);
       font-size: 0.85rem;
       font-weight: 800;
@@ -477,7 +478,7 @@
       border-radius: 6px;
       overflow: hidden;
     }
-    details[open] { border-color: rgba(200, 16, 46, 0.3); }
+    details[open] { border-color: var(--accent); }
     summary {
       padding: 1.2rem 1.5rem;
       font-size: 0.9rem;
@@ -516,7 +517,7 @@
     .final-cta {
       text-align: center;
       padding: 6rem 0;
-      background: #EEF2F7;
+      background: #E8EDF4;
     }
     .final-cta h2 {
       font-size: clamp(1.5rem, 4vw, 2.2rem);
@@ -553,7 +554,7 @@
     }
     .cta-channel:hover {
       border-color: var(--accent);
-      background: rgba(200, 16, 46, 0.03);
+      background: #E8EDF4;
       color: var(--text);
     }
     .cta-channel-icon { font-size: 1.3rem; flex-shrink: 0; }
@@ -579,7 +580,7 @@
     /* ── Footer ── */
     footer {
       background: var(--navy);
-      color: #fff;
+      color: #F2EFE9;
       padding: 3rem 0;
       text-align: center;
     }
@@ -588,24 +589,24 @@
       font-weight: 800;
       letter-spacing: 0.1em;
       margin-bottom: 0.75rem;
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(242, 239, 233, 0.78);
     }
     .footer-note {
       font-size: 0.78rem;
-      color: rgba(255, 255, 255, 0.55);
+      color: rgba(242, 239, 233, 0.62);
       line-height: 1.9;
       margin-bottom: 1rem;
     }
     .footer-link {
       font-size: 0.78rem;
-      color: rgba(255, 255, 255, 0.55);
+      color: rgba(242, 239, 233, 0.62);
       margin-bottom: 1.25rem;
       display: block;
     }
-    .footer-link a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+    .footer-link a { color: #F2EFE9; text-decoration: underline; text-underline-offset: 2px; }
     .footer-copy {
       font-size: 0.72rem;
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(242, 239, 233, 0.42);
     }
 
     /* ── Modal ── */
@@ -614,7 +615,7 @@
       position: fixed;
       inset: 0;
       z-index: 999;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(28, 26, 23, 0.88);
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
@@ -630,9 +631,9 @@
       position: fixed;
       top: 1.2rem;
       right: 1.4rem;
-      background: rgba(255,255,255,0.08);
+      background: rgba(242, 239, 233, 0.14);
       border: none;
-      color: #fff;
+      color: #F2EFE9;
       font-size: 1.5rem;
       width: 2.4rem;
       height: 2.4rem;
@@ -643,7 +644,7 @@
       justify-content: center;
       transition: background 0.15s;
     }
-    .modal-close:hover { background: rgba(255,255,255,0.18); }
+    .modal-close:hover { background: rgba(242, 239, 233, 0.24); }
 
     /* ── Type cards ── */
     .type-grid {
@@ -659,8 +660,8 @@
       padding: 1.6rem 1.4rem;
     }
     .type-card.featured {
-      border-color: rgba(26, 53, 87, 0.4);
-      background: rgba(26, 53, 87, 0.03);
+      border-color: var(--accent);
+      background: #E8EDF4;
     }
     .type-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
     .type-title { font-size: 1rem; font-weight: 800; color: var(--navy); margin-bottom: 0.3rem; }
@@ -710,7 +711,7 @@
         top: 100%;
         left: 0;
         right: 0;
-        background: #fff;
+        background: #FDFCF9;
         border-bottom: 1px solid var(--border);
         padding: 1rem 1.5rem;
         gap: 1rem;
@@ -729,6 +730,8 @@
 
       .final-cta { padding: 4rem 0; }
     }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   </style>
 </head>
 <body>
@@ -749,10 +752,12 @@
   </button>
 </nav>
 
+<main>
+
 <!-- ── Hero ── -->
 <section class="hero" id="top">
   <div class="hero-img-wrap">
-    <img src="images/IMG_7278.jpeg" alt="スタジオ撮影体験会 作例" loading="eager">
+    <img src="images/IMG_7278.webp" alt="スタジオ撮影体験会 作例" width="1365" height="2048" loading="eager">
     <div class="hero-img-overlay"></div>
   </div>
   <div class="container">
@@ -779,11 +784,11 @@
         <span class="hero-spec">10:00〜17:30（4枠制）</span>
       </div>
       <div class="hero-btns">
-        <a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
-          ✉️ DMで気軽に相談する
-        </a>
-        <a href="mailto:nagoyabase2023@gmail.com?subject=20260614撮影会お問い合わせ" class="btn btn-outline btn-lg">
+        <a href="mailto:nagoyabase2023@gmail.com?subject=20260614撮影会お問い合わせ" class="btn btn-primary btn-lg">
           📋 メールで予約・相談する
+        </a>
+        <a href="https://x.com/baseballuni2022" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-lg">
+          ✉️ X @baseballuni2022 にDMする
         </a>
       </div>
     </div>
@@ -802,7 +807,7 @@
         <div class="type-price">¥3,000 <small>/ 90分</small></div>
         <ul class="type-list">
           <li>一眼レフ＋ストロボで撮ってもらう</li>
-          <li>スポユニ・コスプレ・フェチ衣装OK</li>
+          <li>スポユニ・コスプレ・フェチ衣装OK（衣装は各自持参・貸し出しなし）</li>
           <li>白背景・カラー照明・学校机あり</li>
           <li>撮影指示あり・初めてでも安心</li>
           <li>データ当日お渡し</li>
@@ -817,10 +822,10 @@
           <li>自分のカメラで本格ストロボ撮影を体験</li>
           <li>ライティングのセットアップから体験</li>
           <li>白背景・カラー照明・学校机を自由に使用</li>
-          <li>モデル同伴での参加も可能</li>
+          <li>モデル（被写体）同伴でご参加ください</li>
           <li>事前予約制・完全個室</li>
         </ul>
-        <div class="type-note">※ モデル（被写体）は同伴の場合のみ。モデルなし・機材のみの体験も歓迎。DMまたはメールで事前予約を。</div>
+        <div class="type-note">※ 撮影者としての参加は、モデル（被写体）同伴でお願いします。DMまたはメールで事前予約を。</div>
         <a href="#contact" class="btn btn-primary" style="display:block;text-align:center;width:100%;border-radius:6px;margin-top:1rem;">参加を申し込む</a>
       </div>
     </div>
@@ -872,7 +877,7 @@
         <span class="ti-icon">🔦</span>
         <div>
           <strong>カメラを持ってストロボ撮影を試してみたい</strong>
-          <span>自分のカメラ持参でライティング体験ができます。モデル同伴での参加も歓迎。¥3,000 / 90分。</span>
+          <span>自分のカメラ持参でライティング体験ができます。モデル（被写体）同伴でご参加ください。¥3,000 / 90分。</span>
         </div>
       </div>
     </div>
@@ -888,28 +893,28 @@
       ※ 画像は過去の撮影作例です。クリックで拡大できます。
     </p>
     <div class="gallery-grid">
-      <div class="gallery-item" onclick="openModal('images/IMG_7278.jpeg')">
-        <img src="images/IMG_7278.jpeg" alt="コスプレ撮影作例" loading="lazy">
+      <div class="gallery-item" onclick="openModal('images/IMG_7278.webp')">
+        <img src="images/IMG_7278.webp" alt="コスプレ撮影作例" loading="lazy">
         <div class="gallery-cap">コスプレ・衣装撮影</div>
       </div>
-      <div class="gallery-item" onclick="openModal('images/224A3133.jpeg')">
-        <img src="images/224A3133.jpeg" alt="ユニフォーム撮影作例" loading="lazy">
+      <div class="gallery-item" onclick="openModal('images/224A3133.webp')">
+        <img src="images/224A3133.webp" alt="ユニフォーム撮影作例" loading="lazy">
         <div class="gallery-cap">スポーツユニフォーム</div>
       </div>
-      <div class="gallery-item" onclick="openModal('images/IMG_7264.jpeg')">
-        <img src="images/IMG_7264.jpeg" alt="野球ユニフォーム撮影作例" loading="lazy">
+      <div class="gallery-item" onclick="openModal('images/IMG_7264.webp')">
+        <img src="images/IMG_7264.webp" alt="野球ユニフォーム撮影作例" loading="lazy">
         <div class="gallery-cap">野球ユニフォーム</div>
       </div>
-      <div class="gallery-item" onclick="openModal('images/DSC03598.jpeg')">
-        <img src="images/DSC03598.jpeg" alt="カラー照明作例（赤）" loading="lazy">
+      <div class="gallery-item" onclick="openModal('images/DSC03598.webp')">
+        <img src="images/DSC03598.webp" alt="カラー照明作例（赤）" loading="lazy">
         <div class="gallery-cap">カラー照明（赤）</div>
       </div>
       <div class="gallery-item" onclick="openModal('images/DSC03600.jpeg')">
         <img src="images/DSC03600.jpeg" alt="カラー照明作例（青）" loading="lazy">
         <div class="gallery-cap">カラー照明（青）</div>
       </div>
-      <div class="gallery-item" onclick="openModal('images/IMG_7741.jpeg')">
-        <img src="images/IMG_7741.jpeg" alt="スタジオ撮影作例" loading="lazy">
+      <div class="gallery-item" onclick="openModal('images/IMG_7741.webp')">
+        <img src="images/IMG_7741.webp" alt="スタジオ撮影作例" loading="lazy">
         <div class="gallery-cap">スタジオ撮影</div>
       </div>
     </div>
@@ -1087,7 +1092,7 @@
       <details>
         <summary>どんな衣装・服装でもOKですか？</summary>
         <div class="faq-body">
-          スポーツユニフォーム・コスプレ衣装・私服・フェチ系の衣装など、基本的に何でもOKです。過度に性的なものや、他者の権利を侵害するものは対応できません。不安な場合は事前にDMでご確認ください。
+          スポーツユニフォーム・コスプレ衣装・私服・フェチ系の衣装など、基本的に何でもOKです。衣装は各自でご持参ください（貸し出しはありません）。過度に性的なものや、他者の権利を侵害するものは対応できません。不安な場合は事前にDMでご確認ください。
         </div>
       </details>
       <details>
@@ -1116,13 +1121,6 @@
       気になったら、まず気軽にDMを。
     </p>
     <div class="cta-channels">
-      <a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener" class="cta-channel">
-        <span class="cta-channel-icon">✉️</span>
-        <span>
-          <span class="cta-channel-label">X（旧Twitter）のDMで相談する</span>
-          <span class="cta-channel-note">一番気軽。短い質問だけでもOK。</span>
-        </span>
-      </a>
       <a href="mailto:nagoyabase2023@gmail.com?subject=20260614撮影会お問い合わせ" class="cta-channel">
         <span class="cta-channel-icon">📧</span>
         <span>
@@ -1130,10 +1128,19 @@
           <span class="cta-channel-note">nagoyabase2023@gmail.com　24時間以内に返信。</span>
         </span>
       </a>
+      <a href="https://x.com/baseballuni2022" target="_blank" rel="noopener noreferrer" class="cta-channel">
+        <span class="cta-channel-icon">✉️</span>
+        <span>
+          <span class="cta-channel-label">X（旧Twitter）@baseballuni2022 にDMする</span>
+          <span class="cta-channel-note">一番気軽。短い質問だけでもOK。</span>
+        </span>
+      </a>
     </div>
     <p class="cta-limit-note">⚡ 6/14限定 ／ 枠に限りがあります</p>
   </div>
 </section>
+
+</main>
 
 <!-- ── Modal ── -->
 <div id="modal" class="modal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeModal()">
@@ -1157,7 +1164,10 @@
 </footer>
 
 <script>
+  var _modalLastFocused = null;
+
   function openModal(src) {
+    _modalLastFocused = document.activeElement;
     var modalImg = document.getElementById('modal-img');
     modalImg.src = src;
     var srcAbsolute = new URL(src, document.baseURI).href;
@@ -1167,12 +1177,17 @@
     modalImg.alt = thumbImg ? thumbImg.alt : '';
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
+    setTimeout(function () { document.querySelector('.modal-close').focus(); }, 50);
   }
   function closeModal() {
     document.getElementById('modal').classList.remove('open');
     document.body.style.overflow = '';
+    if (_modalLastFocused) { _modalLastFocused.focus(); _modalLastFocused = null; }
   }
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+  document.getElementById('modal').addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') { e.preventDefault(); document.querySelector('.modal-close').focus(); }
+  });
 
   var hamburger = document.getElementById('hamburger');
   var navLinks = document.getElementById('nav-links');
