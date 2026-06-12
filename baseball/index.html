@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>名古屋野球ユニ部｜ゆるく楽しむキャッチボールサークル</title>
+  <meta name="description" content="名古屋で活動するキャッチボールサークル「名古屋野球ユニ部」。野球ユニフォームを着てゆるく体を動かす、未経験・初心者大歓迎のコミュニティ。1人参加OK、20〜50代中心。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://nagoya-base.github.io/ataru-nagoya/baseball/">
+
+  <!-- OGP -->
+  <meta property="og:title" content="名古屋野球ユニ部｜ゆるく楽しむキャッチボールサークル">
+  <meta property="og:description" content="野球ユニフォームを着てゆるく体を動かすキャッチボールサークル。未経験・初心者大歓迎、1人参加OK。名古屋市内で不定期（主に土日）開催。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://nagoya-base.github.io/ataru-nagoya/baseball/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="名古屋野球ユニ部｜ゆるく楽しむキャッチボールサークル">
+  <meta name="twitter:description" content="野球ユニフォームを着てゆるく体を動かすキャッチボールサークル。未経験・初心者大歓迎、1人参加OK。">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8K1TJG0S9Y"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8K1TJG0S9Y');
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #F8F5EC;   /* 明るい砂色 */
+      --bg-card:    #FFFFFF;
+      --bg-green:   #EAF3E7;   /* 芝の薄緑 */
+      --bg-sky:     #E8F3FA;   /* 空の薄青 */
+      --green:      #3A7D44;   /* 芝の緑 */
+      --green-dark: #2C5F35;
+      --sky:        #2D7DD2;   /* 空の青 */
+      --dirt:       #B97A3D;   /* 内野の土 */
+      --text:       #2B2B26;
+      --text-muted: #6E685C;
+      --border:     #E2DCCD;
+    }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Hiragino Sans', 'Noto Sans JP', 'Meiryo', sans-serif;
+      font-size: 15px;
+      line-height: 1.9;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
+    section { padding: 4rem 0; }
+    a { color: var(--sky); }
+
+    .section-label {
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.4rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 1.75rem;
+      color: var(--green-dark);
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.8rem 1.5rem;
+    }
+    .nav-brand {
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+      color: var(--green-dark);
+      white-space: nowrap;
+    }
+    .nav-links {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem 1.1rem;
+      justify-content: flex-end;
+    }
+    .nav-links a {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--green); }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(180deg, var(--bg-sky) 0%, var(--bg-green) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 4.5rem 0 4rem;
+      text-align: center;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.3rem 1.1rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 5.5vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.35;
+      letter-spacing: 0.03em;
+      color: var(--green-dark);
+      margin-bottom: 1rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--sky); }
+    .hero-lead {
+      max-width: 560px;
+      margin: 0 auto 1.75rem;
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+    .hero-specs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem 0.6rem;
+      margin-bottom: 2rem;
+    }
+    .hero-spec {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.35rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.95rem 2rem;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      transition: all 0.18s;
+      margin: 0.25rem;
+    }
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-outline {
+      background: var(--bg-card);
+      border: 2px solid var(--green);
+      color: var(--green);
+    }
+    .btn-outline:hover { background: var(--bg-green); transform: translateY(-2px); }
+
+    /* ── About ── */
+    .about-lead { margin-bottom: 2rem; }
+    .about-lead strong { color: var(--green-dark); }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+    .point-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.6rem 1.4rem;
+      text-align: center;
+    }
+    .point-icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+    .point-title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--green-dark);
+      margin-bottom: 0.4rem;
+    }
+    .point-desc { font-size: 0.86rem; color: var(--text-muted); }
+
+    /* ── Activity ── */
+    #activity { background: var(--bg-green); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .activity-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .activity-tag {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.35rem 1rem;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .flow-list {
+      list-style: none;
+      counter-reset: flow;
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .flow-list li {
+      counter-increment: flow;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1.2rem 0.9rem 3.2rem;
+      position: relative;
+      font-size: 0.92rem;
+    }
+    .flow-list li::before {
+      content: counter(flow);
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flow-list li strong { color: var(--green-dark); }
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 0.9rem;
+    }
+    .info-table th, .info-table td {
+      text-align: left;
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .info-table tr:last-child th, .info-table tr:last-child td { border-bottom: none; }
+    .info-table th {
+      width: 8.5em;
+      white-space: nowrap;
+      color: var(--green-dark);
+      font-weight: 800;
+      background: var(--bg-green);
+    }
+
+    /* ── Join ── */
+    .note-box {
+      background: var(--bg-sky);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--sky);
+      border-radius: 10px;
+      padding: 1.1rem 1.4rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 2rem;
+    }
+    .note-box strong { color: var(--text); }
+
+    /* ── FAQ ── */
+    .faq-list { display: grid; gap: 0.75rem; margin-top: 2rem; }
+    .faq-list details {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1.2rem;
+    }
+    .faq-list summary {
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: var(--green-dark);
+      cursor: pointer;
+    }
+    .faq-list p { margin-top: 0.6rem; font-size: 0.88rem; color: var(--text-muted); }
+
+    /* ── Schedule ── */
+    #schedule { background: var(--bg-sky); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .schedule-card {
+      background: var(--bg-card);
+      border: 2px dashed var(--sky);
+      border-radius: 14px;
+      padding: 2rem 1.75rem;
+      text-align: center;
+    }
+    .schedule-title { font-size: 1.1rem; font-weight: 800; color: var(--sky); margin-bottom: 0.5rem; }
+    .schedule-note { font-size: 0.88rem; color: var(--text-muted); }
+
+    /* ── Gallery ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+    }
+    .gallery-item {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .gallery-ph {
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+    .gallery-ph.grass { background: linear-gradient(135deg, #CDE6C5, #9CCB94); }
+    .gallery-ph.sky   { background: linear-gradient(135deg, #CFE8F7, #9DCCEC); }
+    .gallery-ph.dirt  { background: linear-gradient(135deg, #EFD9BC, #DDB888); }
+    .gallery-cap {
+      padding: 0.6rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .gallery-note { margin-top: 1.5rem; font-size: 0.84rem; color: var(--text-muted); }
+
+    /* ── Contact ── */
+    .contact-links { display: grid; gap: 1rem; margin-top: 2rem; max-width: 560px; }
+    .contact-link {
+      display: block;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem 1.5rem;
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: var(--green-dark);
+      text-decoration: none;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .contact-link:hover { border-color: var(--green); transform: translateY(-2px); }
+    .contact-note {
+      display: block;
+      font-weight: 400;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 0;
+      background: var(--bg-green);
+    }
+    .footer-brand { font-size: 0.92rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--green-dark); }
+    .footer-note { font-size: 0.8rem; color: var(--text-muted); }
+    .footer-links { margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted); }
+    .footer-links a { color: var(--text-muted); }
+    .footer-links a:hover { color: var(--green-dark); }
+    .footer-copy { font-size: 0.74rem; color: var(--text-muted); margin-top: 1.5rem; }
+
+    @media (max-width: 600px) {
+      section { padding: 3rem 0; }
+      nav { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+      .nav-links { justify-content: flex-start; }
+    }
+
+    :focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav>
+  <span class="nav-brand">⚾ 名古屋野球ユニ部</span>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#activity">活動内容</a></li>
+    <li><a href="#join">参加方法</a></li>
+    <li><a href="#schedule">次回開催</a></li>
+    <li><a href="#gallery">ギャラリー</a></li>
+    <li><a href="#contact">連絡先</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ── Hero ── -->
+<section class="hero" id="top">
+  <div class="container">
+    <p class="hero-tag">名古屋のキャッチボールサークル 🏳️‍🌈</p>
+    <h1>ユニを着て、<br><em>ゆるく投げよう。</em></h1>
+    <p class="hero-lead">
+      名古屋野球ユニ部は、野球ユニフォームが好きな人たちが集まって、<br>
+      キャッチボールでゆるく体を動かすサークルです。<br>
+      未経験でも、ブランクがあっても、1人でも。和気あいあいとお待ちしています。
+    </p>
+    <div class="hero-specs">
+      <span class="hero-spec">⚾ 未経験・初心者大歓迎</span>
+      <span class="hero-spec">🙋 1人参加OK</span>
+      <span class="hero-spec">👥 20〜50代中心</span>
+      <span class="hero-spec">📍 名古屋市内</span>
+    </div>
+    <a href="#join" class="btn btn-primary">参加してみる</a>
+    <a href="#activity" class="btn btn-outline">活動内容を見る</a>
+  </div>
+</section>
+
+<!-- ── About ── -->
+<section id="about">
+  <div class="container">
+    <p class="section-label">About</p>
+    <h2>名古屋野球ユニ部って？</h2>
+    <p class="about-lead">
+      「野球ユニフォームが好き。でも本格的な野球はちょっとハードルが高い……」<br>
+      そんな人たちが集まる、<strong>ユニを着てゆるく汗を流すキャッチボールサークル</strong>です。<br>
+      2022年3月26日にスタートして以来、経験者も未経験者もちょうどいいバランスで混ざりながら、
+      名古屋でゆるく活動を続けています。ガチ野球ではなく、楽しむことがいちばん。
+      最近は1回の活動に13〜14名が集まることもあり、少しずつ仲間が増えています。
+    </p>
+    <div class="cards-grid">
+      <div class="point-card">
+        <div class="point-icon">🔰</div>
+        <div class="point-title">未経験でも安心</div>
+        <p class="point-desc">キャッチボール中心なので、野球経験ゼロでも大丈夫。みんなでフォローします。</p>
+      </div>
+      <div class="point-card">
+        <div class="point-icon">🙋</div>
+        <div class="point-title">1人参加OK</div>
+        <p class="point-desc">ほとんどの人が1人参加からのスタート。すぐに打ち解けられる雰囲気です。</p>
+      </div>
+      <div class="point-card">
+        <div class="point-icon">😄</div>
+        <div class="point-title">和気あいあい</div>
+        <p class="point-desc">勝ち負けより楽しさ優先。20〜50代の幅広い仲間がゆるくつながっています。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Activity ── -->
+<section id="activity">
+  <div class="container">
+    <p class="section-label">Activity</p>
+    <h2>活動内容</h2>
+    <p style="margin-bottom: 1.5rem;">
+      メインはキャッチボール。あとはノックや送球練習など、軽めの野球遊びをみんなで楽しみます。
+      「部活っぽい体験をしてみたい」という声にもゆるく応えています。
+    </p>
+    <div class="activity-tags">
+      <span class="activity-tag">⚾ キャッチボール</span>
+      <span class="activity-tag">🥎 ノック</span>
+      <span class="activity-tag">💪 送球練習</span>
+      <span class="activity-tag">🍻 練習後の飲み会（開催回あり）</span>
+    </div>
+
+    <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--green-dark); margin-bottom: 1rem;">当日の流れ（例）</h3>
+    <ol class="flow-list">
+      <li><strong>集合</strong> — 名古屋市内の公園・グラウンドに集まります</li>
+      <li><strong>キャッチボール</strong> — まずはゆるく投げ合って体を温めます</li>
+      <li><strong>ノック・軽い練習</strong> — やりたい人でわいわい野球遊び</li>
+      <li><strong>交流</strong> — 回によっては練習後に飲み会も（練習参加が条件です）</li>
+    </ol>
+
+    <table class="info-table">
+      <tr>
+        <th>活動頻度</th>
+        <td>不定期（主に土日）。開催情報はX（Twitter）で告知します。</td>
+      </tr>
+      <tr>
+        <th>場所</th>
+        <td>名古屋市内の公園など屋外グラウンド中心。雨の日は橋の下などで開催したことも。</td>
+      </tr>
+      <tr>
+        <th>持ち物</th>
+        <td><strong>グローブ（必須）</strong>。野球ユニフォームの着用を推奨しています（ユニを楽しむための部です⚾）。</td>
+      </tr>
+      <tr>
+        <th>参加者</th>
+        <td>20〜50代中心。直近は13〜14名規模で開催（過去最多を更新中）。</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- ── Join ── -->
+<section id="join">
+  <div class="container">
+    <p class="section-label">Join</p>
+    <h2>参加方法</h2>
+    <ol class="flow-list">
+      <li><strong>連絡する</strong> — XのDMまたはメールで「参加したい」と送ってください</li>
+      <li><strong>自己紹介</strong> — 初参加のときは「年代」と「簡単な運動経験」を教えてください</li>
+      <li><strong>準備する</strong> — グローブを用意（ユニフォームがあればぜひ着てきてください）</li>
+      <li><strong>当日集合</strong> — あとは一緒にゆるく投げるだけ！</li>
+    </ol>
+    <p style="font-size: 0.9rem; color: var(--text-muted);">
+      当日参加もできるだけ柔軟に対応していますが、事前のご連絡をおすすめします。
+    </p>
+
+    <div class="note-box">
+      <strong>📝 ご参加にあたって</strong><br>
+      ・ガチ志向のサークルではありません。楽しむことを優先しています。<br>
+      ・飲み会は「練習に参加した人」だけの開催です（飲み会だけの参加はできません）。
+    </div>
+
+    <div class="faq-list">
+      <details>
+        <summary>Q. 野球経験がまったくなくても大丈夫？</summary>
+        <p>大丈夫です！キャッチボール中心なので、未経験の方やブランクが長い方も多く参加しています。経験者がやさしくフォローします。</p>
+      </details>
+      <details>
+        <summary>Q. ユニフォームを持っていないのですが……</summary>
+        <p>着用は「推奨」なので、なくても参加できます。動きやすい服装でOK。気に入ったらぜひお気に入りの一着を見つけてください。</p>
+      </details>
+      <details>
+        <summary>Q. 1人で参加するのが不安です</summary>
+        <p>ほとんどのメンバーが1人参加からのスタートです。和気あいあいとした雰囲気なので、すぐになじめますよ。</p>
+      </details>
+      <details>
+        <summary>Q. 参加費はかかりますか？</summary>
+        <p>開催回によって異なる場合があるため、参加前にDMまたはメールでお気軽にご確認ください。</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ── Schedule ── -->
+<section id="schedule">
+  <div class="container">
+    <p class="section-label">Schedule</p>
+    <h2>次回開催</h2>
+    <!-- ▼ 次回開催情報はここを編集 ▼
+         開催が決まったら schedule-card の中身を書き換えてください。例:
+         <div class="schedule-title">6月28日（日）10:00〜 ◯◯公園</div>
+         <p class="schedule-note">参加希望はXのDMまたはメールでご連絡ください。</p>
+    -->
+    <div class="schedule-card">
+      <div class="schedule-title">📅 次回の開催はXで告知します</div>
+      <p class="schedule-note">
+        最新の開催情報は <a href="https://x.com/baseballuni_ngo" target="_blank" rel="noopener noreferrer">X（@BaseballUni_NGO）</a> をチェック！<br>
+        「次はいつ？」のDMも大歓迎です。
+      </p>
+    </div>
+    <!-- ▲ 次回開催情報はここを編集 ▲ -->
+  </div>
+</section>
+
+<!-- ── Gallery ── -->
+<section id="gallery">
+  <div class="container">
+    <p class="section-label">Gallery</p>
+    <h2>活動の様子</h2>
+    <!--
+      写真を追加するときは、画像を ../images/ に置いて gallery-ph の div を
+      以下のように差し替えてください:
+      <img src="../images/ファイル名.webp" alt="説明" loading="lazy"
+           style="width:100%; aspect-ratio:4/3; object-fit:cover; display:block;">
+    -->
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <div class="gallery-ph grass">⚾</div>
+        <div class="gallery-cap">キャッチボールの様子（写真準備中）</div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-ph sky">📸</div>
+        <div class="gallery-cap">ユニ姿で集合写真（写真準備中）</div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-ph dirt">🥎</div>
+        <div class="gallery-cap">ノック練習の様子（写真準備中）</div>
+      </div>
+    </div>
+    <p class="gallery-note">
+      活動写真は <a href="https://x.com/baseballuni_ngo" target="_blank" rel="noopener noreferrer">X（@BaseballUni_NGO）</a> でも公開中です。
+    </p>
+  </div>
+</section>
+
+<!-- ── Contact ── -->
+<section id="contact">
+  <div class="container">
+    <p class="section-label">Contact</p>
+    <h2>連絡先・参加申し込み</h2>
+    <p>
+      「ちょっと気になる」だけでも大歓迎。質問でも参加希望でも、お気軽にどうぞ。<br>
+      初参加の方は「年代」と「簡単な運動経験」を添えてもらえるとスムーズです。
+    </p>
+    <div class="contact-links">
+      <a href="https://x.com/baseballuni_ngo" target="_blank" rel="noopener noreferrer" class="contact-link">
+        X（@BaseballUni_NGO）にDMする
+        <span class="contact-note">いちばん早く返信できます。フォローもお気軽に！</span>
+      </a>
+      <a href="mailto:bbuni.ngo@gmail.com?subject=名古屋野球ユニ部 参加希望" class="contact-link">
+        メールで連絡する
+        <span class="contact-note">bbuni.ngo@gmail.com</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <div class="footer-brand">⚾ 名古屋野球ユニ部</div>
+    <p class="footer-note">
+      野球ユニフォームが好きな人たちの、ゆるいキャッチボールサークル。<br>
+      名古屋市内で不定期（主に土日）活動中。未経験・1人参加歓迎🏳️‍🌈
+    </p>
+    <p class="footer-links">
+      関連リンク：
+      <a href="../portrait/">ポートレート体験（撮影）</a> ／
+      <a href="https://nagoya-base.github.io/Studio-nagoya-base/">Studio Nagoya Base</a>
+    </p>
+    <p class="footer-copy">© 2022-2026 名古屋野球ユニ部. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
