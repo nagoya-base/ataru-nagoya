@@ -95,6 +95,30 @@
       line-height: 1.9;
     }
 
+    .event-card {
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 1.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem 1.5rem;
+    }
+    .event-date-badge {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .event-body { flex: 1; min-width: 220px; }
+    .event-title { font-size: 1.08rem; font-weight: 800; color: var(--navy); margin-bottom: 0.3rem; }
+    .event-desc { font-size: 0.86rem; color: var(--text-muted); }
+
     @media (max-width: 600px) {
       .path-grid { grid-template-columns: 1fr; }
     }
@@ -164,6 +188,24 @@
   </div>
 </section>
 
+<!-- ── Event ── -->
+<section id="event">
+  <div class="container">
+    <p class="section-label">Event</p>
+    <h2>開催予定のイベント</h2>
+    <!-- ▼ イベントが増えたら event-card をここに追加 ▼ -->
+    <div class="event-card">
+      <div class="event-date-badge">6/14（日）</div>
+      <div class="event-body">
+        <div class="event-title">スタジオ撮影体験会 in 名古屋・上前津</div>
+        <p class="event-desc">90分¥3,000・完全個室。スポユニ・コスプレ歓迎、スタジオ未経験・自撮り勢も大歓迎の限定開催です。</p>
+      </div>
+      <a href="../event-0614.html" class="path-cta" style="flex: 0 0 auto; padding: 0.75rem 1.5rem;">詳細を見る →</a>
+    </div>
+    <!-- ▲ イベントはここまで ▲ -->
+  </div>
+</section>
+
 <section id="contact">
   <div class="container">
     <p class="section-label">Contact</p>
@@ -188,7 +230,9 @@
     <a href="../main.html">メインページ</a> ／
     <a href="model.html">モデル向け</a> ／
     <a href="photographer.html">撮影者向け</a> ／
-    <a href="../baseball/">⚾ 名古屋野球ユニ部</a>
+    <a href="../event-0614.html">6/14 撮影体験会</a> ／
+    <a href="../baseball/">⚾ 名古屋野球ユニ部</a> ／
+    <a href="../sitemap.html">サイトマップ</a>
   </div>
   <p class="footer-copy">© 2026 アタル. All rights reserved.</p>
 </footer>
