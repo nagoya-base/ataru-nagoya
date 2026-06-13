@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>名古屋野球ユニ部｜ゆるく楽しむキャッチボールサークル</title>
-  <meta name="description" content="名古屋で活動するキャッチボールサークル「名古屋野球ユニ部」。野球ユニフォームを着てゆるく体を動かす、未経験・初心者大歓迎のコミュニティ。1人参加OK、20〜50代中心。">
+  <meta name="description" content="名古屋で活動するキャッチボールサークル「名古屋野球ユニ部」。野球ユニフォームを着てゆるく体を動かす、未経験・初心者大歓迎のコミュニティ。1人参加OK、20〜30代中心。">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://nagoya-base.github.io/ataru-nagoya/baseball/">
 
@@ -26,123 +26,13 @@
     gtag('config', 'G-8K1TJG0S9Y');
   </script>
 
+  <!-- 共通スタイル -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- このページ固有のスタイル -->
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:         #F8F5EC;   /* 明るい砂色 */
-      --bg-card:    #FFFFFF;
-      --bg-green:   #EAF3E7;   /* 芝の薄緑 */
-      --bg-sky:     #E8F3FA;   /* 空の薄青 */
-      --green:      #3A7D44;   /* 芝の緑 */
-      --green-dark: #2C5F35;
-      --sky:        #2D7DD2;   /* 空の青 */
-      --dirt:       #B97A3D;   /* 内野の土 */
-      --text:       #2B2B26;
-      --text-muted: #6E685C;
-      --border:     #E2DCCD;
-    }
-
-    html { scroll-behavior: smooth; scroll-padding-top: 70px; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Hiragino Sans', 'Noto Sans JP', 'Meiryo', sans-serif;
-      font-size: 15px;
-      line-height: 1.9;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .container { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
-    section { padding: 4rem 0; }
-    a { color: var(--sky); }
-
-    .section-label {
-      font-size: 0.74rem;
-      font-weight: 800;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--green);
-      margin-bottom: 0.4rem;
-    }
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      margin-bottom: 1.75rem;
-      color: var(--green-dark);
-    }
-
-    /* ── Nav ── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(6px);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.8rem 1.5rem;
-    }
-    .nav-brand {
-      font-weight: 800;
-      font-size: 0.95rem;
-      letter-spacing: 0.05em;
-      color: var(--green-dark);
-      white-space: nowrap;
-    }
-    .nav-links {
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.2rem 1.1rem;
-      justify-content: flex-end;
-    }
-    .nav-links a {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-decoration: none;
-    }
-    .nav-links a:hover { color: var(--green); }
-
     /* ── Hero ── */
-    .hero {
-      background: linear-gradient(180deg, var(--bg-sky) 0%, var(--bg-green) 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 4.5rem 0 4rem;
-      text-align: center;
-    }
-    .hero-tag {
-      display: inline-block;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 0.3rem 1.1rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--green);
-      margin-bottom: 1.25rem;
-    }
-    .hero h1 {
-      font-size: clamp(1.9rem, 5.5vw, 2.8rem);
-      font-weight: 800;
-      line-height: 1.35;
-      letter-spacing: 0.03em;
-      color: var(--green-dark);
-      margin-bottom: 1rem;
-    }
     .hero h1 em { font-style: normal; color: var(--sky); }
-    .hero-lead {
-      max-width: 560px;
-      margin: 0 auto 1.75rem;
-      color: var(--text-muted);
-      font-size: 0.98rem;
-    }
     .hero-specs {
       display: flex;
       flex-wrap: wrap;
@@ -185,18 +75,16 @@
       aspect-ratio: 16 / 6;
       background: linear-gradient(135deg, #CDE6C5 0%, #9CCB94 50%, #CFE8F7 100%);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 5rem;
+      gap: 0.5rem;
       border-bottom: 1px solid var(--border);
       overflow: hidden;
     }
-    .hero-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .hero-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-image-emoji { font-size: 4rem; line-height: 1; }
+    .hero-image-cap { font-size: 0.8rem; font-weight: 700; color: var(--green-dark); opacity: 0.75; }
 
     /* ── About ── */
     .about-lead { margin-bottom: 2rem; }
@@ -272,42 +160,6 @@
       justify-content: center;
     }
     .flow-list li strong { color: var(--green-dark); }
-    .info-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      font-size: 0.9rem;
-    }
-    .info-table th, .info-table td {
-      text-align: left;
-      padding: 0.85rem 1.2rem;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top;
-    }
-    .info-table tr:last-child th, .info-table tr:last-child td { border-bottom: none; }
-    .info-table th {
-      width: 8.5em;
-      white-space: nowrap;
-      color: var(--green-dark);
-      font-weight: 800;
-      background: var(--bg-green);
-    }
-
-    /* ── Join ── */
-    .note-box {
-      background: var(--bg-sky);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--sky);
-      border-radius: 10px;
-      padding: 1.1rem 1.4rem;
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      margin-top: 2rem;
-    }
-    .note-box strong { color: var(--text); }
 
     /* ── History ── */
     .timeline { display: grid; gap: 0; position: relative; padding-left: 2rem; }
@@ -362,29 +214,6 @@
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1.25rem;
     }
-    .gallery-item {
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--bg-card);
-    }
-    .gallery-ph {
-      aspect-ratio: 4 / 3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-    }
-    .gallery-ph.grass { background: linear-gradient(135deg, #CDE6C5, #9CCB94); }
-    .gallery-ph.sky   { background: linear-gradient(135deg, #CFE8F7, #9DCCEC); }
-    .gallery-ph.dirt  { background: linear-gradient(135deg, #EFD9BC, #DDB888); }
-    .gallery-cap {
-      padding: 0.6rem 0.9rem;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-align: center;
-    }
     .gallery-note { margin-top: 1.5rem; font-size: 0.84rem; color: var(--text-muted); }
 
     /* ── Contact ── */
@@ -409,27 +238,6 @@
       color: var(--text-muted);
       margin-top: 0.3rem;
     }
-
-    /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 3rem 0;
-      background: var(--bg-green);
-    }
-    .footer-brand { font-size: 0.92rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--green-dark); }
-    .footer-note { font-size: 0.8rem; color: var(--text-muted); }
-    .footer-links { margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted); }
-    .footer-links a { color: var(--text-muted); }
-    .footer-links a:hover { color: var(--green-dark); }
-    .footer-copy { font-size: 0.74rem; color: var(--text-muted); margin-top: 1.5rem; }
-
-    @media (max-width: 600px) {
-      section { padding: 3rem 0; }
-      nav { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
-      .nav-links { justify-content: flex-start; }
-    }
-
-    :focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
   </style>
 </head>
 <body>
@@ -473,12 +281,15 @@
 
 <!-- ── Hero Image ── -->
 <!--
-  写真を追加するときはプレースホルダーの div を以下の img に差し替えてください:
+  写真を追加するときは、中身を以下の img に差し替えてください:
   <div class="hero-image">
     <img src="../images/ファイル名.webp" alt="キャッチボールの様子" loading="eager">
   </div>
 -->
-<div class="hero-image">⚾</div>
+<div class="hero-image">
+  <span class="hero-image-emoji" aria-hidden="true">⚾</span>
+  <span class="hero-image-cap">写真準備中</span>
+</div>
 
 <!-- ── About ── -->
 <section id="about">
@@ -488,9 +299,9 @@
     <p class="about-lead">
       「野球ユニフォームが好き。でも本格的な野球はちょっとハードルが高い……」<br>
       そんな人たちが集まる、<strong>ユニを着てゆるく汗を流すキャッチボールサークル</strong>です。<br>
-      2022年3月26日にスタートして以来、経験者も未経験者もちょうどいいバランスで混ざりながら、
+      2022年に活動をスタートして以来、経験者も未経験者もちょうどいいバランスで混ざりながら、
       名古屋でゆるく活動を続けています。ガチ野球ではなく、楽しむことがいちばん。
-      最近は1回の活動に13〜14名が集まることもあり、少しずつ仲間が増えています。
+      最近は少しずつ仲間が増えています。
     </p>
     <div class="cards-grid">
       <div class="point-card">
@@ -554,7 +365,7 @@
       <span class="activity-tag">🍻 練習後の飲み会（開催回あり）</span>
     </div>
 
-    <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--green-dark); margin-bottom: 1rem;">当日の流れ（例）</h3>
+    <h3>当日の流れ（例）</h3>
     <ol class="flow-list">
       <li><strong>集合</strong> — 名古屋市内の公園・グラウンドに集まります</li>
       <li><strong>キャッチボール</strong> — まずはゆるく投げ合って体を温めます</li>
