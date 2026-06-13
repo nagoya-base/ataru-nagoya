@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サイトマップ｜ATARU / Nagoya Base</title>
+  <meta name="description" content="名古屋で活動するATARU / Nagoya Baseのサイトマップ。緊縛・ロープセッション、撮影・ポートレート、野球体験コミュニティの3つの活動をご案内します。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://nagoya-base.github.io/ataru-nagoya/sitemap.html">
+
+  <!-- OGP -->
+  <meta property="og:title" content="サイトマップ｜ATARU / Nagoya Base">
+  <meta property="og:description" content="緊縛・ロープセッション、撮影・ポートレート、野球体験コミュニティ。3つの活動の入口をまとめたサイトマップです。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://nagoya-base.github.io/ataru-nagoya/sitemap.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="サイトマップ｜ATARU / Nagoya Base">
+  <meta name="twitter:description" content="3つの活動の入口をまとめたサイトマップです。">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8K1TJG0S9Y"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8K1TJG0S9Y');
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #F2EFE9;
+      --bg-card:    #FDFCF9;
+      --accent:     #1D3557;
+      --accent-lt:  #457B9D;
+      --text:       #1C1A17;
+      --text-muted: #6A6258;
+      --border:     #DDD8CF;
+      --rope:       #1D3557;   /* 緊縛柱 */
+      --photo:      #A4243B;   /* 撮影柱 */
+      --ball:       #3A7D44;   /* 野球柱 */
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Hiragino Sans', 'Noto Sans JP', 'Meiryo', sans-serif;
+      font-size: 15px;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    .wrap { max-width: 960px; margin: 0 auto; }
+
+    .page-label {
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent-lt);
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+    .lead {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      max-width: 560px;
+      margin: 0 auto 3rem;
+    }
+
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.5rem;
+    }
+    .pillar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 1.9rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .pillar.rope  { border-top-color: var(--rope); }
+    .pillar.photo { border-top-color: var(--photo); }
+    .pillar.ball  { border-top-color: var(--ball); }
+
+    .pillar-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .pillar-title { font-size: 1.12rem; font-weight: 800; margin-bottom: 0.2rem; }
+    .pillar.rope  .pillar-title { color: var(--rope); }
+    .pillar.photo .pillar-title { color: var(--photo); }
+    .pillar.ball  .pillar-title { color: var(--ball); }
+
+    .pillar-badge {
+      display: inline-block;
+      align-self: flex-start;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      border-radius: 999px;
+      padding: 0.1rem 0.7rem;
+      margin-bottom: 0.7rem;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      background: var(--bg);
+    }
+    .pillar-badge.adult { color: #fff; background: var(--rope); border-color: var(--rope); }
+
+    .pillar-desc {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      flex: 0 0 auto;
+    }
+
+    .page-list { list-style: none; display: grid; gap: 0.5rem; margin-top: auto; }
+    .page-list a {
+      display: block;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .page-list a:hover { border-color: var(--accent-lt); transform: translateY(-1px); }
+    .page-list .page-note {
+      display: block;
+      font-weight: 400;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+    .event-date {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #fff;
+      background: var(--photo);
+      border-radius: 4px;
+      padding: 0 0.45rem;
+      margin-right: 0.4rem;
+      vertical-align: 1px;
+    }
+
+    .related {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+    .related a { color: var(--accent); }
+
+    .footer-copy {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <p class="page-label">Sitemap</p>
+  <h1>サイトマップ</h1>
+  <p class="lead">
+    名古屋を拠点に、3つの活動を行っています。<br>
+    気になる入口からどうぞ。
+  </p>
+
+  <div class="pillar-grid">
+
+    <!-- ── 柱1: 緊縛 ── -->
+    <div class="pillar rope">
+      <div class="pillar-icon">🪢</div>
+      <div class="pillar-title">緊縛・ロープセッション</div>
+      <span class="pillar-badge adult">18歳以上限定</span>
+      <p class="pillar-desc">
+        完全マンツーマンの個人セッション。体験から作品撮りまで、初心者の方も丁寧にご案内します。
+        成人向けコンテンツを含むため、年齢確認ページからお進みください。
+      </p>
+      <ul class="page-list">
+        <li><a href="index.html">セッション案内へ（年齢確認あり）
+          <span class="page-note">料金・FAQ・予約方法はこの先のページに掲載しています</span></a></li>
+      </ul>
+    </div>
+
+    <!-- ── 柱2: 撮影・ポートレート ── -->
+    <div class="pillar photo">
+      <div class="pillar-icon">📷</div>
+      <div class="pillar-title">撮影・ポートレート</div>
+      <span class="pillar-badge">名古屋・上前津 完全個室スタジオ</span>
+      <p class="pillar-desc">
+        一眼レフ＋本格照明で楽しむポートレート体験。撮ってもらいたい方も、撮りたい方も歓迎です。
+      </p>
+      <ul class="page-list">
+        <li><a href="portrait/">ポートレート体験 トップ
+          <span class="page-note">コース選びはこちらから</span></a></li>
+        <li><a href="portrait/model.html">モデル（被写体）向けコース
+          <span class="page-note">90分¥5,000〜・スポユニ／コスプレOK</span></a></li>
+        <li><a href="portrait/photographer.html">撮影者向けコース
+          <span class="page-note">見学無料・お試し撮影90分¥3,000</span></a></li>
+        <li><a href="event-0614.html"><span class="event-date">6/14（日）</span>スタジオ撮影体験会
+          <span class="page-note">限定開催・90分¥3,000・スタジオ未経験歓迎</span></a></li>
+      </ul>
+    </div>
+
+    <!-- ── 柱3: 野球体験コミュニティ ── -->
+    <div class="pillar ball">
+      <div class="pillar-icon">⚾</div>
+      <div class="pillar-title">野球体験コミュニティ</div>
+      <span class="pillar-badge">全年齢・未経験歓迎</span>
+      <p class="pillar-desc">
+        野球ユニフォームが好きな人たちの、ゆるいキャッチボールサークル。名古屋市内で不定期（主に土日）活動中です。
+      </p>
+      <ul class="page-list">
+        <li><a href="baseball/">名古屋野球ユニ部
+          <span class="page-note">活動内容・参加方法・次回開催はこちら</span></a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <p class="related">
+    スタジオレンタルは <a href="https://nagoya-base.github.io/Studio-nagoya-base/">Studio Nagoya Base</a> をご覧ください。
+  </p>
+
+  <p class="footer-copy">© 2026 ATARU / Nagoya Base. All rights reserved.</p>
+</div>
+
+</body>
+</html>
