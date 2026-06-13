@@ -179,6 +179,25 @@
     }
     .btn-outline:hover { background: var(--bg-green); transform: translateY(-2px); }
 
+    /* ── Hero Image ── */
+    .hero-image {
+      width: 100%;
+      aspect-ratio: 16 / 6;
+      background: linear-gradient(135deg, #CDE6C5 0%, #9CCB94 50%, #CFE8F7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .hero-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     /* ── About ── */
     .about-lead { margin-bottom: 2rem; }
     .about-lead strong { color: var(--green-dark); }
@@ -444,13 +463,22 @@
     <div class="hero-specs">
       <span class="hero-spec">⚾ 未経験・初心者大歓迎</span>
       <span class="hero-spec">🙋 1人参加OK</span>
-      <span class="hero-spec">👥 20〜50代中心</span>
+      <span class="hero-spec">👥 20〜30代中心</span>
       <span class="hero-spec">📍 名古屋市内</span>
     </div>
     <a href="#join" class="btn btn-primary">参加してみる</a>
     <a href="#activity" class="btn btn-outline">活動内容を見る</a>
   </div>
 </section>
+
+<!-- ── Hero Image ── -->
+<!--
+  写真を追加するときはプレースホルダーの div を以下の img に差し替えてください:
+  <div class="hero-image">
+    <img src="../images/ファイル名.webp" alt="キャッチボールの様子" loading="eager">
+  </div>
+-->
+<div class="hero-image">⚾</div>
 
 <!-- ── About ── -->
 <section id="about">
@@ -478,7 +506,7 @@
       <div class="point-card">
         <div class="point-icon">😄</div>
         <div class="point-title">和気あいあい</div>
-        <p class="point-desc">勝ち負けより楽しさ優先。20〜50代の幅広い仲間がゆるくつながっています。</p>
+        <p class="point-desc">勝ち負けより楽しさ優先。20〜30代の仲間がゆるくつながっています。</p>
       </div>
     </div>
   </div>
@@ -500,7 +528,7 @@
       </div>
       <div class="tl-item">
         <div class="tl-date">2026年、初めて9人を超える</div>
-        <p class="tl-body">1回の参加者が10名を超えるように。ユニが増えて、グラウンドが少し賑やかになってきた。</p>
+        <p class="tl-body">野球1チーム分の9人を超えた。ユニが増えて、グラウンドが少し賑やかになってきた。</p>
       </div>
       <div class="tl-item">
         <div class="tl-date">2026年6月 ホームページ開設</div>
