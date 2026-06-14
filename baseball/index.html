@@ -72,7 +72,7 @@
     /* ── Hero Image ── */
     .hero-image {
       width: 100%;
-      aspect-ratio: 16 / 6;
+      aspect-ratio: 16 / 7;
       background: linear-gradient(135deg, #CDE6C5 0%, #9CCB94 50%, #CFE8F7 100%);
       display: flex;
       flex-direction: column;
@@ -82,7 +82,7 @@
       border-bottom: 1px solid var(--border);
       overflow: hidden;
     }
-    .hero-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-image img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
     .hero-image-emoji { font-size: 4rem; line-height: 1; }
     .hero-image-cap { font-size: 0.8rem; font-weight: 700; color: var(--green-dark); opacity: 0.75; }
 
@@ -280,15 +280,8 @@
 </section>
 
 <!-- ── Hero Image ── -->
-<!--
-  写真を追加するときは、中身を以下の img に差し替えてください:
-  <div class="hero-image">
-    <img src="../images/ファイル名.webp" alt="キャッチボールの様子" loading="eager">
-  </div>
--->
 <div class="hero-image">
-  <span class="hero-image-emoji" aria-hidden="true">⚾</span>
-  <span class="hero-image-cap">写真準備中</span>
+  <img src="../images/hero.webp" alt="ユニ姿でグローブを構えるメンバー" loading="eager">
 </div>
 
 <!-- ── About ── -->
@@ -484,8 +477,8 @@
         <div class="gallery-cap">キャッチボールの様子（写真準備中）</div>
       </div>
       <div class="gallery-item">
-        <div class="gallery-ph sky">📸</div>
-        <div class="gallery-cap">ユニ姿で集合写真（写真準備中）</div>
+        <img src="../images/group.webp" alt="ユニ姿の集合写真" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover; display:block;">
+        <div class="gallery-cap">ユニ姿で集合写真</div>
       </div>
       <div class="gallery-item">
         <div class="gallery-ph dirt">🥎</div>
