@@ -124,29 +124,27 @@
     }
 
     /* ── Gallery ── */
-    .masonry {
-      columns: 2;
-      column-gap: 0.75rem;
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
       margin-top: 1.5rem;
     }
     @media (min-width: 600px) {
-      .masonry { columns: 3; }
+      .gallery { grid-template-columns: repeat(3, 1fr); }
     }
-    .masonry-item {
-      break-inside: avoid;
-      margin-bottom: 0.75rem;
-    }
-    .masonry-item img {
+    .gallery img,
+    .gallery-slot {
       width: 100%;
-      max-width: 100%;
-      display: block;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
       border-radius: 10px;
-      border: 1px solid var(--border);
+      display: block;
     }
+    .gallery img { border: 1px solid var(--border); }
     .gallery-slot {
       background: var(--bg-card);
       border: 1.5px dashed var(--border);
-      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -154,9 +152,6 @@
       font-size: 0.78rem;
       letter-spacing: 0.08em;
     }
-    .gallery-slot.h-sm  { height: 160px; }
-    .gallery-slot.h-md  { height: 240px; }
-    .gallery-slot.h-lg  { height: 320px; }
   </style>
 </head>
 <body>
@@ -246,19 +241,19 @@
   <div class="container">
     <p class="section-label">Gallery</p>
     <h2>作例ギャラリー</h2>
-    <div class="masonry">
-      <!-- 画像を追加するときは <div class="gallery-slot ..."> を
+    <div class="gallery">
+      <!-- 画像を追加するときは <div class="gallery-slot"> を
            <img src="../images/ファイル名.webp" alt="説明" loading="lazy"> に置き換えてください -->
-      <div class="masonry-item"><img src="../images/IMG_0083.webp" alt="作例" width="1536" height="2304" loading="lazy"></div>
-      <div class="masonry-item"><img src="../images/IMG_0088.webp" alt="作例" width="1536" height="1859" loading="lazy"></div>
-      <div class="masonry-item"><img src="../images/IMG_0092.webp" alt="作例" width="1536" height="2197" loading="lazy"></div>
-      <div class="masonry-item"><img src="../images/IMG_0102.webp" alt="作例" width="1536" height="1842" loading="lazy"></div>
-      <div class="masonry-item"><img src="../images/IMG_0146.webp" alt="作例" width="1536" height="2304" loading="lazy"></div>
-      <div class="masonry-item"><img src="../images/IMG_0157.webp" alt="作例" width="1536" height="2304" loading="lazy"></div>
-      <div class="masonry-item"><div class="gallery-slot h-md">07</div></div>
-      <div class="masonry-item"><div class="gallery-slot h-lg">08</div></div>
-      <div class="masonry-item"><div class="gallery-slot h-sm">09</div></div>
-      <div class="masonry-item"><div class="gallery-slot h-md">10</div></div>
+      <img src="../images/IMG_0083.webp" alt="作例" loading="lazy">
+      <img src="../images/IMG_0088.webp" alt="作例" loading="lazy">
+      <img src="../images/IMG_0092.webp" alt="作例" loading="lazy">
+      <img src="../images/IMG_0102.webp" alt="作例" loading="lazy">
+      <img src="../images/IMG_0146.webp" alt="作例" loading="lazy">
+      <img src="../images/IMG_0157.webp" alt="作例" loading="lazy">
+      <div class="gallery-slot">07</div>
+      <div class="gallery-slot">08</div>
+      <div class="gallery-slot">09</div>
+      <div class="gallery-slot">10</div>
     </div>
   </div>
 </section>
