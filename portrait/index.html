@@ -122,6 +122,41 @@
     @media (max-width: 600px) {
       .path-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Gallery ── */
+    .masonry {
+      columns: 2;
+      column-gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    @media (min-width: 600px) {
+      .masonry { columns: 3; }
+    }
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 0.75rem;
+    }
+    .masonry-item img {
+      width: 100%;
+      display: block;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+    .gallery-slot {
+      background: var(--bg-card);
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+    }
+    .gallery-slot.h-sm  { height: 160px; }
+    .gallery-slot.h-md  { height: 240px; }
+    .gallery-slot.h-lg  { height: 320px; }
   </style>
 </head>
 <body>
@@ -203,6 +238,28 @@
       <a href="../event-0614.html" class="path-cta" style="flex: 0 0 auto; padding: 0.75rem 1.5rem;">詳細を見る →</a>
     </div>
     <!-- ▲ イベントはここまで ▲ -->
+  </div>
+</section>
+
+<!-- ── Gallery ── -->
+<section id="gallery">
+  <div class="container">
+    <p class="section-label">Gallery</p>
+    <h2>作例ギャラリー</h2>
+    <div class="masonry">
+      <!-- 画像を追加するときは <div class="gallery-slot ..."> を
+           <img src="../images/ファイル名.webp" alt="説明" loading="lazy"> に置き換えてください -->
+      <div class="masonry-item"><div class="gallery-slot h-lg">01</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-sm">02</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-md">03</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-lg">04</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-sm">05</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-md">06</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-md">07</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-lg">08</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-sm">09</div></div>
+      <div class="masonry-item"><div class="gallery-slot h-md">10</div></div>
+    </div>
   </div>
 </section>
 
