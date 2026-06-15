@@ -123,6 +123,25 @@
       .path-grid { grid-template-columns: 1fr; }
     }
 
+    .event-none {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      padding: 1rem 0;
+    }
+    .past-events-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      margin: 2rem 0 0.75rem;
+      text-transform: uppercase;
+    }
+    .event-card--past {
+      opacity: 0.6;
+      border-color: var(--border);
+      border-width: 1px;
+    }
+
     /* ── Gallery ── */
     .gallery {
       display: grid;
@@ -223,8 +242,12 @@
   <div class="container">
     <p class="section-label">Event</p>
     <h2>開催予定のイベント</h2>
-    <!-- ▼ イベントが増えたら event-card をここに追加 ▼ -->
-    <div class="event-card">
+    <!-- ▼ 開催予定イベントはここに追加 ▼ -->
+    <p class="event-none">現在、開催予定のイベントはありません。</p>
+    <!-- ▲ 開催予定イベントはここまで ▲ -->
+
+    <h3 class="past-events-label">過去のイベント</h3>
+    <div class="event-card event-card--past">
       <div class="event-date-badge">6/14（日）</div>
       <div class="event-body">
         <div class="event-title">スタジオ撮影体験会 in 名古屋・上前津</div>
@@ -232,7 +255,6 @@
       </div>
       <a href="../event-0614.html" class="path-cta" style="flex: 0 0 auto; padding: 0.75rem 1.5rem;">詳細を見る →</a>
     </div>
-    <!-- ▲ イベントはここまで ▲ -->
   </div>
 </section>
 
