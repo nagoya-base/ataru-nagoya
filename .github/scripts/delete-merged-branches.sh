@@ -22,23 +22,23 @@ fi
 echo "リモート情報を更新中..."
 git fetch origin --prune
 
-# origin/main にマージ済みのブランチを列挙（main・HEAD を除く）
-MERGED=$(git branch -r --merged origin/main | grep -v 'origin/main\|HEAD' | sed 's|origin/||' | xargs)
+# origin/main にマージ済みのブランチを配列に格納（main・HEAD を除く）
+mapfile -t MERGED < <(git branch -r --merged origin/main | grep -v 'origin/main\|HEAD' | sed 's|[[:space:]]*origin/||')
 
-if [[ -z "$MERGED" ]]; then
+if [[ ${#MERGED[@]} -eq 0 ]]; then
   echo "削除対象のマージ済みブランチはありません。"
   exit 0
 fi
 
 echo ""
 echo "削除対象のマージ済みリモートブランチ:"
-for branch in $MERGED; do
-  echo "  - $branch"
+for branch in "${MERGED[@]}"; do
+  echo "  - ${branch}"
 done
 
 echo ""
 if $DRY_RUN; then
-  echo "[DRY RUN] 上記 $(echo $MERGED | wc -w) 本を削除予定（実際には削除しません）。"
+  echo "[DRY RUN] 上記 ${#MERGED[@]} 本を削除予定（実際には削除しません）。"
   exit 0
 fi
 
@@ -49,5 +49,5 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
 fi
 
 echo "削除中..."
-git push origin --delete $MERGED
+git push origin --delete "${MERGED[@]}"
 echo "完了しました。"
