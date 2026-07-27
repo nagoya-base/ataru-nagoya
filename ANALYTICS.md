@@ -1,6 +1,6 @@
 # アクセス解析（Google Analytics 4）
 
-測定 ID: `<<NEW_ATARU_ID>>`（`index.html` / `main.html` / `profile.html` に設定済み）。
+測定 ID: `G-5Z48YLCKNG`（`index.html` / `main.html` / `profile.html` に設定済み）。
 SNBC（snb-community）と共用していた `G-8K1TJG0S9Y` からアタル専用プロパティに
 分離した。切替日より前の計測データには SNBC 分のトラフィックが混在している。
 
