@@ -4,38 +4,23 @@
 
 計測ヘルパーは `analytics.js`（`window.AtaruAnalytics`）です。
 
-## 成果イベント（キーイベント）の現状
+## 成果イベント（キーイベント）
 
-**現時点で GA4 管理画面でキーイベントとして ON にするイベントはありません。**
-
-`reservation_submit` / `reservation_complete` / `generate_lead` は実装していません。
-理由は次のとおりです。
-
-| イベント名 | 実装しない理由 |
-| --- | --- |
-| `reservation_submit` | 当サイトに予約フォームが存在しない。予約導線はメールリンクと X のリンクのみで、リンクを開いたことは分かっても実際に送信されたかをサイト側で判定できない |
-| `reservation_complete` | 予約完了ページ・完了状態が存在しない |
-| `generate_lead` | 問い合わせフォームが存在しない。メール・X のクリックを成果として扱うと、実際には送信せず離脱した人まで成果に計上してしまう |
-
-メール・X のクリックは、分析用イベント `mail_click` /
-`consultation_x_click` として計測しています。
-
-### 成果イベントを計測できるようにするには
-
-予約・問い合わせフォーム（送信成功を JavaScript で判定できるもの）を設置する必要が
-あります。設置後、送信の **POST が成功した時だけ** 次を送信するよう実装してください。
-
-- 予約フォーム → `reservation_submit`
-- 問い合わせフォーム → `generate_lead`
-
-その際は、送信ボタンのクリックだけでは発火させないこと、バリデーションエラー時は
-発火させないこと、送信操作ごとのトークンで二重計測を防ぐことを守ってください。
-同系列リポジトリの `Studio-nagoya-base/scripts/analytics.js`、
-`snb-community/analytics.js` が実装例です。
-
-実装した後、GA4 管理画面 →「管理」→「データの表示」→「イベント」→ 一覧から
-該当イベントを探し、「キーイベントとしてマークを付ける」を ON にします。
+`#contact` の予約・相談フォーム設置に伴い、送信成功イベントを実装しました。
+GA4 管理画面 →「管理」→「データの表示」→「イベント」→ 一覧から
+`ataru_form_submit_booking` / `ataru_form_submit_consult` を探し、
+「キーイベントとしてマークを付ける」を ON にしてください。
 イベントが一覧に表示されるのは、実際に 1 回以上計測された後です（最大 24 時間程度）。
+
+| イベント名 | 発火条件 |
+| --- | --- |
+| `ataru_form_submit_booking` | お問い合わせ内容で「日程を決めて予約したい」を選んだ状態でフォーム送信のPOSTが成功した時だけ、1回 |
+| `ataru_form_submit_consult` | 予約以外（相談・質問・作品撮り・その他）を選んだ状態でフォーム送信のPOSTが成功した時だけ、1回 |
+
+送信ボタンのクリックやバリデーションエラーでは発火しません。`reservation_complete` /
+`generate_lead` は実装していません。当サイトには送信完了ページが存在せず、送信成功と
+完了メッセージの表示が同一の瞬間に起きるため、`ataru_form_submit_*` と両方送ると
+1件の送信を二重に計上することになります。
 
 ## 分析用イベント（キーイベントにしない）
 
@@ -53,8 +38,14 @@
 | `contact_view` | 「ご予約・お問い合わせ」（`#contact`）が画面に入った時、1 回 |
 | `faq_open` | FAQ の各項目を開いた時 |
 | `gallery_open` | 作例画像を開いた時 |
-| `mail_click` | メールリンクをクリックした時 |
-| `consultation_x_click` | X のリンクをクリックした時 |
+| `mail_click` | 送信エラー時の最終手段としてメールリンクをクリックした時 |
+| `consultation_x_click` | 送信エラー時の最終手段としてXのリンクをクリックした時 |
+| `ataru_form_view` | `#contact` のフォームが画面に入った時、1 回 |
+| `ataru_form_start` | フォームの最初の入力・選択をした時、1 回 |
+| `ataru_form_select_intent` | 「お問い合わせ内容」を選択・変更した時 |
+| `ataru_form_success` | フォーム送信が成功した時（成功メッセージ表示と同時） |
+| `ataru_form_error` | フォーム送信が失敗した時 |
+| `contact_cta_click` | ヒーロー・料金・FAQ等の「予約・相談する」系CTAをクリックした時 |
 
 `flow_view` は実装していません。当サイトに独立した「流れ」セクションが存在せず、
 該当する内容は `#contact` と `#notice` に含まれるためです。
@@ -70,6 +61,7 @@
 - `link_destination`：`mail` / `x`
 - `faq_id`：`faq_01` 形式の連番
 - `gallery_category`：`bondage` / `suspension`、`gallery_index`：並び順の番号
+- `contact_intent`：`booking` / `consult` / `question` / `artwork` / `other`（お問い合わせ種別のカテゴリのみ。自由記述・氏名・連絡先は送らない）
 
 ## 発火確認の手順
 

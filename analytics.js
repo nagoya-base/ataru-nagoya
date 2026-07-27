@@ -24,6 +24,8 @@
 
   var isDebug = /(?:^|[?&])debug_mode=true(?:&|$)/.test(window.location.search);
   var sentOnce = {};
+  /* ataru_form_submit_* の二重送信防止用。送信成功1回につき1件だけ記録する。 */
+  var submittedTokens = {};
 
   function isTrackableEnvironment() {
     if (isDebug) return true;
@@ -129,5 +131,18 @@
   initFaqOpenTracking();
   initGalleryOpenTracking();
 
-  window.AtaruAnalytics = { track: track };
+  window.AtaruAnalytics = {
+    track: track,
+    /* キーイベント。#contact フォームのPOSTが成功した時だけ呼ぶこと。
+       送信ボタンのクリックやバリデーション通過、送信開始では呼ばない。
+       submissionToken は1回の送信操作ごとに一意な値。同じトークンでは二度送信しない。 */
+    trackFormSubmit: function (submissionToken, intent, params) {
+      var token = String(submissionToken);
+      if (submittedTokens[token]) return;
+      submittedTokens[token] = true;
+
+      var eventName = intent === 'booking' ? 'ataru_form_submit_booking' : 'ataru_form_submit_consult';
+      track(eventName, params);
+    }
+  };
 })();
