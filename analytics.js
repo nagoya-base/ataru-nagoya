@@ -12,20 +12,17 @@
  * 外れていないか確認すること。
  *
  * 【成果イベント（キーイベント）について】
- * 現時点で generate_lead は実装しない。
- * 当サイトには予約・問い合わせフォームが存在せず、導線はメールリンクと X のリンクのみ。
- * リンクを開いたことは分かっても、実際に送信されたかをサイト側で判定できないため。
- * メール・X のクリックを成果イベントとして扱うと、送信していない離脱まで
- * 成果として計上してしまう。クリックは補助成果イベント outbound_contact_click
- * として計測する。
- *
- * 問い合わせフォームを設置した時点で、その送信成功をもって generate_lead を実装すること。
+ * #contact の予約・相談フォームのPOSTが成功した時だけ generate_lead を送信する。
+ * lead_type で予約（ataru_booking）と相談・質問（ataru_consultation）を区別する。
+ * 送信ボタンのクリックやバリデーションエラーでは発火しない（form_errorを送信）。
  */
 (function () {
   'use strict';
 
   var isDebug = /(?:^|[?&])debug_mode=true(?:&|$)/.test(window.location.search);
   var sentOnce = {};
+  /* generate_lead の二重送信防止用。送信成功1回につき1件だけ記録する。 */
+  var submittedTokens = {};
 
   function siteSection() {
     return (document.body && document.body.getAttribute('data-site-section')) || 'session';
@@ -143,5 +140,19 @@
   initFaqOpenTracking();
   initGalleryOpenTracking();
 
-  window.AtaruAnalytics = { track: track };
+  window.AtaruAnalytics = {
+    track: track,
+    /* 主成果。#contact フォームのPOSTが成功した時だけ呼ぶこと。
+       送信ボタンのクリックやバリデーション通過、送信開始では呼ばない。
+       submissionToken は1回の送信操作ごとに一意な値。同じトークンでは二度送信しない。 */
+    trackGenerateLead: function (submissionToken, intent, params) {
+      var token = String(submissionToken);
+      if (submittedTokens[token]) return;
+      submittedTokens[token] = true;
+
+      var payload = params ? Object.assign({}, params) : {};
+      payload.lead_type = intent === 'booking' ? 'ataru_booking' : 'ataru_consultation';
+      track('generate_lead', payload);
+    }
+  };
 })();
