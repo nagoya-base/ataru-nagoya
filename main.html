@@ -1377,6 +1377,7 @@
   var submitBtn = document.getElementById('cf-submit-btn');
   var successBox = document.getElementById('cf-success');
   var errorBox = document.getElementById('cf-error');
+  var submissionSeq = 0;
 
   function track(name, params) {
     if (window.AtaruAnalytics) window.AtaruAnalytics.track(name, params);
@@ -1535,10 +1536,12 @@
 
     if (!form.reportValidity()) return;
 
-    track(intent === 'booking' ? 'ataru_form_submit_booking' : 'ataru_form_submit_consult', { contact_intent: intent });
     setSubmitting(true);
     successBox.hidden = true;
     errorBox.hidden = true;
+
+    submissionSeq += 1;
+    var submissionToken = submissionSeq;
 
     var formData = new FormData(form);
 
@@ -1552,6 +1555,10 @@
         return response.json();
       })
       .then(function () {
+        /* キーイベント：POST成功時のみ、1送信につき1回 */
+        if (window.AtaruAnalytics) {
+          window.AtaruAnalytics.trackFormSubmit(submissionToken, intent, { contact_intent: intent });
+        }
         track('ataru_form_success', { contact_intent: intent });
         form.hidden = true;
         successBox.hidden = false;
