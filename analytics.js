@@ -3,8 +3,7 @@
  * ビルドなしの静的サイトのため、グローバルスクリプトとして読み込む。
  *
  * 送信するのはカテゴリ値のみ。氏名・メールアドレス・Xアカウント・希望メニュー・
- * 希望日時・自由記述などは一切送信しない（そもそも当サイトに入力フォームはない）。
- * 作例画像の実パス・ファイル名も送信しない。
+ * 希望日時・自由記述などの入力内容は一切送信しない。作例画像の実パス・ファイル名も送信しない。
  * gtag が未定義でも黙って何もしないため、計測がページ機能を止めることはない。
  *
  * 3リポジトリ（snb-community / Studio-nagoya-base / ataru-nagoya）共通の
@@ -28,6 +27,10 @@
     return (document.body && document.body.getAttribute('data-site-section')) || 'session';
   }
 
+  function pageType() {
+    return (document.body && document.body.getAttribute('data-page-type')) || 'top';
+  }
+
   function isTrackableEnvironment() {
     if (isDebug) return true;
     var protocol = window.location.protocol;
@@ -42,7 +45,8 @@
 
     var payload = {
       site_brand: 'ataru',
-      site_section: siteSection()
+      site_section: siteSection(),
+      page_type: pageType()
     };
     if (params) {
       for (var key in params) {

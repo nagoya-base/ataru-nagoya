@@ -65,6 +65,7 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 
 - `site_brand`：`ataru` 固定
 - `site_section`：`session`（`index.html` / `main.html`）/ `profile`（`profile.html`）
+- `page_type`：`age_gate`（`index.html`）/ `form`（`main.html`）/ `redirect`（`profile.html`）。`<body>` の `data-page-type` から自動的に付与（未設定時は `top`）
 - `cta_location`：`contact` / `age_gate` など
 - `channel`：`mail` / `x`
 - `faq_id`：`faq_01` 形式の連番
@@ -89,6 +90,7 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 ## ページを追加するとき
 
 - GA4 タグ（`gtag.js`）と `analytics.js` の読み込みを追加する
+- `<body>` に `data-site-section` と `data-page-type` を付ける（省略時は `session` / `top` になる）
 - 閲覧イベントを取りたいセクションには、上表と同じ `id` を付ける
 - メール・X などの外部導線には
   `data-ga-event="outbound_contact_click"` / `data-ga-location` /
