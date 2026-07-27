@@ -573,6 +573,90 @@
     }
 
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── Contact form ── */
+    .contact-form { text-align: left; margin: 2rem auto 0; max-width: 560px; }
+    .contact-form__honey { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+    .cf-fieldset { border: none; padding: 0; margin: 0 0 2.25rem; }
+    .cf-fieldset legend {
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.9rem;
+      padding: 0;
+    }
+    .cf-field { margin-top: 1.1rem; }
+    .cf-fieldset .cf-field:first-of-type { margin-top: 0; }
+    .cf-field label, .cf-field__label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .cf-required, .cf-optional {
+      display: inline-block;
+      font-size: 0.66rem;
+      font-weight: 800;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+    }
+    .cf-required { background: #f3d9d5; color: #8a3b2e; }
+    .cf-optional { background: var(--bg-card2); color: var(--text-muted); }
+    .cf-field input[type="text"],
+    .cf-field input[type="email"],
+    .cf-field input[type="date"],
+    .cf-field select,
+    .cf-field textarea {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg-card);
+    }
+    .cf-field input:focus, .cf-field select:focus, .cf-field textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+    .cf-field textarea { resize: vertical; min-height: 5rem; }
+    .cf-hint { margin-top: 0.4rem; font-size: 0.76rem; color: var(--text-muted); line-height: 1.6; }
+    .cf-hint--rule { margin-top: 0.25rem; font-weight: 700; color: var(--text); }
+    .cf-error { margin-top: 0.5rem; font-size: 0.78rem; color: #9c2f24; font-weight: 700; }
+    .cf-radio-group, .cf-checkbox-group { display: flex; flex-direction: column; gap: 0.55rem; }
+    .cf-radio-option, .cf-checkbox-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.86rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .cf-radio-option input, .cf-checkbox-option input { margin-top: 0.2rem; flex-shrink: 0; }
+    .cf-submit { width: 100%; margin-top: 0.5rem; }
+    .cf-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .cf-privacy-note { margin-top: 1.1rem; font-size: 0.76rem; color: var(--text-muted); line-height: 1.8; }
+    .cf-result {
+      border-radius: 8px;
+      padding: 1.4rem 1.6rem;
+      margin: 1.5rem auto 0;
+      max-width: 560px;
+      text-align: left;
+      font-size: 0.88rem;
+      line-height: 1.85;
+    }
+    .cf-result p { margin-bottom: 0.5rem; }
+    .cf-result p:last-child { margin-bottom: 0; }
+    .cf-result--success { background: var(--bg-card2); border: 1px solid var(--border); }
+    .cf-result--error { background: #f7e8e6; border: 1px solid #e3bdb6; }
+    [hidden] { display: none !important; }
   </style>
   <script>
   (function () {
@@ -633,7 +717,7 @@
       名古屋・上前津のマンツーマン個人セッション。<br>
       経験のない方も、お気軽にどうぞ。
     </p>
-    <a href="#contact" class="btn btn-primary">予約・相談する</a>
+    <a href="#contact" class="btn btn-primary" data-contact-intent="booking" data-ga-event="contact_cta_click" data-ga-location="hero">予約・相談する</a>
     <a href="#pricing" class="btn btn-outline">料金を見る</a>
   </div>
 </section>
@@ -817,7 +901,7 @@
           <span class="plan-badge">条件クリア者のみ</span>
         </div>
         <div class="plan-body">
-          <p class="plan-desc">低空〜中空吊り。適性確認・条件クリアが必要です。詳細はお問い合わせください。</p>
+          <p class="plan-desc">低空〜中空吊り。適性確認・条件クリアが必要です。詳細は<a href="#contact" data-contact-intent="consult" data-plan="ハード／吊り（条件クリア者のみ）" data-ga-event="contact_cta_click" data-ga-location="pricing_hard">フォームでお問い合わせください</a>。</p>
           <div class="price-row">
             <span class="price-label">平日 120分</span>
             <span class="price-value">¥20,000</span>
@@ -959,7 +1043,7 @@
 
       <details class="faq-item" data-ga-faq-id="faq_01">
         <summary class="faq-q">初めてなのですが、不安があります。</summary>
-        <div class="faq-a">参加者の約8割が初回です。事前にフォームで「こういうことが不安」と書いていただければ、内容・強さ・進め方を調整します。当日もいつでも止められます。まずはご相談だけでも構いません。</div>
+        <div class="faq-a">参加者の約8割が初回です。事前にフォームで「こういうことが不安」と書いていただければ、内容・強さ・進め方を調整します。当日もいつでも止められます。まずは<a href="#contact" data-contact-intent="question" data-ga-event="contact_cta_click" data-ga-location="faq">フォームでご相談</a>だけでも構いません。</div>
       </details>
 
       <details class="faq-item" data-ga-faq-id="faq_02">
@@ -1021,26 +1105,173 @@
       内容・日時のご希望を伺い、最適なプランをご提案します。
     </p>
     <ol class="notice-list" style="text-align: left; max-width: 480px; margin: 0 auto 2rem; list-style: none;">
-      <li style="padding-left: 1.6rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent); font-weight: 700;">1.</span>下記いずれかの方法で連絡（匿名・ニックネームOK）</li>
+      <li style="padding-left: 1.6rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent); font-weight: 700;">1.</span>下記フォームに入力して送信（匿名・ニックネームOK）</li>
       <li style="padding-left: 1.6rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent); font-weight: 700;">2.</span>希望日程・内容を確認（やりとり2〜3回が目安）</li>
       <li style="padding-left: 1.6rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent); font-weight: 700;">3.</span>場所・詳細をお伝えして当日へ</li>
     </ol>
-    <div class="contact-channels">
-      <a href="mailto:nagoyabase2023@gmail.com?subject=%E7%B7%8A%E7%B8%9B%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" class="contact-channel" data-ga-event="mail_click" data-ga-location="contact" data-ga-destination="mail">
-        <span class="contact-channel-icon">✉️</span>
-        <span class="contact-channel-text">
-          <span class="contact-channel-label">メールで相談・予約する</span>
-          <span class="contact-channel-note">nagoyabase2023@gmail.com　返信は通常24時間以内。</span>
-        </span>
-      </a>
-      <a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener noreferrer" class="contact-channel" data-ga-event="consultation_x_click" data-ga-location="contact" data-ga-destination="x">
-        <span class="contact-channel-icon">✉️</span>
-        <span class="contact-channel-text">
-          <span class="contact-channel-label">X（旧Twitter）のDMで相談する</span>
-          <span class="contact-channel-note">フォームより気軽に。短い質問だけでもOKです。</span>
-        </span>
-      </a>
+
+    <div id="cf-success" class="cf-result cf-result--success" role="status" aria-live="polite" tabindex="-1" hidden>
+      <p><strong>送信を受け付けました。</strong></p>
+      <p>この時点では予約は確定していません。内容を確認し、通常24時間以内に希望した方法で返信します。</p>
+      <p>返信がない場合は、迷惑メールフォルダやDM受信設定をご確認ください。</p>
     </div>
+
+    <div id="cf-error" class="cf-result cf-result--error" role="alert" aria-live="assertive" tabindex="-1" hidden>
+      <p><strong>送信中にエラーが発生しました。</strong></p>
+      <p>お手数ですが、入力内容はそのままに、時間をおいて再度お試しください。通信障害が続く場合のみ、下記へ直接ご連絡ください。</p>
+      <p><a href="mailto:nagoyabase2023@gmail.com?subject=%E7%B7%8A%E7%B8%9B%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" data-ga-event="mail_click" data-ga-location="contact_error" data-ga-destination="mail">メール</a>／<a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener noreferrer" data-ga-event="consultation_x_click" data-ga-location="contact_error" data-ga-destination="x">X（旧Twitter）のDM</a></p>
+    </div>
+
+    <form id="contact-form" class="contact-form" novalidate>
+      <input type="hidden" name="_subject" value="【アタル】ロープセッション予約・相談">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="text" name="_honey" class="contact-form__honey" tabindex="-1" autocomplete="off">
+
+      <fieldset class="cf-fieldset">
+        <legend>お問い合わせ内容</legend>
+        <div class="cf-field">
+          <span class="cf-field__label">ご希望の内容 <span class="cf-required">必須</span></span>
+          <div class="cf-radio-group" id="cf-intent-group">
+            <label class="cf-radio-option"><input type="radio" name="お問い合わせ内容" value="日程を決めて予約したい" data-intent="booking" required> 日程を決めて予約したい</label>
+            <label class="cf-radio-option"><input type="radio" name="お問い合わせ内容" value="プラン・内容について相談したい" data-intent="consult"> プラン・内容について相談したい</label>
+            <label class="cf-radio-option"><input type="radio" name="お問い合わせ内容" value="初めてなので事前に質問したい" data-intent="question"> 初めてなので事前に質問したい</label>
+            <label class="cf-radio-option"><input type="radio" name="お問い合わせ内容" value="作品撮りについて相談したい" data-intent="artwork"> 作品撮りについて相談したい</label>
+            <label class="cf-radio-option"><input type="radio" name="お問い合わせ内容" value="その他" data-intent="other"> その他</label>
+          </div>
+          <p class="cf-error" id="cf-intent-error" hidden></p>
+        </div>
+      </fieldset>
+
+      <fieldset class="cf-fieldset">
+        <legend>連絡先</legend>
+        <p class="cf-hint cf-hint--rule">メールアドレスまたはXアカウントのどちらかを入力してください。</p>
+
+        <div class="cf-field">
+          <label for="cf-name">お名前またはニックネーム <span class="cf-required">必須</span></label>
+          <input type="text" id="cf-name" name="お名前" required autocomplete="name">
+        </div>
+
+        <div class="cf-field">
+          <label for="cf-email">メールアドレス <span class="cf-optional">任意</span></label>
+          <input type="email" id="cf-email" name="メールアドレス" autocomplete="email">
+        </div>
+
+        <div class="cf-field">
+          <label for="cf-x">Xアカウント <span class="cf-optional">任意</span></label>
+          <input type="text" id="cf-x" name="Xアカウント" placeholder="@ataru_nawa2020" autocomplete="off">
+        </div>
+
+        <div class="cf-field">
+          <span class="cf-field__label">希望する返信方法 <span class="cf-required">必須</span></span>
+          <div class="cf-radio-group">
+            <label class="cf-radio-option"><input type="radio" name="希望する返信方法" value="メール" required> メール</label>
+            <label class="cf-radio-option"><input type="radio" name="希望する返信方法" value="XのDM" required> XのDM</label>
+            <label class="cf-radio-option"><input type="radio" name="希望する返信方法" value="どちらでもよい" required> どちらでもよい</label>
+          </div>
+          <p class="cf-hint">XのDMを希望する場合は、Xアカウントを入力してください。</p>
+        </div>
+      </fieldset>
+
+      <fieldset class="cf-fieldset is-booking-only" data-scope="booking">
+        <legend>予約希望日時・内容</legend>
+
+        <div class="cf-field">
+          <label for="cf-plan">希望プラン <span class="cf-required">必須</span></label>
+          <select id="cf-plan" name="希望プラン">
+            <option value="迷っている・相談して決めたい" selected>迷っている・相談して決めたい</option>
+            <option value="ライト60分（¥7,000）">ライト60分（¥7,000）</option>
+            <option value="スタンダード90分（平日¥10,000／休日¥15,000）">スタンダード90分（平日¥10,000／休日¥15,000）</option>
+            <option value="ハード／吊り（条件クリア者のみ）">ハード／吊り（条件クリア者のみ）</option>
+          </select>
+        </div>
+
+        <div class="cf-field">
+          <label for="cf-date1">第1希望日 <span class="cf-required">必須</span></label>
+          <input type="date" id="cf-date1" name="第1希望日">
+        </div>
+
+        <div class="cf-field">
+          <label for="cf-time1">第1希望開始時間 <span class="cf-required">必須</span></label>
+          <select id="cf-time1" name="第1希望開始時間">
+            <option value="" selected disabled>選択してください</option>
+            <option value="20:00">20:00（平日）</option>
+            <option value="20:30">20:30（平日）</option>
+            <option value="21:00">21:00（平日）</option>
+            <option value="応相談（土日祝等）">応相談（土日祝等）</option>
+          </select>
+        </div>
+
+        <div class="cf-field">
+          <label for="cf-date2">第2希望日時 <span class="cf-optional">任意</span></label>
+          <input type="text" id="cf-date2" name="第2希望日時" placeholder="例：8月〇日 21時ごろ">
+        </div>
+
+        <div class="cf-field">
+          <label for="cf-flex">平日夜／土日祝など調整可能範囲 <span class="cf-optional">任意</span></label>
+          <input type="text" id="cf-flex" name="調整可能範囲" placeholder="例：平日夜なら比較的調整できます">
+        </div>
+
+        <div class="cf-field">
+          <span class="cf-field__label">ロープ経験 <span class="cf-required">必須</span></span>
+          <div class="cf-radio-group">
+            <label class="cf-radio-option"><input type="radio" name="ロープ経験" value="初めて"> 初めて</label>
+            <label class="cf-radio-option"><input type="radio" name="ロープ経験" value="経験あり"> 経験あり</label>
+            <label class="cf-radio-option"><input type="radio" name="ロープ経験" value="相談したい"> 相談したい</label>
+          </div>
+          <p class="cf-error" id="cf-experience-error" hidden></p>
+        </div>
+
+        <div class="cf-field">
+          <span class="cf-field__label">希望内容・衣装・撮影の有無 <span class="cf-optional">任意・複数選択可</span></span>
+          <div class="cf-checkbox-group">
+            <label class="cf-checkbox-option"><input type="checkbox" name="希望内容[]" value="ユニフォーム緊縛"> ユニフォーム緊縛（野球・サッカー・ラグビー等）</label>
+            <label class="cf-checkbox-option"><input type="checkbox" name="希望内容[]" value="横吊り・体験型の緊縛"> 横吊り・体験型の緊縛</label>
+            <label class="cf-checkbox-option"><input type="checkbox" name="希望内容[]" value="フェチコスプレ撮影のみ（縛りなし）"> フェチコスプレ撮影のみ（縛りなし）</label>
+            <label class="cf-checkbox-option"><input type="checkbox" name="希望内容[]" value="一眼レフ撮影を希望"> 一眼レフ撮影を希望</label>
+            <label class="cf-checkbox-option"><input type="checkbox" name="希望内容[]" value="スマホ撮影のみ"> スマホ撮影のみ</label>
+            <label class="cf-checkbox-option"><input type="checkbox" name="希望内容[]" value="まだ決めていない"> まだ決めていない</label>
+          </div>
+        </div>
+
+        <div class="cf-field">
+          <label for="cf-consideration">配慮してほしいこと <span class="cf-optional">任意</span></label>
+          <textarea id="cf-consideration" name="配慮してほしいこと" rows="2" placeholder="例：体力に自信がないのでゆっくり進めてほしい"></textarea>
+        </div>
+      </fieldset>
+
+      <fieldset class="cf-fieldset">
+        <legend>ご質問・確認事項</legend>
+        <div class="cf-field">
+          <label for="cf-message" id="cf-message-label">質問・相談内容 <span class="cf-optional" id="cf-message-mark">任意</span></label>
+          <textarea id="cf-message" name="質問・相談内容" rows="4" placeholder="不安なこと、聞いてみたいこと、希望のプランなどをご記入ください。"></textarea>
+          <p class="cf-error" id="cf-message-error" hidden></p>
+        </div>
+      </fieldset>
+
+      <fieldset class="cf-fieldset">
+        <legend>確認事項</legend>
+        <div class="cf-field">
+          <label class="cf-checkbox-option"><input type="checkbox" id="cf-agree-age" name="18歳以上の確認" value="確認した" required> 18歳以上であることを確認しました。</label>
+          <p class="cf-error" id="cf-agree-age-error" hidden></p>
+        </div>
+        <div class="cf-field">
+          <label class="cf-checkbox-option"><input type="checkbox" id="cf-agree-nonsexual" name="非性的サービスの確認" value="確認した" required> 本セッションはロープ・写真制作を目的とし、性的なサービスを含まないことを理解しました。</label>
+          <p class="cf-error" id="cf-agree-nonsexual-error" hidden></p>
+        </div>
+        <div class="cf-field is-booking-only" data-scope="booking">
+          <label class="cf-checkbox-option"><input type="checkbox" id="cf-agree-condition" name="予約確定条件の確認" value="確認した"> フォーム送信時点では予約は確定せず、返信による内容・日時確認後に成立することを理解しました。</label>
+          <p class="cf-error" id="cf-agree-condition-error" hidden></p>
+        </div>
+        <div class="cf-field">
+          <label class="cf-checkbox-option"><input type="checkbox" id="cf-agree-privacy" name="プライバシーの確認" value="確認した" required> いただいた情報はセッション調整のみに使用し、第三者への共有・無断公開は一切行わないことに同意します。</label>
+          <p class="cf-error" id="cf-agree-privacy-error" hidden></p>
+        </div>
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary cf-submit" id="cf-submit-btn">送信する</button>
+      <p class="cf-privacy-note">お名前はニックネーム可。いただいた情報はセッション調整のみに使用し、第三者への提供や無断公開は一切行いません。フォーム送信にはFormSubmitを利用します。</p>
+    </form>
   </div>
 </section>
 </main>
@@ -1121,5 +1352,221 @@
   });
 </script>
 <script src="analytics.js"></script>
+
+<!-- ── 予約・相談フォーム制御 ── -->
+<script>
+(function () {
+  'use strict';
+
+  var FORM_ENDPOINT = 'https://formsubmit.co/ajax/nagoyabase2023@gmail.com';
+
+  var form = document.getElementById('contact-form');
+  if (!form) return;
+
+  var intentRadios = form.querySelectorAll('input[name="お問い合わせ内容"]');
+  var intentError = document.getElementById('cf-intent-error');
+  var emailField = document.getElementById('cf-email');
+  var xField = document.getElementById('cf-x');
+  var methodRadios = form.querySelectorAll('input[name="希望する返信方法"]');
+  var bookingOnlyEls = form.querySelectorAll('.is-booking-only');
+  var experienceError = document.getElementById('cf-experience-error');
+  var messageField = document.getElementById('cf-message');
+  var messageMark = document.getElementById('cf-message-mark');
+  var conditionCheckbox = document.getElementById('cf-agree-condition');
+  var planField = document.getElementById('cf-plan');
+  var submitBtn = document.getElementById('cf-submit-btn');
+  var successBox = document.getElementById('cf-success');
+  var errorBox = document.getElementById('cf-error');
+
+  function track(name, params) {
+    if (window.AtaruAnalytics) window.AtaruAnalytics.track(name, params);
+  }
+
+  function getIntent() {
+    for (var i = 0; i < intentRadios.length; i++) {
+      if (intentRadios[i].checked) return intentRadios[i].getAttribute('data-intent');
+    }
+    return null;
+  }
+
+  function applyIntentMode(intent, fireEvent) {
+    var isBooking = intent === 'booking';
+    bookingOnlyEls.forEach(function (el) { el.hidden = !isBooking; });
+
+    ['cf-plan', 'cf-date1', 'cf-time1'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (isBooking) el.setAttribute('required', 'required'); else el.removeAttribute('required');
+    });
+    if (conditionCheckbox) {
+      if (isBooking) conditionCheckbox.setAttribute('required', 'required'); else conditionCheckbox.removeAttribute('required');
+    }
+
+    if (messageField && messageMark) {
+      if (isBooking) {
+        messageField.removeAttribute('required');
+        messageMark.textContent = '任意';
+        messageMark.className = 'cf-optional';
+      } else {
+        messageField.setAttribute('required', 'required');
+        messageMark.textContent = '必須';
+        messageMark.className = 'cf-required';
+      }
+    }
+
+    if (submitBtn && !submitBtn.disabled) {
+      submitBtn.textContent = isBooking ? 'この内容で予約を申し込む' : '送信する';
+    }
+
+    if (fireEvent && intent) track('ataru_form_select_intent', { contact_intent: intent });
+  }
+
+  applyIntentMode(getIntent(), false);
+  intentRadios.forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      if (intentError) intentError.hidden = true;
+      applyIntentMode(getIntent(), true);
+    });
+  });
+
+  /* CTA（予約・相談する 等）から遷移した際に、お問い合わせ内容とプランを自動選択する */
+  function setContactIntent(intent) {
+    var radio = form.querySelector('input[name="お問い合わせ内容"][data-intent="' + intent + '"]');
+    if (!radio) return;
+    radio.checked = true;
+    applyIntentMode(intent, true);
+  }
+  document.querySelectorAll('[data-contact-intent]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var intent = this.getAttribute('data-contact-intent');
+      var plan = this.getAttribute('data-plan');
+      if (planField && plan) planField.value = plan;
+      if (intent) setContactIntent(intent);
+    });
+  });
+
+  /* フォーム表示イベント（1回だけ） */
+  var viewFired = false;
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && !viewFired) {
+          viewFired = true;
+          track('ataru_form_view');
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0 });
+    observer.observe(form);
+  }
+
+  /* フォーム着手イベント（最初の入力・選択で1回だけ） */
+  var startFired = false;
+  form.addEventListener('focusin', function () {
+    if (!startFired) {
+      startFired = true;
+      track('ataru_form_start');
+    }
+  });
+
+  /* 連絡先：メールアドレスとXアカウントのどちらか一方は必須。希望する返信方法との矛盾も検出する。 */
+  function getPreferredMethod() {
+    for (var i = 0; i < methodRadios.length; i++) {
+      if (methodRadios[i].checked) return methodRadios[i].value;
+    }
+    return null;
+  }
+
+  function updateContactValidity() {
+    if (!emailField || !xField) return;
+    var hasEmail = emailField.value.trim() !== '';
+    var hasX = xField.value.trim() !== '';
+    var preferred = getPreferredMethod();
+
+    emailField.setCustomValidity('');
+    xField.setCustomValidity('');
+
+    if (!hasEmail && !hasX) {
+      emailField.setCustomValidity('メールアドレスまたはXアカウントのどちらかを入力してください。');
+      return;
+    }
+    if (preferred === 'メール' && !hasEmail) {
+      emailField.setCustomValidity('メールでの返信を希望する場合は、メールアドレスを入力してください。');
+    }
+    if (preferred === 'XのDM' && !hasX) {
+      xField.setCustomValidity('XのDMでの返信を希望する場合は、Xアカウントを入力してください。');
+    }
+  }
+
+  if (emailField) emailField.addEventListener('input', updateContactValidity);
+  if (xField) xField.addEventListener('input', updateContactValidity);
+  methodRadios.forEach(function (radio) { radio.addEventListener('change', updateContactValidity); });
+
+  function setSubmitting(isSubmitting) {
+    if (!submitBtn) return;
+    submitBtn.disabled = isSubmitting;
+    submitBtn.textContent = isSubmitting ? '送信中…' : (getIntent() === 'booking' ? 'この内容で予約を申し込む' : '送信する');
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var intent = getIntent();
+    if (!intent) {
+      if (intentError) intentError.hidden = false;
+      intentRadios[0].focus();
+      intentRadios[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (intentError) intentError.hidden = true;
+
+    if (intent === 'booking') {
+      var experienceChecked = form.querySelector('input[name="ロープ経験"]:checked');
+      if (!experienceChecked) {
+        if (experienceError) experienceError.hidden = false;
+        form.querySelector('input[name="ロープ経験"]').focus();
+        form.querySelector('input[name="ロープ経験"]').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (experienceError) experienceError.hidden = true;
+    }
+
+    updateContactValidity();
+
+    if (!form.reportValidity()) return;
+
+    track(intent === 'booking' ? 'ataru_form_submit_booking' : 'ataru_form_submit_consult', { contact_intent: intent });
+    setSubmitting(true);
+    successBox.hidden = true;
+    errorBox.hidden = true;
+
+    var formData = new FormData(form);
+
+    fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      body: formData,
+      headers: { Accept: 'application/json' }
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error('送信に失敗しました');
+        return response.json();
+      })
+      .then(function () {
+        track('ataru_form_success', { contact_intent: intent });
+        form.hidden = true;
+        successBox.hidden = false;
+        successBox.focus();
+        successBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      })
+      .catch(function () {
+        track('ataru_form_error', { contact_intent: intent });
+        setSubmitting(false);
+        errorBox.hidden = false;
+        errorBox.focus();
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+  });
+})();
+</script>
 </body>
 </html>
