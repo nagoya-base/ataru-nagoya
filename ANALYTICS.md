@@ -1,8 +1,8 @@
 # アクセス解析（Google Analytics 4）
 
-測定 ID: `G-5Z48YLCKNG`（`index.html` / `main.html` / `profile.html` に設定済み）。
-SNBC（snb-community）と共用していた `G-8K1TJG0S9Y` からアタル専用プロパティに
-分離した。切替日より前の計測データには SNBC 分のトラフィックが混在している。
+測定 ID: `G-8K1TJG0S9Y`（`index.html` / `main.html` / `profile.html` に設定済み）。
+ストリーム名は `ataru-Nagoya`、対象 URL は
+`https://nagoya-base.github.io/ataru-nagoya/`。
 
 計測ヘルパーは `analytics.js`（`window.AtaruAnalytics`）です。
 3リポジトリ（snb-community / Studio-nagoya-base / ataru-nagoya）共通のイベント
