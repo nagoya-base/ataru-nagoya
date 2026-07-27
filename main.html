@@ -8,12 +8,12 @@
   <meta name="robots" content="noindex, nofollow">
 
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8K1TJG0S9Y"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5Z48YLCKNG"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-8K1TJG0S9Y');
+    gtag('config', 'G-5Z48YLCKNG');
   </script>
 
   <style>
@@ -689,7 +689,7 @@
   }
   </script>
 </head>
-<body>
+<body data-site-section="session" data-page-type="form">
 
 <!-- ── Navigation ── -->
 <nav>
@@ -717,7 +717,7 @@
       名古屋・上前津のマンツーマン個人セッション。<br>
       経験のない方も、お気軽にどうぞ。
     </p>
-    <a href="#contact" class="btn btn-primary" data-contact-intent="booking" data-ga-event="contact_cta_click" data-ga-location="hero">予約・相談する</a>
+    <a href="#contact" class="btn btn-primary" data-contact-intent="booking" data-ga-event="cta_click" data-ga-type="contact_form" data-ga-location="hero">予約・相談する</a>
     <a href="#pricing" class="btn btn-outline">料金を見る</a>
   </div>
 </section>
@@ -901,7 +901,7 @@
           <span class="plan-badge">条件クリア者のみ</span>
         </div>
         <div class="plan-body">
-          <p class="plan-desc">低空〜中空吊り。適性確認・条件クリアが必要です。詳細は<a href="#contact" data-contact-intent="consult" data-plan="ハード／吊り（条件クリア者のみ）" data-ga-event="contact_cta_click" data-ga-location="pricing_hard">フォームでお問い合わせください</a>。</p>
+          <p class="plan-desc">低空〜中空吊り。適性確認・条件クリアが必要です。詳細は<a href="#contact" data-contact-intent="consult" data-plan="ハード／吊り（条件クリア者のみ）" data-ga-event="cta_click" data-ga-type="contact_form" data-ga-location="pricing_hard">フォームでお問い合わせください</a>。</p>
           <div class="price-row">
             <span class="price-label">平日 120分</span>
             <span class="price-value">¥20,000</span>
@@ -1043,7 +1043,7 @@
 
       <details class="faq-item" data-ga-faq-id="faq_01">
         <summary class="faq-q">初めてなのですが、不安があります。</summary>
-        <div class="faq-a">参加者の約8割が初回です。事前にフォームで「こういうことが不安」と書いていただければ、内容・強さ・進め方を調整します。当日もいつでも止められます。まずは<a href="#contact" data-contact-intent="question" data-ga-event="contact_cta_click" data-ga-location="faq">フォームでご相談</a>だけでも構いません。</div>
+        <div class="faq-a">参加者の約8割が初回です。事前にフォームで「こういうことが不安」と書いていただければ、内容・強さ・進め方を調整します。当日もいつでも止められます。まずは<a href="#contact" data-contact-intent="question" data-ga-event="cta_click" data-ga-type="contact_form" data-ga-location="faq">フォームでご相談</a>だけでも構いません。</div>
       </details>
 
       <details class="faq-item" data-ga-faq-id="faq_02">
@@ -1119,7 +1119,7 @@
     <div id="cf-error" class="cf-result cf-result--error" role="alert" aria-live="assertive" tabindex="-1" hidden>
       <p><strong>送信中にエラーが発生しました。</strong></p>
       <p>お手数ですが、入力内容はそのままに、時間をおいて再度お試しください。通信障害が続く場合のみ、下記へ直接ご連絡ください。</p>
-      <p><a href="mailto:nagoyabase2023@gmail.com?subject=%E7%B7%8A%E7%B8%9B%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" data-ga-event="mail_click" data-ga-location="contact_error" data-ga-destination="mail">メール</a>／<a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener noreferrer" data-ga-event="consultation_x_click" data-ga-location="contact_error" data-ga-destination="x">X（旧Twitter）のDM</a></p>
+      <p><a href="mailto:nagoyabase2023@gmail.com?subject=%E7%B7%8A%E7%B8%9B%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" data-ga-event="outbound_contact_click" data-ga-location="contact_error" data-ga-channel="mail">メール</a>／<a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener noreferrer" data-ga-event="outbound_contact_click" data-ga-location="contact_error" data-ga-channel="x">X（旧Twitter）のDM</a></p>
     </div>
 
     <form id="contact-form" class="contact-form" novalidate>
@@ -1390,7 +1390,7 @@
     return null;
   }
 
-  function applyIntentMode(intent, fireEvent) {
+  function applyIntentMode(intent) {
     var isBooking = intent === 'booking';
     bookingOnlyEls.forEach(function (el) { el.hidden = !isBooking; });
 
@@ -1418,15 +1418,13 @@
     if (submitBtn && !submitBtn.disabled) {
       submitBtn.textContent = isBooking ? 'この内容で予約を申し込む' : '送信する';
     }
-
-    if (fireEvent && intent) track('ataru_form_select_intent', { contact_intent: intent });
   }
 
-  applyIntentMode(getIntent(), false);
+  applyIntentMode(getIntent());
   intentRadios.forEach(function (radio) {
     radio.addEventListener('change', function () {
       if (intentError) intentError.hidden = true;
-      applyIntentMode(getIntent(), true);
+      applyIntentMode(getIntent());
     });
   });
 
@@ -1435,7 +1433,7 @@
     var radio = form.querySelector('input[name="お問い合わせ内容"][data-intent="' + intent + '"]');
     if (!radio) return;
     radio.checked = true;
-    applyIntentMode(intent, true);
+    applyIntentMode(intent);
   }
   document.querySelectorAll('[data-contact-intent]').forEach(function (el) {
     el.addEventListener('click', function () {
@@ -1446,27 +1444,15 @@
     });
   });
 
-  /* フォーム表示イベント（1回だけ） */
-  var viewFired = false;
-  if ('IntersectionObserver' in window) {
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting && !viewFired) {
-          viewFired = true;
-          track('ataru_form_view');
-          observer.disconnect();
-        }
-      });
-    }, { threshold: 0 });
-    observer.observe(form);
-  }
+  /* フォーム表示イベントは、#contact のsection_view（analytics.js側で計測済み）と重複するため
+     ここでは個別に計測しない。 */
 
   /* フォーム着手イベント（最初の入力・選択で1回だけ） */
   var startFired = false;
   form.addEventListener('focusin', function () {
     if (!startFired) {
       startFired = true;
-      track('ataru_form_start');
+      track('form_start', { form_name: 'ataru_contact' });
     }
   });
 
@@ -1517,6 +1503,7 @@
       if (intentError) intentError.hidden = false;
       intentRadios[0].focus();
       intentRadios[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      track('form_error', { form_name: 'ataru_contact', error_type: 'required' });
       return;
     }
     if (intentError) intentError.hidden = true;
@@ -1527,6 +1514,7 @@
         if (experienceError) experienceError.hidden = false;
         form.querySelector('input[name="ロープ経験"]').focus();
         form.querySelector('input[name="ロープ経験"]').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        track('form_error', { form_name: 'ataru_contact', error_type: 'required' });
         return;
       }
       if (experienceError) experienceError.hidden = true;
@@ -1534,7 +1522,10 @@
 
     updateContactValidity();
 
-    if (!form.reportValidity()) return;
+    if (!form.reportValidity()) {
+      track('form_error', { form_name: 'ataru_contact', error_type: 'required' });
+      return;
+    }
 
     setSubmitting(true);
     successBox.hidden = true;
@@ -1551,22 +1542,25 @@
       headers: { Accept: 'application/json' }
     })
       .then(function (response) {
-        if (!response.ok) throw new Error('送信に失敗しました');
+        if (!response.ok) {
+          var err = new Error('送信に失敗しました');
+          err.errorType = 'server';
+          throw err;
+        }
         return response.json();
       })
       .then(function () {
-        /* キーイベント：POST成功時のみ、1送信につき1回 */
+        /* 主成果：POST成功時のみ、1送信につき1回 */
         if (window.AtaruAnalytics) {
-          window.AtaruAnalytics.trackFormSubmit(submissionToken, intent, { contact_intent: intent });
+          window.AtaruAnalytics.trackGenerateLead(submissionToken, intent, { form_name: 'ataru_contact' });
         }
-        track('ataru_form_success', { contact_intent: intent });
         form.hidden = true;
         successBox.hidden = false;
         successBox.focus();
         successBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
       })
-      .catch(function () {
-        track('ataru_form_error', { contact_intent: intent });
+      .catch(function (err) {
+        track('form_error', { form_name: 'ataru_contact', error_type: (err && err.errorType) || 'network' });
         setSubmitting(false);
         errorBox.hidden = false;
         errorBox.focus();

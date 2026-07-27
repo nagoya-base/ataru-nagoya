@@ -1,26 +1,31 @@
 # アクセス解析（Google Analytics 4）
 
-測定 ID: `G-8K1TJG0S9Y`（`index.html` / `main.html` / `profile.html` に設定済み）
+測定 ID: `G-5Z48YLCKNG`（`index.html` / `main.html` / `profile.html` に設定済み）。
+SNBC（snb-community）と共用していた `G-8K1TJG0S9Y` からアタル専用プロパティに
+分離した。切替日より前の計測データには SNBC 分のトラフィックが混在している。
 
 計測ヘルパーは `analytics.js`（`window.AtaruAnalytics`）です。
+3リポジトリ（snb-community / Studio-nagoya-base / ataru-nagoya）共通のイベント
+設計に統一しています。
 
 ## 成果イベント（キーイベント）
 
 `#contact` の予約・相談フォーム設置に伴い、送信成功イベントを実装しました。
 GA4 管理画面 →「管理」→「データの表示」→「イベント」→ 一覧から
-`ataru_form_submit_booking` / `ataru_form_submit_consult` を探し、
-「キーイベントとしてマークを付ける」を ON にしてください。
+`generate_lead` を探し、「キーイベントとしてマークを付ける」を ON にしてください。
 イベントが一覧に表示されるのは、実際に 1 回以上計測された後です（最大 24 時間程度）。
 
 | イベント名 | 発火条件 |
 | --- | --- |
-| `ataru_form_submit_booking` | お問い合わせ内容で「日程を決めて予約したい」を選んだ状態でフォーム送信のPOSTが成功した時だけ、1回 |
-| `ataru_form_submit_consult` | 予約以外（相談・質問・作品撮り・その他）を選んだ状態でフォーム送信のPOSTが成功した時だけ、1回 |
+| `generate_lead`（`lead_type: ataru_booking`） | お問い合わせ内容で「日程を決めて予約したい」を選んだ状態でフォーム送信のPOSTが成功した時だけ、1回 |
+| `generate_lead`（`lead_type: ataru_consultation`） | 予約以外（相談・質問・作品撮り・その他）を選んだ状態でフォーム送信のPOSTが成功した時だけ、1回 |
 
-送信ボタンのクリックやバリデーションエラーでは発火しません。`reservation_complete` /
-`generate_lead` は実装していません。当サイトには送信完了ページが存在せず、送信成功と
-完了メッセージの表示が同一の瞬間に起きるため、`ataru_form_submit_*` と両方送ると
+送信ボタンのクリックやバリデーションエラーでは発火しません（`form_error`を送信）。
+`reservation_complete` は実装していません。当サイトには送信完了ページが存在せず、
+送信成功と完了メッセージの表示が同一の瞬間に起きるため、`generate_lead` と両方送ると
 1件の送信を二重に計上することになります。
+
+二重計測は、送信操作ごとに採番するトークンで防いでいます。
 
 ## 分析用イベント（キーイベントにしない）
 
@@ -28,40 +33,46 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 | --- | --- |
 | `page_view` | GA4 標準 |
 | `scroll` | GA4 拡張計測機能 |
-| `age_verified` | 年齢確認ページで「入る」を押した時 |
-| `menu_view` | 「どんな体験ができる？」（`#session`）が画面に入った時、1 回 |
-| `pricing_view` | 「料金・プラン」（`#pricing`）が画面に入った時、1 回 |
-| `gallery_view` | 作例ギャラリー（`#gallery`）が画面に入った時、1 回 |
-| `access_view` | 「日程・場所」（`#schedule`）が画面に入った時、1 回 |
-| `notice_view` | 「来店時のお願い」（`#notice`）が画面に入った時、1 回 |
-| `faq_view` | 「よくある質問」（`#faq`）が画面に入った時、1 回 |
-| `contact_view` | 「ご予約・お問い合わせ」（`#contact`）が画面に入った時、1 回 |
+| `section_view`（`section_id: session`） | 「どんな体験ができる？」（`#session`）が画面に入った時、1 回 |
+| `section_view`（`section_id: price`） | 「料金・プラン」（`#pricing`）が画面に入った時、1 回 |
+| `section_view`（`section_id: gallery`） | 作例ギャラリー（`#gallery`）が画面に入った時、1 回 |
+| `section_view`（`section_id: access`） | 「日程・場所」（`#schedule`）が画面に入った時、1 回 |
+| `section_view`（`section_id: notice`） | 「来店時のお願い」（`#notice`）が画面に入った時、1 回 |
+| `section_view`（`section_id: faq`） | 「よくある質問」（`#faq`）が画面に入った時、1 回 |
+| `section_view`（`section_id: contact`） | 「ご予約・お問い合わせ」（`#contact`）が画面に入った時、1 回 |
 | `faq_open` | FAQ の各項目を開いた時 |
 | `gallery_open` | 作例画像を開いた時 |
-| `mail_click` | 送信エラー時の最終手段としてメールリンクをクリックした時 |
-| `consultation_x_click` | 送信エラー時の最終手段としてXのリンクをクリックした時 |
-| `ataru_form_view` | `#contact` のフォームが画面に入った時、1 回 |
-| `ataru_form_start` | フォームの最初の入力・選択をした時、1 回 |
-| `ataru_form_select_intent` | 「お問い合わせ内容」を選択・変更した時 |
-| `ataru_form_success` | フォーム送信が成功した時（成功メッセージ表示と同時） |
-| `ataru_form_error` | フォーム送信が失敗した時 |
-| `contact_cta_click` | ヒーロー・料金・FAQ等の「予約・相談する」系CTAをクリックした時 |
+| `outbound_contact_click`（`channel: mail`） | メールリンクをクリックした時（補助成果）。送信エラー時の最終手段リンクも含む |
+| `outbound_contact_click`（`channel: x`） | X のリンクをクリックした時（補助成果）。送信エラー時の最終手段リンクも含む |
+| `cta_click`（`cta_name: age_verified`） | 年齢確認ページで「入る」を押した時 |
+| `cta_click`（`cta_name: contact_form`） | ヒーロー・料金・FAQ等の「予約・相談する」系CTAをクリックした時 |
+| `form_start`（`form_name: ataru_contact`） | フォームの最初の入力・選択をした時、1 回 |
+| `form_error`（`form_name: ataru_contact`） | フォーム送信のバリデーションエラー時（`error_type: required`）・送信失敗時（`server` / `network`） |
 
 `flow_view` は実装していません。当サイトに独立した「流れ」セクションが存在せず、
 該当する内容は `#contact` と `#notice` に含まれるためです。
+
+`profile.html` は現在 `index.html` へ即時リダイレクトするだけのスタブページで、
+クリック可能な要素が存在しない。`analytics.js` は将来のために読み込んでいるが、
+`cta_click` / `outbound_contact_click` を発火させる導線は未実装。ページに実導線を
+追加した時点で、メインページへの遷移（`cta_click`）とXクリック
+（`outbound_contact_click`）の計測を追加すること。
 
 ## 送信するパラメータ
 
 個人情報（氏名・メールアドレス・X アカウント・希望メニュー・希望日時・自由記述）は
 一切送信しません。メールアドレスや画像ファイル名も送信しません。
 
-- `site_section`：`ataru` 固定
-- `page_path`：`location.pathname`
+- `site_brand`：`ataru` 固定
+- `site_section`：`session`（`index.html` / `main.html`）/ `profile`（`profile.html`）
+- `page_type`：`age_gate`（`index.html`）/ `form`（`main.html`）/ `redirect`（`profile.html`）。`<body>` の `data-page-type` から自動的に付与（未設定時は `top`）
 - `cta_location`：`contact` / `age_gate` など
-- `link_destination`：`mail` / `x`
+- `channel`：`mail` / `x`
 - `faq_id`：`faq_01` 形式の連番
-- `gallery_category`：`bondage` / `suspension`、`gallery_index`：並び順の番号
-- `contact_intent`：`booking` / `consult` / `question` / `artwork` / `other`（お問い合わせ種別のカテゴリのみ。自由記述・氏名・連絡先は送らない）
+- `gallery_category`：`bondage` / `suspension`、`gallery_item`：並び順の番号
+- `lead_type`：`ataru_booking` / `ataru_consultation`
+- `form_name`：`ataru_contact`
+- `error_type`：`required` / `server` / `network`
 
 ## 発火確認の手順
 
@@ -79,6 +90,10 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 ## ページを追加するとき
 
 - GA4 タグ（`gtag.js`）と `analytics.js` の読み込みを追加する
+- `<body>` に `data-site-section` と `data-page-type` を付ける（省略時は `session` / `top` になる）
 - 閲覧イベントを取りたいセクションには、上表と同じ `id` を付ける
-- リンククリックを取りたい要素には
-  `data-ga-event` / `data-ga-location` / `data-ga-destination` を付ける
+- メール・X などの外部導線には
+  `data-ga-event="outbound_contact_click"` / `data-ga-location` /
+  `data-ga-channel`（`mail` / `x`）を付ける
+- サイト内CTAには `data-ga-event="cta_click"` / `data-ga-location` /
+  `data-ga-type`（`cta_name` として送信）を付ける

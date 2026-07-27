@@ -19,12 +19,12 @@
   <meta name="twitter:image" content="https://nagoya-base.github.io/ataru-nagoya/images/ogp_ataru_session.jpeg">
 
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8K1TJG0S9Y"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5Z48YLCKNG"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-8K1TJG0S9Y');
+    gtag('config', 'G-5Z48YLCKNG');
   </script>
 
   <style>
@@ -192,7 +192,7 @@
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   </style>
 </head>
-<body>
+<body data-page-type="age_gate">
 
 <div class="card">
   <p class="brand">ATARU</p>
@@ -237,7 +237,7 @@
       sessionStorage.setItem('ataru_age_verified', '1');
       /* 年齢確認を通過した数（分析用イベント）。gtag は sendBeacon で送るため
          直後に遷移しても送信される。送信可否に関わらず遷移は必ず実行する。 */
-      if (window.AtaruAnalytics) window.AtaruAnalytics.track('age_verified', { cta_location: 'age_gate' });
+      if (window.AtaruAnalytics) window.AtaruAnalytics.track('cta_click', { cta_name: 'age_verified', cta_location: 'age_gate' });
       location.replace('main.html');
     });
   })();
