@@ -235,10 +235,14 @@
 
     document.getElementById('btn-enter').addEventListener('click', function () {
       sessionStorage.setItem('ataru_age_verified', '1');
+      /* 年齢確認を通過した数（分析用イベント）。gtag は sendBeacon で送るため
+         直後に遷移しても送信される。送信可否に関わらず遷移は必ず実行する。 */
+      if (window.AtaruAnalytics) window.AtaruAnalytics.track('age_verified', { cta_location: 'age_gate' });
       location.replace('main.html');
     });
   })();
 </script>
 
+<script src="analytics.js"></script>
 </body>
 </html>
