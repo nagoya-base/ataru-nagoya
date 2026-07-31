@@ -1495,6 +1495,26 @@
     submitBtn.textContent = isSubmitting ? '送信中…' : (getIntent() === 'booking' ? 'この内容で予約を申し込む' : '送信する');
   }
 
+  /* 複数選択項目（name="○○[]"）は、そのままFormSubmitへ送ると受信メールで1件しか表示されないため、
+     送信直前に選択済みの値を「、」で連結した単一キーへ集約する。未選択の場合はキー自体を追加しない。 */
+  var MULTI_SELECT_FIELDS = ['希望内容'];
+
+  function aggregateMultiSelectField(formData, fieldName) {
+    var values = formData.getAll(fieldName + '[]');
+    formData.delete(fieldName + '[]');
+    if (values.length > 0) {
+      formData.append(fieldName, values.join('、'));
+    }
+  }
+
+  function buildSubmissionFormData(formEl) {
+    var data = new FormData(formEl);
+    MULTI_SELECT_FIELDS.forEach(function (fieldName) {
+      aggregateMultiSelectField(data, fieldName);
+    });
+    return data;
+  }
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -1534,7 +1554,7 @@
     submissionSeq += 1;
     var submissionToken = submissionSeq;
 
-    var formData = new FormData(form);
+    var formData = buildSubmissionFormData(form);
 
     fetch(FORM_ENDPOINT, {
       method: 'POST',
