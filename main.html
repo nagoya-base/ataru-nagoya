@@ -1162,6 +1162,12 @@
           <input type="email" id="cf-email" name="メールアドレス" autocomplete="email">
         </div>
 
+        <div class="cf-field" id="cf-carrier-mail-field">
+          <p class="cf-hint"><strong>携帯電話会社のメールアドレスをご利用の方へ</strong><br>docomo・au・SoftBankなどのキャリアメールでは、当方からのGmailが受信拒否される場合があります。Gmailからのメールを受信できる設定になっているか、迷惑メールフォルダに振り分けられていないかをご確認ください。</p>
+          <label class="cf-checkbox-option"><input type="checkbox" id="cf-agree-carrier-mail" name="キャリアメール受信設定の確認" value="確認した"> 上記のメール受信設定・迷惑メールフォルダについて確認しました <span class="cf-optional" id="cf-carrier-mail-mark">任意</span></label>
+          <p class="cf-error" id="cf-agree-carrier-mail-error" hidden></p>
+        </div>
+
         <div class="cf-field">
           <label for="cf-x">Xアカウント <span class="cf-optional">任意</span></label>
           <input type="text" id="cf-x" name="Xアカウント" placeholder="@ataru_nawa2020" autocomplete="off">
@@ -1372,6 +1378,8 @@
   var intentError = document.getElementById('cf-intent-error');
   var emailField = document.getElementById('cf-email');
   var xField = document.getElementById('cf-x');
+  var carrierMailCheckbox = document.getElementById('cf-agree-carrier-mail');
+  var carrierMailMark = document.getElementById('cf-carrier-mail-mark');
   var methodRadios = form.querySelectorAll('input[name="希望する返信方法"]');
   var bookingOnlyEls = form.querySelectorAll('.is-booking-only');
   var experienceError = document.getElementById('cf-experience-error');
@@ -1477,6 +1485,18 @@
 
     emailField.setCustomValidity('');
     xField.setCustomValidity('');
+
+    if (carrierMailCheckbox && carrierMailMark) {
+      if (hasEmail) {
+        carrierMailCheckbox.setAttribute('required', 'required');
+        carrierMailMark.textContent = '必須';
+        carrierMailMark.className = 'cf-required';
+      } else {
+        carrierMailCheckbox.removeAttribute('required');
+        carrierMailMark.textContent = '任意';
+        carrierMailMark.className = 'cf-optional';
+      }
+    }
 
     if (!hasEmail && !hasX) {
       emailField.setCustomValidity('メールアドレスまたはXアカウントのどちらかを入力してください。');
