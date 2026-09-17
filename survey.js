@@ -87,6 +87,17 @@ window.__Survey = {};
   function isMaleAny(a) { return a.q2_gender === '男性'; }
   function isFemaleOther(a) { return a.q2_gender === '女性' || a.q2_gender === 'その他'; }
 
+  /* Q12で「興味はない」を選んだ場合、Q13から緊縛系の項目（ロープ撮影・緊縛撮影）を
+     除いた一般項目だけを候補にする。「緊縛・プレイ詳細を飛ばし、一般企画の関心へ」
+     というIssueの意図どおり、興味なしと答えた直後に緊縛の話を再提示しないため。 */
+  var Q13_KINK_OPTIONS = ['ロープ撮影', '緊縛撮影'];
+  function q13Options(a) {
+    if (a.q12_gate === '興味はない') {
+      return OPT.q13.filter(function (v) { return Q13_KINK_OPTIONS.indexOf(v) === -1; });
+    }
+    return OPT.q13;
+  }
+
   function q8DerivedOptions(a) {
     return (a.q8_uniform || []).map(function (v) {
       return v === 'その他' ? (a.q8_other ? 'その他：' + a.q8_other : 'その他') : v;
@@ -155,7 +166,7 @@ window.__Survey = {};
     /* Q12で「興味はない」を選んだ場合でも、Q13は緊縛系以外の一般項目（ユニフォーム交流・
        軽いスポーツ・撮影企画など）への関心を拾うための設問として表示を続ける。
        緊縛系の項目を選ぶかどうかは回答者の任意選択に委ねる（Issueの選択肢構成どおり）。 */
-    { id: 'q13', section: SECTION.men, type: 'checkbox', title: 'Q13. 興味のある企画', required: false, options: OPT.q13, otherField: 'q13_other', field: 'q13_interest', emailKey: 'Q13_興味のある企画', otherEmailKey: 'Q13_その他',
+    { id: 'q13', section: SECTION.men, type: 'checkbox', title: 'Q13. 興味のある企画', required: false, dynamicOptions: q13Options, otherField: 'q13_other', field: 'q13_interest', emailKey: 'Q13_興味のある企画', otherEmailKey: 'Q13_その他',
       visible: function (a) { return a.q2_gender === '男性' && !!a.q12_gate; } },
 
     { id: 'q14', section: SECTION.men, type: 'checkbox', title: 'Q14. 緊縛・ロープの経験', required: true, options: OPT.q14, otherField: 'q14_other', field: 'q14_experience', exclusive: ['未経験', '回答しない'], emailKey: 'Q14_緊縛経験', otherEmailKey: 'Q14_その他',
@@ -220,7 +231,7 @@ window.__Survey = {};
   ];
 
   window.__Survey.STEPS = STEPS;
-  window.__Survey.helpers = { proceededPastGate: proceededPastGate, isLowInterest: isLowInterest, isMaleFull: isMaleFull, isMaleAny: isMaleAny, isFemaleOther: isFemaleOther, q8DerivedOptions: q8DerivedOptions };
+  window.__Survey.helpers = { proceededPastGate: proceededPastGate, isLowInterest: isLowInterest, isMaleFull: isMaleFull, isMaleAny: isMaleAny, isFemaleOther: isFemaleOther, q8DerivedOptions: q8DerivedOptions, q13Options: q13Options };
 })();
 
 /* ── エンジン本体 ── */
@@ -328,6 +339,12 @@ window.__Survey = {};
     if (validQ9.length === 1 && !answers.q9_favorite) answers.q9_favorite = validQ9[0];
     answers.q10_wear_self = (answers.q10_wear_self || []).filter(function (v) { return validQ9.indexOf(v) !== -1; });
     answers.q10_wear_others = (answers.q10_wear_others || []).filter(function (v) { return validQ9.indexOf(v) !== -1; });
+
+    /* Q12を「興味はない」に変更した後（戻って変更した場合を含む）、
+       Q13で以前選んでいたロープ撮影・緊縛撮影が候補から消えても回答値に
+       残らないよう、候補外の選択値を除去する。 */
+    var validQ13 = S.helpers.q13Options(answers);
+    answers.q13_interest = (answers.q13_interest || []).filter(function (v) { return validQ13.indexOf(v) !== -1; });
 
     var nextIds = next.map(function (s) { return s.id; });
     prevIds.forEach(function (id) {
@@ -756,7 +773,12 @@ window.__Survey = {};
     else if (a.q12_gate === '内容による') score += 1;
     if (a.q11a_self.indexOf('体育会系の雰囲気だと言われる') !== -1) score += 1;
     if (a.q9_favorite === '野球') score += 3;
-    if (a.q10_wear_self.indexOf('野球') !== -1) score += 2;
+    /* 「野球ユニを着たい／撮られたい」は自分で着たい（Q10-A）と、
+       野球が関心対象（Q8/Q9）かつユニフォーム姿で撮られたい（Q10）の両方を拾う。 */
+    var baseballWear = a.q10_wear_self.indexOf('野球') !== -1;
+    var baseballPortrait = (a.q8_uniform.indexOf('野球') !== -1 || a.q9_favorite === '野球') &&
+      a.q10_enjoy.indexOf('ユニフォーム姿で撮られたい') !== -1;
+    if (baseballWear || baseballPortrait) score += 2;
     if (a.q15_level === 'とても好き' || a.q15_level === '興味がある') score += 3;
     if (a.q16_role.indexOf('縛られてみたい') !== -1 || a.q16_role.indexOf('縛る・縛られる両方に興味がある') !== -1) score += 2;
     var visitOk = ['日程が合えば', '内容が合えば', '参加者や雰囲気を確認できれば', '友人と一緒なら', '宿泊を伴っても'];
