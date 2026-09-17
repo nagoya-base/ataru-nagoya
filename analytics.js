@@ -146,19 +146,16 @@
 
   window.AtaruAnalytics = {
     track: track,
-    /* 主成果。POSTが成功した時だけ呼ぶこと（#contact の予約・相談、survey.htmlの
-       任意連絡先フォームなど）。送信ボタンのクリックやバリデーション通過、送信開始では
-       呼ばない。submissionToken は1回の送信操作ごとに一意な値。同じトークンでは
-       二度送信しない。 */
+    /* 主成果。#contact フォームのPOSTが成功した時だけ呼ぶこと。
+       送信ボタンのクリックやバリデーション通過、送信開始では呼ばない。
+       submissionToken は1回の送信操作ごとに一意な値。同じトークンでは二度送信しない。 */
     trackGenerateLead: function (submissionToken, intent, params) {
       var token = String(submissionToken);
       if (submittedTokens[token]) return;
       submittedTokens[token] = true;
 
       var payload = params ? Object.assign({}, params) : {};
-      payload.lead_type = intent === 'booking' ? 'ataru_booking'
-        : intent === 'survey' ? 'ataru_survey_lead'
-        : 'ataru_consultation';
+      payload.lead_type = intent === 'booking' ? 'ataru_booking' : 'ataru_consultation';
       track('generate_lead', payload);
     }
   };
