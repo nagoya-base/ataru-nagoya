@@ -97,3 +97,25 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
   `data-ga-channel`（`mail` / `x`）を付ける
 - サイト内CTAには `data-ga-event="cta_click"` / `data-ga-location` /
   `data-ga-type`（`cta_name` として送信）を付ける
+
+## survey.html（成人向けアンケート）の計測
+
+`survey.html` は `data-site-section="survey"` / `data-page-type="survey"` を使う、
+独立したステップ式アンケートページ。年齢・性自認・緊縛嗜好などの回答内容、
+自由記述、連絡先（Xアカウント・メールアドレス）は一切GA4へ送らない。
+送信するのはフォーム名・ステップ番号・エラー種別などカテゴリ値のみ。
+
+| イベント名 | 発火条件 |
+| --- | --- |
+| `survey_view` | ページ読み込み時、1回 |
+| `survey_start`（`form_name: ataru_survey`） | 「はじめる」を押してQ1を表示した時、1回 |
+| `survey_step_view`（`form_name: ataru_survey`, `step_number`） | 各設問ステップを表示する度（分岐で変わる回答者ごとの通し番号。設問の内容は送らない） |
+| `survey_complete`（`form_name: ataru_survey`） | アンケート回答のPOSTが成功した時だけ、1回 |
+| `lead_form_view`（`form_name: ataru_survey_lead`） | 完了画面で任意の連絡先フォームを開いた時 |
+| `lead_form_submit`（`form_name: ataru_survey_lead`） | 連絡先フォームのPOSTが成功した時だけ、1回 |
+| `survey_error`（`form_name`, `error_type: required` / `server` / `network`） | アンケート・連絡先フォームそれぞれのバリデーションエラー・送信失敗時 |
+
+アンケート回答と任意の連絡先は別々のFormSubmit宛先（件名）へ分離して送信し、
+個人情報を含まないランダムな `response_id` でのみ関連づける。
+内部トリアージ用スコア・判定は送信データ（メール本文）にのみ含め、
+回答者の画面やGA4には一切表示・送信しない。
