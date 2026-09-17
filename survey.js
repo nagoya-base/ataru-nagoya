@@ -1,7 +1,13 @@
 /*
  * survey.html 用のステップフォームエンジン。
- * 個人情報・回答内容はGA4へ送らない（ステップ番号などカテゴリ値のみ）。
- * 回答送信と任意連絡先送信は別々のFormSubmit宛先(件名)へ送る。
+ * 個人情報・回答内容はGA4へ送らない（form_name等のカテゴリ値のみ）。
+ *
+ * アンケート回答と任意連絡先は別々のPOST（別件名のメール）に分離し、
+ * 個人情報を含まないresponse_idのみで突き合わせる。ただし現状は同一の
+ * FormSubmitエンドポイント（同じ受信メールアドレス）宛てであり、メール本文が
+ * 分かれるだけで、別サービス・別受信先への分離ではない。真に別の送信先が
+ * 必要な場合は、連絡先用の別メールアドレスをFormSubmitで有効化した上で
+ * FORM_ENDPOINT_LEAD 定数を分ける対応が必要（要運用判断）。
  */
 window.__Survey = {};
 
@@ -37,7 +43,7 @@ window.__Survey = {};
     q19f: ['縄だけを楽しみたい','撮影だけを楽しみたい','まだ分からない','その他','回答しない'],
     q20: ['完全個室','1対1','服を着たまま','性的な接触なし','吊りなし','顔を撮影しない','SNSへ掲載しない','内容や強さを自分で選べる','途中で中止できる','事前説明がある','NG項目を事前に伝えられる','友人と一緒に参加できる','見学してから決められる','その他'],
     q21: ['日程が合えば','内容が合えば','参加者や雰囲気を確認できれば','友人と一緒なら','宿泊を伴っても','名古屋は難しい','分からない'],
-    q22: ['土曜昼・夜','日曜昼・夜','祝日昼','平日夜','個別相談','その他'],
+    q22: ['土曜昼','土曜夜','日曜昼','日曜夜','祝日昼','平日夜','個別相談','その他'],
     q23: ['2,000円以下','3,000円程度','4,000円程度','5,000円程度','内容次第で5,000円以上','価格より内容・安全性','参加しない'],
     q24: ['日程が合えば参加したい','東京・大阪など遠方からでも内容次第で参加したい','開催案内が欲しい','写真や詳しい説明を見て考えたい','個別相談したい','友人と一緒なら参加したい','見学してから考えたい','今回は参加しない'],
     q25: ['1対1','友人と2人','3〜4人の体験会','見学後に判断','個別相談','まだ分からない','その他']
@@ -146,8 +152,11 @@ window.__Survey = {};
     { id: 'q12', section: SECTION.men, type: 'radio', title: 'Q12. 成人男性同士の企画を前提に、この先の質問へ回答しますか', required: true, options: OPT.q12, field: 'q12_gate', emailKey: 'Q12_成人男性企画ゲート',
       visible: function (a) { return a.q2_gender === '男性'; } },
 
+    /* Q12で「興味はない」を選んだ場合でも、Q13は緊縛系以外の一般項目（ユニフォーム交流・
+       軽いスポーツ・撮影企画など）への関心を拾うための設問として表示を続ける。
+       緊縛系の項目を選ぶかどうかは回答者の任意選択に委ねる（Issueの選択肢構成どおり）。 */
     { id: 'q13', section: SECTION.men, type: 'checkbox', title: 'Q13. 興味のある企画', required: false, options: OPT.q13, otherField: 'q13_other', field: 'q13_interest', emailKey: 'Q13_興味のある企画', otherEmailKey: 'Q13_その他',
-      visible: function (a) { return proceededPastGate(a); } },
+      visible: function (a) { return a.q2_gender === '男性' && !!a.q12_gate; } },
 
     { id: 'q14', section: SECTION.men, type: 'checkbox', title: 'Q14. 緊縛・ロープの経験', required: true, options: OPT.q14, otherField: 'q14_other', field: 'q14_experience', exclusive: ['未経験', '回答しない'], emailKey: 'Q14_緊縛経験', otherEmailKey: 'Q14_その他',
       visible: function (a) { return proceededPastGate(a); } },
@@ -168,22 +177,22 @@ window.__Survey = {};
       visible: function (a) { return isMaleFull(a); } },
 
     { id: 'q19a', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'A. 見た目・作品として楽しみたい', required: false, options: OPT.q19a, field: 'q19a', emailKey: 'Q19A_見た目作品', q19group: 1,
-      visible: function (a) { return isMaleFull(a); } },
+      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
 
     { id: 'q19b', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'B. 縄そのもの・拘束感を味わいたい', required: false, options: OPT.q19b, field: 'q19b', emailKey: 'Q19B_縄拘束感', q19group: 2,
-      visible: function (a) { return isMaleFull(a); } },
+      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
 
     { id: 'q19c', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'C. 縛る・見る・撮る側として楽しみたい', required: false, options: OPT.q19c, field: 'q19c', emailKey: 'Q19C_縛る見る撮る', q19group: 3,
-      visible: function (a) { return isMaleFull(a); } },
+      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
 
     { id: 'q19d', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'D. 吊り・強度を楽しみたい', required: false, options: OPT.q19d, field: 'q19d', emailKey: 'Q19D_吊り強度', q19group: 4,
-      visible: function (a) { return isMaleFull(a); } },
+      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
 
     { id: 'q19e', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'E. SM・性的な責めにも関心がある', notice: TXT.q19eNotice, required: false, options: OPT.q19e, field: 'q19e', emailKey: 'Q19E_SM性的責め', q19group: 5,
-      visible: function (a) { return isMaleFull(a); } },
+      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
 
     { id: 'q19f', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'F. その他', required: false, options: OPT.q19f, otherField: 'q19f_other', field: 'q19f', exclusive: ['まだ分からない', '回答しない'], emailKey: 'Q19F_その他選択', otherEmailKey: 'Q19F_その他', q19group: 6,
-      visible: function (a) { return isMaleFull(a); } },
+      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
 
     { id: 'q20', section: SECTION.play, type: 'checkbox', title: 'Q20. 体験時に重視する条件', required: false, options: OPT.q20, otherField: 'q20_other', field: 'q20_conditions', emailKey: 'Q20_重視条件', otherEmailKey: 'Q20_その他',
       visible: function (a) { return isMaleFull(a); } },
@@ -342,7 +351,17 @@ window.__Survey = {};
     getResponseId: function () { if (!responseId) responseId = makeResponseId(); return responseId; },
     getState: function () { return { plannedSteps: plannedSteps, currentIndex: currentIndex, surveyStarted: surveyStarted }; },
     setCurrentIndex: function (i) { currentIndex = i; },
-    setSurveyStarted: function (v) { surveyStarted = v; }
+    setSurveyStarted: function (v) { surveyStarted = v; },
+    /* 既存の共通GA4設計に合わせ、form_startは「はじめる」クリック時ではなく
+       実際に最初の回答（入力・選択）をした瞬間に1回だけ送る。 */
+    markFormStarted: (function () {
+      var started = false;
+      return function () {
+        if (started) return;
+        started = true;
+        track('form_start', { form_name: 'ataru_survey' });
+      };
+    })()
   };
 })();
 
@@ -369,7 +388,7 @@ window.__Survey = {};
       focusEl.focus();
       focusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    E.track('survey_error', { form_name: 'ataru_survey', error_type: 'required' });
+    E.track('form_error', { form_name: 'ataru_survey', error_type: 'required' });
   }
 
   function clearError(errEl) { errEl.hidden = true; errEl.textContent = ''; }
@@ -413,6 +432,7 @@ window.__Survey = {};
       input.checked = answers[step.field] === opt;
       input.addEventListener('change', function () {
         answers[step.field] = opt;
+        E.markFormStarted();
         clearError(errEl);
         syncSubTexts();
       });
@@ -451,6 +471,25 @@ window.__Survey = {};
         return true;
       }
     };
+  }
+
+  var Q19_GROUP_FIELDS = ['q19a', 'q19b', 'q19c', 'q19d', 'q19e', 'q19f'];
+  var Q19_EXCLUSIVE_VALUES = ['まだ分からない', '回答しない'];
+
+  /* Q19は6画面（A〜F）に分けて表示しているが、設問としては1つ。
+     Fの「まだ分からない」「回答しない」は、A〜Eを含むQ19全体の他の選択肢と
+     同時選択できないようにする（Issueの受入条件）。 */
+  function enforceQ19CrossExclusive(changedField) {
+    var fHasExclusive = (answers.q19f || []).some(function (v) { return Q19_EXCLUSIVE_VALUES.indexOf(v) !== -1; });
+    if (changedField === 'q19f') {
+      if (fHasExclusive) {
+        Q19_GROUP_FIELDS.forEach(function (f) { if (f !== 'q19f') answers[f] = []; });
+      }
+      return;
+    }
+    if ((answers[changedField] || []).length > 0 && fHasExclusive) {
+      answers.q19f = answers.q19f.filter(function (v) { return Q19_EXCLUSIVE_VALUES.indexOf(v) === -1; });
+    }
   }
 
   function renderCheckbox(step) {
@@ -500,7 +539,9 @@ window.__Survey = {};
         if (input.checked) { if (arr.indexOf(opt) === -1) arr.push(opt); }
         else { arr = arr.filter(function (v) { return v !== opt; }); }
         answers[step.field] = arr;
+        E.markFormStarted();
         applyExclusive(opt, input.checked);
+        if (step.crossExclusive === 'q19') enforceQ19CrossExclusive(step.field);
         clearError(errEl);
         syncOther();
       });
@@ -539,7 +580,7 @@ window.__Survey = {};
     if (step.hint) panel.appendChild(h('p', { class: 'q-hint', text: step.hint }));
     var ta = h('textarea', { class: 'q26', 'aria-label': step.title });
     ta.value = answers[step.field] || '';
-    ta.addEventListener('input', function () { answers[step.field] = ta.value; });
+    ta.addEventListener('input', function () { answers[step.field] = ta.value; E.markFormStarted(); });
     panel.appendChild(ta);
     return { el: panel, validate: function () { return true; } };
   }
@@ -584,7 +625,6 @@ window.__Survey = {};
   var subprogress = document.getElementById('subprogress');
 
   var currentValidate = null;
-  var stepViewFired = {};
 
   function showOnly(el) {
     [screenIntro, screenUnderage, screenSurvey, screenComplete].forEach(function (s) { s.hidden = (s !== el); });
@@ -620,11 +660,6 @@ window.__Survey = {};
     btnBack.hidden = idx === 0;
     btnNext.textContent = (idx === plan.length - 1) ? '回答を送信する' : '次へ';
 
-    var stepKey = step.id + ':' + idx;
-    if (!stepViewFired[stepKey]) {
-      stepViewFired[stepKey] = true;
-      E.track('survey_step_view', { form_name: 'ataru_survey', step_number: idx + 1 });
-    }
     showOnly(screenSurvey);
   }
 
@@ -660,14 +695,11 @@ window.__Survey = {};
   document.getElementById('btn-start').addEventListener('click', function () {
     E.setSurveyStarted(true);
     E.setCurrentIndex(0);
-    E.track('survey_start', { form_name: 'ataru_survey' });
     renderCurrent();
   });
 
   btnNext.addEventListener('click', goNext);
   btnBack.addEventListener('click', goBack);
-
-  E.track('survey_view', {});
 
   S.nav = { showOnly: showOnly, screens: { intro: screenIntro, underage: screenUnderage, survey: screenSurvey, complete: screenComplete } };
   window.__submitSurveyFlowRef = function (fn) { submitSurveyFlow = fn; };
@@ -741,6 +773,10 @@ window.__Survey = {};
     return '一般回答';
   }
 
+  /* 連絡先フォーム側（別モジュール）から、連絡希望+3の加点後スコアを再計算できるよう公開する。
+     回答者の画面には一切表示しない（管理側のメール本文にのみ含める）。 */
+  S.scoring = { computeScore: computeScore, rankFromScore: rankFromScore };
+
   function branchLabel(a) {
     if (a.q1_age === '17歳以下') return 'underage';
     if (a.q2_gender === '女性' || a.q2_gender === 'その他') return 'female_other';
@@ -780,19 +816,20 @@ window.__Survey = {};
         return res.json();
       })
       .then(function () {
-        E.track('survey_complete', { form_name: 'ataru_survey' });
+        /* 共通GA4設計のsurvey_submit（アンケート回答の成功）。参加確定や成果を意味しないため
+           generate_leadとは分けて送る。回答内容・分岐・スコアは含めない。 */
+        E.track('survey_submit', { form_name: 'ataru_survey' });
         submitting = false;
         btnNext.disabled = false;
         btnBack.disabled = false;
         S.nav.showOnly(screenComplete);
-        S.leadFormShown && S.leadFormShown();
       })
       .catch(function (err) {
         submitting = false;
         btnNext.disabled = false;
         btnBack.disabled = false;
         btnNext.textContent = '回答を送信する';
-        E.track('survey_error', { form_name: 'ataru_survey', error_type: (err && err.errorType) || 'network' });
+        E.track('form_error', { form_name: 'ataru_survey', error_type: (err && err.errorType) || 'network' });
         submitError.hidden = false;
         submitError.focus();
         submitError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -811,6 +848,7 @@ window.__Survey = {};
 
   var toggleBtn = document.getElementById('btn-lead-toggle');
   var leadForm = document.getElementById('lead-form');
+  var leadFields = document.getElementById('lead-fields');
   var xField = document.getElementById('lead-x');
   var emailField = document.getElementById('lead-email');
   var requestRadios = document.querySelectorAll('input[name="lead-request"]');
@@ -821,14 +859,12 @@ window.__Survey = {};
 
   var revealed = false;
   var submitting = false;
+  var leadSubmissionSeq = 0;
 
   toggleBtn.addEventListener('click', function () {
     revealed = !revealed;
     leadForm.hidden = !revealed;
-    if (revealed) {
-      E.track('lead_form_view', { form_name: 'ataru_survey_lead' });
-      xField.focus();
-    }
+    if (revealed) xField.focus();
   });
 
   function getRequestType() {
@@ -852,12 +888,12 @@ window.__Survey = {};
     if (!xVal && !emailVal) {
       showLeadError('Xアカウントまたはメールアドレスのどちらかを入力してください。');
       xField.focus();
-      E.track('survey_error', { form_name: 'ataru_survey_lead', error_type: 'required' });
+      E.track('form_error', { form_name: 'ataru_survey_lead', error_type: 'required' });
       return;
     }
     if (!reqType) {
       showLeadError('希望内容を選択してください。');
-      E.track('survey_error', { form_name: 'ataru_survey_lead', error_type: 'required' });
+      E.track('form_error', { form_name: 'ataru_survey_lead', error_type: 'required' });
       return;
     }
     errorEl.hidden = true;
@@ -867,6 +903,12 @@ window.__Survey = {};
     submitBtn.textContent = '送信中…';
     resultEl.hidden = true;
 
+    /* Issueのスコア定義「連絡希望＋連絡先送信：+3」。アンケート送信時点のスコアは
+       確定済みで書き換えられないため、この連絡先メール側にのみ加点後の最終スコアを
+       含める（response_idでアンケート側のメールと突き合わせられる）。回答者には非表示。 */
+    var baseScore = S.scoring.computeScore(E.answers);
+    var finalScore = baseScore + 3;
+
     var fd = new FormData();
     fd.append('_subject', '【アタル】アンケート回答者からの連絡先希望');
     fd.append('_template', 'table');
@@ -875,6 +917,11 @@ window.__Survey = {};
     if (xVal) fd.append('Xアカウント', xVal);
     if (emailVal) fd.append('メールアドレス', emailVal);
     fd.append('希望内容', reqType);
+    fd.append('内部スコア_連絡先加点後', String(finalScore));
+    fd.append('内部判定_連絡先加点後', S.scoring.rankFromScore(finalScore));
+
+    leadSubmissionSeq += 1;
+    var submissionToken = 'survey_lead_' + leadSubmissionSeq;
 
     fetch(FORM_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
       .then(function (res) {
@@ -882,9 +929,12 @@ window.__Survey = {};
         return res.json();
       })
       .then(function () {
-        E.track('lead_form_submit', { form_name: 'ataru_survey_lead' });
+        /* 共通GA4設計のgenerate_lead（主成果）。lead_type: ataru_survey_lead。 */
+        if (window.AtaruAnalytics) {
+          window.AtaruAnalytics.trackGenerateLead(submissionToken, 'survey', { form_name: 'ataru_survey_lead' });
+        }
         submitting = false;
-        leadForm.querySelectorAll('input, button#btn-lead-submit').forEach(function (elx) { elx.hidden = true; });
+        leadFields.hidden = true;
         resultEl.className = 'result-box result-box--success';
         resultEl.textContent = 'ご連絡先を送信しました。ありがとうございました。';
         resultEl.hidden = false;
@@ -893,12 +943,10 @@ window.__Survey = {};
         submitting = false;
         submitBtn.disabled = false;
         submitBtn.textContent = '送信する';
-        E.track('survey_error', { form_name: 'ataru_survey_lead', error_type: (err && err.errorType) || 'network' });
+        E.track('form_error', { form_name: 'ataru_survey_lead', error_type: (err && err.errorType) || 'network' });
         resultEl.className = 'result-box result-box--error';
         resultEl.textContent = '送信に失敗しました。入力内容はそのままですので、時間をおいて再度お試しください。';
         resultEl.hidden = false;
       });
   });
-
-  S.leadFormShown = function () {};
 })();

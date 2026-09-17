@@ -142,27 +142,29 @@ textarea.q26 { width: 100%; padding: 0.8rem; border: 1px solid var(--border); bo
       <button type="button" class="btn btn-outline" id="btn-lead-toggle">開催案内・個別相談を希望する（任意）</button>
     </div>
     <div id="lead-form" hidden>
-      <p class="q-hint" style="margin-top:1rem;">開催案内や個別相談を希望する方のみご入力ください。入力しなくてもアンケート回答は送信済みです。</p>
-      <div class="lead-field">
-        <label for="lead-x">Xアカウント <span class="q-badge q-badge--optional">任意</span></label>
-        <input type="text" id="lead-x" placeholder="@ataru_nawa2020" autocomplete="off">
-      </div>
-      <div class="lead-field">
-        <label for="lead-email">メールアドレス <span class="q-badge q-badge--optional">任意</span></label>
-        <input type="email" id="lead-email" autocomplete="email">
-      </div>
-      <div class="lead-field">
-        <span style="display:block;font-size:0.85rem;font-weight:700;margin-bottom:0.4rem;">希望内容</span>
-        <div class="opt-group" id="lead-request-group">
-          <label class="opt-option"><input type="radio" name="lead-request" value="開催案内"> 開催案内</label>
-          <label class="opt-option"><input type="radio" name="lead-request" value="個別相談"> 個別相談</label>
-          <label class="opt-option"><input type="radio" name="lead-request" value="両方"> 両方</label>
+      <div id="lead-fields">
+        <p class="q-hint" style="margin-top:1rem;">開催案内や個別相談を希望する方のみご入力ください。入力しなくてもアンケート回答は送信済みです。</p>
+        <div class="lead-field">
+          <label for="lead-x">Xアカウント <span class="q-badge q-badge--optional">任意</span></label>
+          <input type="text" id="lead-x" placeholder="@ataru_nawa2020" autocomplete="off">
         </div>
+        <div class="lead-field">
+          <label for="lead-email">メールアドレス <span class="q-badge q-badge--optional">任意</span></label>
+          <input type="email" id="lead-email" autocomplete="email">
+        </div>
+        <div class="lead-field">
+          <span style="display:block;font-size:0.85rem;font-weight:700;margin-bottom:0.4rem;">希望内容</span>
+          <div class="opt-group" id="lead-request-group">
+            <label class="opt-option"><input type="radio" name="lead-request" value="開催案内"> 開催案内</label>
+            <label class="opt-option"><input type="radio" name="lead-request" value="個別相談"> 個別相談</label>
+            <label class="opt-option"><input type="radio" name="lead-request" value="両方"> 両方</label>
+          </div>
+        </div>
+        <p class="q-hint">Xアカウントまたはメールアドレスのどちらか一方をご入力ください。</p>
+        <p class="q-error" id="lead-error" hidden></p>
+        <input type="text" class="honey" id="lead-honey" tabindex="-1" autocomplete="off">
+        <button type="button" class="btn btn-primary" id="btn-lead-submit" style="margin-top:1rem;">送信する</button>
       </div>
-      <p class="q-hint">Xアカウントまたはメールアドレスのどちらか一方をご入力ください。</p>
-      <p class="q-error" id="lead-error" hidden></p>
-      <input type="text" class="honey" id="lead-honey" tabindex="-1" autocomplete="off">
-      <button type="button" class="btn btn-primary" id="btn-lead-submit" style="margin-top:1rem;">送信する</button>
       <div id="lead-result" hidden></div>
     </div>
   </section>

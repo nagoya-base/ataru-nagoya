@@ -19,6 +19,7 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 | --- | --- |
 | `generate_lead`（`lead_type: ataru_booking`） | お問い合わせ内容で「日程を決めて予約したい」を選んだ状態でフォーム送信のPOSTが成功した時だけ、1回 |
 | `generate_lead`（`lead_type: ataru_consultation`） | 予約以外（相談・質問・作品撮り・その他）を選んだ状態でフォーム送信のPOSTが成功した時だけ、1回 |
+| `generate_lead`（`lead_type: ataru_survey_lead`） | `survey.html` 完了画面の任意連絡先フォームのPOSTが成功した時だけ、1回（詳細は後述） |
 
 送信ボタンのクリックやバリデーションエラーでは発火しません（`form_error`を送信）。
 `reservation_complete` は実装していません。当サイトには送信完了ページが存在せず、
@@ -70,8 +71,8 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 - `channel`：`mail` / `x`
 - `faq_id`：`faq_01` 形式の連番
 - `gallery_category`：`bondage` / `suspension`、`gallery_item`：並び順の番号
-- `lead_type`：`ataru_booking` / `ataru_consultation`
-- `form_name`：`ataru_contact`
+- `lead_type`：`ataru_booking` / `ataru_consultation` / `ataru_survey_lead`
+- `form_name`：`ataru_contact` / `ataru_survey` / `ataru_survey_lead`
 - `error_type`：`required` / `server` / `network`
 
 ## 発火確認の手順
@@ -103,19 +104,29 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 `survey.html` は `data-site-section="survey"` / `data-page-type="survey"` を使う、
 独立したステップ式アンケートページ。年齢・性自認・緊縛嗜好などの回答内容、
 自由記述、連絡先（Xアカウント・メールアドレス）は一切GA4へ送らない。
-送信するのはフォーム名・ステップ番号・エラー種別などカテゴリ値のみ。
+送信するのはフォーム名・エラー種別などカテゴリ値のみで、既存の3リポジトリ共通の
+イベント設計（`form_start` / `form_error` / `generate_lead`）と、既存のアンケート系
+実装（`snb-community/baseball/enquete_202609.html` 等）が使う `survey_submit` を
+そのまま使う。survey.html専用の新規イベント名は追加していない。
 
 | イベント名 | 発火条件 |
 | --- | --- |
-| `survey_view` | ページ読み込み時、1回 |
-| `survey_start`（`form_name: ataru_survey`） | 「はじめる」を押してQ1を表示した時、1回 |
-| `survey_step_view`（`form_name: ataru_survey`, `step_number`） | 各設問ステップを表示する度（分岐で変わる回答者ごとの通し番号。設問の内容は送らない） |
-| `survey_complete`（`form_name: ataru_survey`） | アンケート回答のPOSTが成功した時だけ、1回 |
-| `lead_form_view`（`form_name: ataru_survey_lead`） | 完了画面で任意の連絡先フォームを開いた時 |
-| `lead_form_submit`（`form_name: ataru_survey_lead`） | 連絡先フォームのPOSTが成功した時だけ、1回 |
-| `survey_error`（`form_name`, `error_type: required` / `server` / `network`） | アンケート・連絡先フォームそれぞれのバリデーションエラー・送信失敗時 |
+| `form_start`（`form_name: ataru_survey`） | 最初の設問に回答（選択・入力）した時、1回 |
+| `survey_submit`（`form_name: ataru_survey`） | アンケート回答のPOSTが成功した時だけ、1回。参加確定を意味しないため`generate_lead`とは分けて送る。回答内容・分岐・スコアは含めない |
+| `generate_lead`（`lead_type: ataru_survey_lead`） | 完了画面の任意連絡先フォームのPOSTが成功した時だけ、1回。既存の`ataru_booking` / `ataru_consultation`と同じ`trackGenerateLead`ヘルパーを使う |
+| `form_error`（`form_name`, `error_type: required` / `server` / `network`） | アンケート・連絡先フォームそれぞれのバリデーションエラー・送信失敗時 |
 
-アンケート回答と任意の連絡先は別々のFormSubmit宛先（件名）へ分離して送信し、
-個人情報を含まないランダムな `response_id` でのみ関連づける。
+段階表示のステップごとの閲覧イベント（step_view相当）は、既存の共通設計に
+存在しないため追加していない。ページ表示自体はGA4標準の`page_view`で計測される。
+
+アンケート回答と任意の連絡先は別々のPOST（別件名のメール）に送信し、
+個人情報を含まないランダムな `response_id` でのみ関連づける。ただし現状は
+アンケート・連絡先とも同一のFormSubmit宛先（同じ受信メールアドレス）であり、
+メール本文が分かれるだけで受信先自体は分離していない。センシティブな回答と
+連絡先を別の受信先で管理したい場合は、連絡先用に別のメールアドレスを
+FormSubmitで有効化する運用対応が別途必要。
+
 内部トリアージ用スコア・判定は送信データ（メール本文）にのみ含め、
-回答者の画面やGA4には一切表示・送信しない。
+回答者の画面やGA4には一切表示・送信しない。連絡先フォーム送信時（+3点）は
+アンケート送信時点のスコアを事後に書き換えられないため、連絡先メール側に
+加点後の最終スコア・判定を別途含める。
