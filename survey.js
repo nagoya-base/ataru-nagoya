@@ -72,6 +72,30 @@ window.__Survey = {};
 
   var FORM_ENDPOINT = 'https://formsubmit.co/ajax/nagoyabase2023@gmail.com';
 
+  /* gas/ataru_survey_public/ をWebアプリとしてデプロイしたURL。
+     デプロイ後に実際のURLへ置き換えること（手動設定が必要。README.md参照）。
+     回答保存・リード保存の正本はこのGASであり、FORM_ENDPOINTは通知補助に過ぎない
+     （Issue #104 追加指示5）。 */
+  var GAS_ENDPOINT = 'https://script.google.com/macros/s/REPLACE_WITH_DEPLOYED_ATARU_SURVEY_PUBLIC_ID/exec';
+
+  /* GASへのPOSTは text/plain でJSON文字列を送る（Content-Type: application/jsonにすると
+     クロスオリジンPOSTがプリフライト(OPTIONS)を要求し、GAS Web Appは安定して応答できない。
+     text/plainは「シンプルリクエスト」としてプリフライトを発生させない。詳細は
+     gas/ataru_survey_public/README.md の「CORS」節を参照）。 */
+  function postJsonToGas(payload) {
+    return fetch(GAS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      if (!res.ok) { var e = new Error('gas_http_error'); e.errorType = 'server'; throw e; }
+      return res.json();
+    }).then(function (json) {
+      if (!json || json.ok !== true) { var e2 = new Error('gas_save_error'); e2.errorType = 'server'; throw e2; }
+      return json;
+    });
+  }
+
   var OPT = {
     q1: ['17歳以下','18〜24歳','25〜29歳','30〜34歳','35〜39歳','40〜49歳','50〜59歳','60歳以上','回答しない'],
     q2: ['男性','女性','その他'],
@@ -144,6 +168,84 @@ window.__Survey = {};
   window.__Survey.TXT = TXT;
   window.__Survey.SECTION = SECTION;
   window.__Survey.FORM_ENDPOINT = FORM_ENDPOINT;
+  window.__Survey.GAS_ENDPOINT = GAS_ENDPOINT;
+  window.__Survey.postJsonToGas = postJsonToGas;
+})();
+
+/* ── 重複回答抑止（Cookie / localStorage） ──
+ * GAS保存成功後だけ回答済み状態を記録する（Issue #104 1章・2章）。
+ * Cookie・localStorageのどちらか一方でも回答済みが確認できれば、通常の再回答を抑止する。
+ * IP・User-Agent・フィンガープリントは一切使わない。Cookie削除・別ブラウザ・別端末による
+ * 再回答は許容する（強固な本人認証・不正検知は目的にしない）。
+ */
+(function () {
+  'use strict';
+  var S = window.__Survey;
+
+  var COOKIE_NAME = 'ataru_survey_v1_answered';
+  /* Path=/ は禁止（同じgithub.io配下の他リポジトリのページにもCookieが送られてしまう）。
+     GitHub Pagesの実際の公開パスは https://nagoya-base.github.io/ataru-nagoya/survey.html
+     であり、このCookieはsurvey.html以外（main.html・予約導線等）では参照・利用しない。 */
+  var COOKIE_PATH = '/ataru-nagoya/survey.html';
+  var LS_KEY = 'ataru_survey_v1';
+  var SURVEY_VERSION = 'issue107-2026-09-18';
+
+  function setAnsweredCookie() {
+    try {
+      var secure = window.location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = COOKIE_NAME + '=1; Max-Age=31536000; Path=' + COOKIE_PATH + '; SameSite=Lax' + secure;
+    } catch (e) { /* Cookie無効環境でも回答保存自体は完了しているため処理を継続する */ }
+  }
+
+  function hasAnsweredCookie() {
+    try {
+      return new RegExp('(?:^|;\\s*)' + COOKIE_NAME + '=1(?:;|$)').test(document.cookie || '');
+    } catch (e) { return false; }
+  }
+
+  function readAnsweredLocalStorage() {
+    try {
+      var raw = window.localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      return (obj && obj.answered) ? obj : null;
+    } catch (e) { return null; }
+  }
+
+  function writeAnsweredLocalStorage(responseId) {
+    try {
+      window.localStorage.setItem(LS_KEY, JSON.stringify({
+        answered: true,
+        response_id: responseId || null,
+        answered_at: new Date().toISOString(),
+        survey_version: SURVEY_VERSION
+      }));
+    } catch (e) { /* localStorage無効環境でもCookie側で抑止を継続する */ }
+  }
+
+  /* GAS保存成功後にのみ呼ぶこと。送信開始時・バリデーション通過時・通信失敗時には呼ばない。 */
+  function markAnswered(responseId) {
+    setAnsweredCookie();
+    writeAnsweredLocalStorage(responseId);
+  }
+
+  function isAlreadyAnswered() {
+    return hasAnsweredCookie() || !!readAnsweredLocalStorage();
+  }
+
+  /* 再訪連絡先送信で、可能な範囲で元のresponse_idを復元するために使う。
+     Cookieのみが残っている場合はnullになり得るが、その場合も連絡先送信自体は妨げない
+     （GAS側が「未紐付けの再訪リード」として扱う）。 */
+  function storedResponseId() {
+    var ls = readAnsweredLocalStorage();
+    return (ls && ls.response_id) ? ls.response_id : null;
+  }
+
+  S.dedup = {
+    markAnswered: markAnswered,
+    isAlreadyAnswered: isAlreadyAnswered,
+    storedResponseId: storedResponseId
+  };
 })();
 
 (function () {
@@ -808,6 +910,17 @@ window.__Survey = {};
   S.nav = { showOnly: showOnly, screens: { intro: screenIntro, underage: screenUnderage, survey: screenSurvey, complete: screenComplete } };
   window.__submitSurveyFlowRef = function (fn) { submitSurveyFlow = fn; };
   var submitSurveyFlow = function () { /* placeholder, replaced by submit module */ };
+
+  /* 再訪時：Cookie/localStorageのどちらかで回答済みと判定できれば、通常フォームを一切
+     開始させず、完了画面（回答済みメッセージ・結果を見る・開催案内/相談導線）を表示する
+     （Issue #104 1章「再訪時」。通常利用者向けの「もう一度回答する」ボタンは設置しない）。 */
+  if (S.dedup.isAlreadyAnswered()) {
+    var heading = document.getElementById('complete-heading');
+    var body = document.getElementById('complete-body');
+    if (heading) heading.textContent = 'このブラウザではすでに回答済みです。';
+    if (body) body.textContent = 'ご協力ありがとうございました。下の「結果を見る」から現在の集計結果をご覧いただけます。開催案内・個別相談をご希望の場合は「開催案内・個別相談を希望する」からご連絡先をお送りください。';
+    showOnly(screenComplete);
+  }
 })();
 
 /* ── 回答送信 ── */
@@ -930,6 +1043,47 @@ window.__Survey = {};
     return 'unknown';
   }
 
+  /* FormSubmitは通知補助に完全に下げる（Issue #104 追加指示5）。GAS保存成功後にのみ、
+     ベストエフォートで送る。失敗しても回答完了状態・UIには一切影響させない。 */
+  function notifyFormSubmitBestEffort(serverResponseId) {
+    try {
+      var plan = E.recomputePlan();
+      var fd = collectFieldsForPlan(plan);
+      var score = safeComputeScore(answers);
+      var rank = safeRankFromScore(score);
+      fd.append('_subject', '【アタル】アンケート回答');
+      fd.append('_template', 'table');
+      fd.append('_captcha', 'false');
+      fd.append('_honey', '');
+      fd.append('response_id', serverResponseId);
+      fd.append('送信日時', new Date().toISOString());
+      fd.append('到達分岐', branchLabel(answers));
+      if (score !== null) fd.append('内部スコア', String(score));
+      if (rank !== null) fd.append('内部判定', rank);
+      fetch(FORM_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } }).catch(function () { /* 通知失敗は無視（正本はGAS保存） */ });
+    } catch (e) { /* 通知組み立て失敗も回答完了状態には影響させない */ }
+  }
+
+  /* answersの各フィールドを個別にtry/catchしながらコピーする。computeScore()同様、
+     単一フィールドへのアクセスで例外が起きても送信データの組み立て全体を止めない
+     （defaultAnswers()のキー一覧を基準にするため、answers自体の列挙が壊れていても影響しない）。 */
+  function safeSnapshotAnswers() {
+    var out = {};
+    Object.keys(E.defaultAnswers()).forEach(function (key) {
+      try {
+        out[key] = answers[key];
+      } catch (e) {
+        out[key] = [];
+      }
+    });
+    return out;
+  }
+
+  /* 回答完了の基準はGAS保存成功のみ（Issue #104 2章）。
+     順序：①GASへ送信 → ②保存成功 → ③Cookie/localStorageへ回答済み保存 →
+     ④survey_submit発火 → ⑤完了画面表示 → ⑥FormSubmit通知（ベストエフォート）。
+     GAS失敗時は完了画面・回答済み状態・survey_submitのいずれも発生させず、
+     現在のanswersを保持したまま再送できるようにする（入力内容はクリアしない）。 */
   function realSubmit() {
     if (submitting) return;
     submitting = true;
@@ -938,35 +1092,24 @@ window.__Survey = {};
     btnNext.textContent = '送信中…';
     submitError.hidden = true;
 
-    var plan = E.recomputePlan();
-    var fd = collectFieldsForPlan(plan);
-    var rid = E.getResponseId();
-    /* スコア計算で例外が発生しても送信データ自体は組み立てを継続する（#12） */
-    var score = safeComputeScore(answers);
-    var rank = safeRankFromScore(score);
-    fd.append('_subject', '【アタル】アンケート回答');
-    fd.append('_template', 'table');
-    fd.append('_captcha', 'false');
-    fd.append('_honey', '');
-    fd.append('response_id', rid);
-    fd.append('送信日時', new Date().toISOString());
-    fd.append('到達分岐', branchLabel(answers));
-    if (score !== null) fd.append('内部スコア', String(score));
-    if (rank !== null) fd.append('内部判定', rank);
+    var payload = { action: 'save_response', answers: safeSnapshotAnswers(), clientResponseId: E.getResponseId() };
 
-    fetch(FORM_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
-      .then(function (res) {
-        if (!res.ok) { var e = new Error('failed'); e.errorType = 'server'; throw e; }
-        return res.json();
-      })
-      .then(function () {
+    S.postJsonToGas(payload)
+      .then(function (json) {
+        var serverResponseId = json.response_id;
+        S.dedup.markAnswered(serverResponseId);
         /* 共通GA4設計のsurvey_submit（アンケート回答の成功）。参加確定や成果を意味しないため
-           generate_leadとは分けて送る。回答内容・分岐・スコアは含めない。 */
+           generate_leadとは分けて送る。回答内容・分岐・スコア・response_idは含めない。 */
         E.track('survey_submit', { form_name: 'ataru_survey' });
         submitting = false;
         btnNext.disabled = false;
         btnBack.disabled = false;
+        var heading = document.getElementById('complete-heading');
+        var body = document.getElementById('complete-body');
+        if (heading) heading.textContent = 'ご回答ありがとうございました。';
+        if (body) body.textContent = 'アンケートの回答はすでに送信済みです。これ以降、何も入力しなくても回答は完了しています。';
         S.nav.showOnly(screenComplete);
+        notifyFormSubmitBestEffort(serverResponseId);
       })
       .catch(function (err) {
         submitting = false;
@@ -1055,25 +1198,21 @@ window.__Survey = {};
     var finalScore = baseScore === null ? null : baseScore + 3;
     var finalRank = S.scoring.safeRankFromScore(finalScore);
 
-    var fd = new FormData();
-    fd.append('_subject', '【アタル】アンケート回答者からの連絡先希望');
-    fd.append('_template', 'table');
-    fd.append('_captcha', 'false');
-    fd.append('response_id', E.getResponseId());
-    if (xVal) fd.append('Xアカウント', xVal);
-    if (emailVal) fd.append('メールアドレス', emailVal);
-    fd.append('希望内容', reqType);
-    if (finalScore !== null) fd.append('内部スコア_連絡先加点後', String(finalScore));
-    if (finalRank !== null) fd.append('内部判定_連絡先加点後', finalRank);
+    /* 再訪リードのlink_statusはGAS側で決める（Issue #104 追加指示13）。ここではCookie/
+       localStorageから復元できるresponse_idを「申告」として送るだけで、実在確認は行わない。
+       復元できない（Cookieのみ残っている等）場合も送信自体は妨げない。 */
+    var claimedResponseId = S.dedup.storedResponseId() || '';
 
     leadSubmissionSeq += 1;
     var submissionToken = 'survey_lead_' + leadSubmissionSeq;
 
-    fetch(FORM_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
-      .then(function (res) {
-        if (!res.ok) { var e = new Error('failed'); e.errorType = 'server'; throw e; }
-        return res.json();
-      })
+    S.postJsonToGas({
+      action: 'save_lead',
+      response_id: claimedResponseId,
+      x_account: xVal,
+      email: emailVal,
+      requested_content: reqType
+    })
       .then(function () {
         /* 共通GA4設計のgenerate_lead（主成果）。lead_type: ataru_survey_lead。 */
         if (window.AtaruAnalytics) {
@@ -1084,6 +1223,7 @@ window.__Survey = {};
         resultEl.className = 'result-box result-box--success';
         resultEl.textContent = 'ご連絡先を送信しました。ありがとうございました。';
         resultEl.hidden = false;
+        notifyLeadFormSubmitBestEffort(xVal, emailVal, reqType, finalScore, finalRank);
       })
       .catch(function (err) {
         submitting = false;
@@ -1095,4 +1235,22 @@ window.__Survey = {};
         resultEl.hidden = false;
       });
   });
+
+  /* リード保存の正本はGAS。FormSubmitは通知補助のベストエフォートに留める
+     （Issue #104 追加指示5と同じ方針）。失敗してもユーザーへは既に成功表示済み。 */
+  function notifyLeadFormSubmitBestEffort(xVal, emailVal, reqType, finalScore, finalRank) {
+    try {
+      var fd = new FormData();
+      fd.append('_subject', '【アタル】アンケート回答者からの連絡先希望');
+      fd.append('_template', 'table');
+      fd.append('_captcha', 'false');
+      fd.append('response_id', S.dedup.storedResponseId() || E.getResponseId());
+      if (xVal) fd.append('Xアカウント', xVal);
+      if (emailVal) fd.append('メールアドレス', emailVal);
+      fd.append('希望内容', reqType);
+      if (finalScore !== null) fd.append('内部スコア_連絡先加点後', String(finalScore));
+      if (finalRank !== null) fd.append('内部判定_連絡先加点後', finalRank);
+      fetch(FORM_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } }).catch(function () { /* 通知失敗は無視（正本はGAS保存） */ });
+    } catch (e) { /* 通知組み立て失敗はユーザー体験に影響させない */ }
+  }
 })();

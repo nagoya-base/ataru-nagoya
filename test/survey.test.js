@@ -456,8 +456,13 @@ test('女性・その他としてアンケートを送信すると、送信デ�
 
   setTimeout(function () {
     try {
-      assert.equal(ctx.fetchCalls.length, 1);
-      var fd = ctx.fetchCalls[0].opts.body;
+      /* GAS保存成功後、通知補助としてFormSubmitへもPOSTする（Issue #104）。
+         GAS保存成功が先に1件、その後FormSubmit通知が1件の計2件になる。 */
+      assert.equal(ctx.fetchCalls.length, 2);
+      assert.equal(ctx.fetchCalls[0].url, ctx.S.GAS_ENDPOINT, '1件目はGAS保存POST');
+      var formCall = ctx.fetchCalls.filter(function (c) { return c.url === ctx.S.FORM_ENDPOINT; })[0];
+      assert.ok(formCall, 'FormSubmitへの通知POSTがある');
+      var fd = formCall.opts.body;
       var keys = fd._data.map(function (pair) { return pair[0]; });
       assert.equal(keys.indexOf('内部スコア'), -1, '女性・その他の送信には内部スコアを含めない');
       assert.equal(keys.indexOf('内部判定'), -1, '女性・その他の送信には内部判定を含めない');
@@ -535,8 +540,10 @@ test('スコア計算例外時でもアンケート送信（POST）自体は実�
   // fetchは非同期(Promise)なので、マイクロタスクの完了を待ってから検証する
   setTimeout(function () {
     try {
-      assert.equal(ctx.fetchCalls.length, 1, 'スコア計算例外があっても送信(fetch)は実行される');
-      var fd = ctx.fetchCalls[0].opts.body;
+      assert.equal(ctx.fetchCalls.length, 2, 'スコア計算例外があっても送信(fetch)は実行される（GAS保存＋FormSubmit通知）');
+      var formCall = ctx.fetchCalls.filter(function (c) { return c.url === ctx.S.FORM_ENDPOINT; })[0];
+      assert.ok(formCall, 'FormSubmitへの通知POSTがある');
+      var fd = formCall.opts.body;
       var keys = fd._data.map(function (pair) { return pair[0]; });
       assert.equal(keys.indexOf('内部スコア'), -1, 'スコア計算失敗時は内部スコアを含めない');
       assert.equal(ctx.S.nav.screens.complete.hidden, false, '送信成功後に完了画面が表示される');

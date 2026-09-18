@@ -6,10 +6,13 @@ on:
       - 'survey-schema.json'
       - 'survey.js'
       - 'survey.html'
+      - 'survey-results.html'
+      - 'survey-results.js'
       - 'scripts/**'
       - 'schema/**'
       - 'generated/**'
       - 'gas/ataru_survey_admin/**'
+      - 'gas/ataru_survey_public/**'
       - 'test/**'
       - '.github/workflows/survey-schema-check.yml'
   push:
