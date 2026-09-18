@@ -64,6 +64,38 @@ test('それでも公開セルが残らない場合は設問ブロック全体�
   assert.strictEqual(r.otherSmall.count, 100);
 });
 
+/* PR #110レビュー対応: 「その他少数」自体が5人未満のまま公開されてはいけない */
+test('複数の非公開セルを合算しても5人未満のままなら、その合算値（その他少数）自体を公開せず、追加で公開セルを巻き込んで5人以上にする', function () {
+  var r = pub.maskSingleSelect(['A', 'B', 'C'], { A: 1, B: 1, C: 98 }, 100);
+  /* A(1)+B(1)=2人（5人未満）のまま「その他少数」として公開してはいけない。
+     Cを追加で巻き込んで合算が5人以上になるまで抑制を続ける。 */
+  assert.strictEqual(r.hidden, false);
+  assert.deepStrictEqual(r.options, [], 'Cも追加で抑制されるため、個別に公開される選択肢は残らない');
+  assert.strictEqual(r.otherSmall.count, 100);
+  assert.ok(r.otherSmall.count >= 5, 'その他少数として公開する値は必ず5以上');
+});
+
+test('複数の非公開セル（0件のバケットを含む）を合算しても5人未満なら、公開可能な選択肢を1つだけ追加で巻き込む（最小限の犠牲）', function () {
+  /* A=1,B=1,C=1(すべて非公開・合算3人)、D=5(公開可)、E=91(公開可)。
+     合算(3)が5未満の間だけ、最小のD(5)を1つ追加すれば5+3=8で5人以上に達するため、
+     Eまでは巻き込まない（必要最小限の追加抑制であることを確認する）。 */
+  var r = pub.maskSingleSelect(['A', 'B', 'C', 'D', 'E'], { A: 1, B: 1, C: 1, D: 5, E: 91 }, 99);
+  var values = r.options.map(function (o) { return o.value; });
+  assert.deepStrictEqual(values, ['E'], 'Dだけ追加で抑制され、Eは公開されたまま残る');
+  assert.strictEqual(r.otherSmall.count, 8, 'A(1)+B(1)+C(1)+D(5)');
+});
+
+test('すべての選択肢を合算しても5人未満なら（全体が極端な低N）、設問ブロック全体を非公開にする', function () {
+  var r = pub.maskSingleSelect(['A', 'B', 'C'], { A: 1, B: 1, C: 1 }, 3);
+  assert.strictEqual(r.hidden, true, '合算しても3人しかおらず、公開できる値が1つも作れない');
+});
+
+test('決定的：A=1,B=1,C=98の同じ入力に対し、maskSingleSelectは常に同じ結果を返す', function () {
+  var r1 = pub.maskSingleSelect(['A', 'B', 'C'], { A: 1, B: 1, C: 98 }, 100);
+  var r2 = pub.maskSingleSelect(['A', 'B', 'C'], { A: 1, B: 1, C: 98 }, 100);
+  assert.deepStrictEqual(r1, r2);
+});
+
 test('追加で抑制する公開セルが1つも存在しない場合は設問ブロック全体を完全非公開(hidden)にする', function () {
   /* 選択肢が1つしかなく、かつ5人未満：抑制対象を merge する相手の公開セルが存在しないため、
      残差復元を防ぐ手段がなく設問ブロック全体を非公開にする。 */
@@ -136,7 +168,16 @@ test('excluded=trueの行は有効回答数・公開集計から除外される'
 /* ── Q1/Q3の公開表示バケット化 ── */
 
 test('Q1は50〜59歳・60歳以上を「50歳以上」へ統合して公開する', function () {
-  var rows = rowsOf(60, { q1_age: '50〜59歳' }).concat(rowsOf(50, { q1_age: '60歳以上' }));
+  /* 他の年代バケットにも十分な人数（>=5）を割り当て、0件バケットの追加抑制に
+     巻き込まれず「50歳以上」バケットがそのまま公開されることを検証する。 */
+  var rows = rowsOf(60, { q1_age: '50〜59歳' })
+    .concat(rowsOf(50, { q1_age: '60歳以上' }))
+    .concat(rowsOf(10, { q1_age: '18〜24歳' }))
+    .concat(rowsOf(10, { q1_age: '25〜29歳' }))
+    .concat(rowsOf(10, { q1_age: '30〜34歳' }))
+    .concat(rowsOf(10, { q1_age: '35〜39歳' }))
+    .concat(rowsOf(10, { q1_age: '40〜49歳' }))
+    .concat(rowsOf(10, { q1_age: '回答しない' }));
   var result = pub.buildPublicResult(rows, schema);
   var values = result.overview.Q1.options.map(function (o) { return o.value; });
   assert.ok(values.indexOf('50歳以上') !== -1);
@@ -146,11 +187,21 @@ test('Q1は50〜59歳・60歳以上を「50歳以上」へ統合して公開す�
 });
 
 test('Q3は大分類（東海/関東/関西/その他国内/海外）へ丸めて公開し、自由記述地域名は含まれない', function () {
-  var rows = rowsOf(60, { q3_region: '愛知県・名古屋市' }).concat(rowsOf(50, { q3_region: '東京都', q3_region_other: '秘密の地名' }));
+  /* 5バケットすべてに十分な人数（>=5）を割り当てることで、少人数マスキング（複数の
+     0件バケットをまとめるための追加抑制）に巻き込まれず、バケット化そのものを検証する。 */
+  var rows = rowsOf(60, { q3_region: '愛知県・名古屋市' })
+    .concat(rowsOf(50, { q3_region: '東京都', q3_region_other: '秘密の地名' }))
+    .concat(rowsOf(10, { q3_region: '関西' }))
+    .concat(rowsOf(10, { q3_region: '北海道' }))
+    .concat(rowsOf(10, { q3_region: '海外' }));
   var result = pub.buildPublicResult(rows, schema);
   var values = result.overview.Q3.options.map(function (o) { return o.value; });
   assert.ok(values.indexOf('東海') !== -1);
   assert.ok(values.indexOf('関東') !== -1);
+  assert.ok(values.indexOf('関西') !== -1);
+  assert.ok(values.indexOf('その他国内') !== -1);
+  assert.ok(values.indexOf('海外') !== -1);
+  assert.strictEqual(result.overview.Q3.otherSmall, null, '全バケットが5人以上なのでその他少数は発生しない');
   assert.strictEqual(JSON.stringify(result).indexOf('秘密の地名'), -1);
 });
 

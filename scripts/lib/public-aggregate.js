@@ -94,12 +94,16 @@ function byOrder(a, b) { return a.order - b.order; }
 /*
  * 単一選択設問の5人未満マスキング＋補完的抑制（Issue #104 8章）。
  *  1. count<5 のセルは非公開にする
- *  2. 単一選択は合計=targetCountのため、非公開セルが1つだけだと残差から正確な人数が
- *     一意に復元できてしまう。その場合、次に小さい公開セルも追加で「その他少数」へ含め、
- *     残差を一意に復元できない状態にする
- *  3. それでも公開セルが1つも残らない（=これ以上足せない）場合は設問ブロック全体を非公開にする
- * 同じ入力に対して常に同じ結果になるよう、タイブレークはschemaの選択肢順で固定する
- * （Object列挙順・ランダムに依存しない）。
+ *  2. 単一選択は合計=targetCountのため、非公開セルをそのまま「その他少数」へまとめても、
+ *     その合算値自体が5人未満なら、公開している他セルとtargetCountとの差分から
+ *     正確な人数がそのまま見えてしまう（「その他少数」も1つの公開カテゴリである以上、
+ *     count<5の基本ルールが等しく適用される）。合算値が5人未満の間は、
+ *     次に小さい公開セルを1つずつ追加で「その他少数」へ含め、5人以上になるまで続ける
+ *     （すでに非公開なセルが2個以上でも、合算が5人未満なら同様に繰り返す）
+ *  3. 公開セルをすべて使い切っても合算値が5人未満のままなら、その5人未満という値自体を
+ *     公開できないため、設問ブロック全体を非公開にする
+ * 同じ入力に対して常に同じ結果になるよう、タイブレーク（どの公開セルから追加で
+ * 抑制するか）はschemaの選択肢順で固定する（Object列挙順・ランダムに依存しない）。
  */
 function maskSingleSelect(orderedLabels, counts, targetCount) {
   var entries = toEntries(orderedLabels, counts);
@@ -115,16 +119,22 @@ function maskSingleSelect(orderedLabels, counts, targetCount) {
     };
   }
 
-  if (suppressed.length === 1) {
-    if (visible.length === 0) {
-      return { hidden: true, targetCount: targetCount };
-    }
+  function suppressedSum() { return suppressed.reduce(function (s, e) { return s + e.count; }, 0); }
+
+  while (suppressedSum() < MIN_PUBLIC_CELL && visible.length > 0) {
     var moved = smallestEntry(visible);
     visible = visible.filter(function (e) { return e !== moved; });
     suppressed = suppressed.concat([moved]);
   }
 
-  var otherSmallCount = suppressed.reduce(function (s, e) { return s + e.count; }, 0);
+  var otherSmallCount = suppressedSum();
+  if (otherSmallCount < MIN_PUBLIC_CELL) {
+    /* 公開セルを全て使い切っても「その他少数」を5人以上にできない
+       （＝この設問ブロックで安全に公開できる数値が1つも残らない）。
+       ブロック全体を非公開にする。 */
+    return { hidden: true, targetCount: targetCount };
+  }
+
   return {
     hidden: false,
     targetCount: targetCount,

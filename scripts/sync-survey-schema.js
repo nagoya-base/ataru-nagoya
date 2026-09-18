@@ -299,6 +299,7 @@ function buildFullSchemaForPublicApp(schema) {
     conditions: schema.conditions,
     questions: schema.questions,
     questionsById: questionsById,
+    q20CrossExclusive: schema.q20CrossExclusive,
     responsesManagementColumns: schema.responsesManagementColumns,
     leadsColumns: schema.leadsColumns
   };

@@ -57,6 +57,14 @@ test('FullSchema.gs（FullSurveySchema）はadmin_only設問・leadsColumnsを�
   assert.ok(Array.isArray(sandbox.FullSurveySchema.leadsColumns) && sandbox.FullSurveySchema.leadsColumns.length > 0);
 });
 
+test('FullSchema.gs（FullSurveySchema）はq20CrossExclusiveを含む（欠落するとQ20の同時選択チェックがGAS実行時に無効化されてしまうため）', function () {
+  var sandbox = loadPublicGasSandbox();
+  var spec = sandbox.FullSurveySchema.q20CrossExclusive;
+  assert.ok(spec, 'FullSurveySchema.q20CrossExclusiveが存在しない');
+  assert.deepEqual(spec.memberQuestionIds, ['Q20A', 'Q20B', 'Q20C', 'Q20D']);
+  assert.deepEqual(spec.exclusiveValues, ['まだ分からない', '回答しない']);
+});
+
 test('ResponseNormalize.gs の buildStorageRow がvm実行時にReferenceErrorを起こさず動作する（FullSurveySchemaを使用）', function () {
   var sandbox = loadPublicGasSandbox();
   assert.strictEqual(typeof sandbox.buildStorageRow, 'function');

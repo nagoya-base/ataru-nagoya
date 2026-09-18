@@ -104,6 +104,96 @@ test('17歳以下はexcluded=trueかつexcluded_reason=undergeとなり、comple
   assert.strictEqual(res.completionStage, 'underage_end');
 });
 
+/* ── フロントで成立しない回答状態の拒否（PR #110レビュー対応その2） ── */
+
+test('トリガー選択肢（Q2「その他」）を選んだのに対応する自由記述が空なら無効になる', function () {
+  var raw = { q1_age: '25〜29歳', q2_gender: 'その他', q3_region: '東京都', q4_interest: '興味がある' };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.valid, false);
+  assert.ok(res.missingRequired.indexOf('q2_gender_other') !== -1, JSON.stringify(res.missingRequired));
+});
+
+test('Q3「海外」を選んだのに国名が空なら無効、「その他」を選んだのに地域名が空なら無効', function () {
+  var res1 = norm.buildStorageRow(schema, { q1_age: '25〜29歳', q2_gender: '男性', q3_region: '海外', q4_interest: '興味がある' });
+  assert.ok(res1.missingRequired.indexOf('q3_country') !== -1, JSON.stringify(res1.missingRequired));
+
+  var res2 = norm.buildStorageRow(schema, { q1_age: '25〜29歳', q2_gender: '男性', q3_region: 'その他', q4_interest: '興味がある' });
+  assert.ok(res2.missingRequired.indexOf('q3_region_other') !== -1, JSON.stringify(res2.missingRequired));
+});
+
+test('複数選択で「その他」を選び自由記述も入力していれば有効になる', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q5_enjoy: ['その他'], q5_other: '縄の匂いが好き'
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.row.q5_other, '縄の匂いが好き');
+  assert.ok(res.missingRequired.indexOf('q5_other') === -1);
+});
+
+test('exclusiveOptions（Q5「回答しない」）を通常選択肢と同時送信すると無効になる', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q5_enjoy: ['回答しない', '縄の感触を感じたい']
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.valid, false);
+  assert.ok(res.invalidCombinations.indexOf('Q5:exclusive_options') !== -1, JSON.stringify(res.invalidCombinations));
+});
+
+test('exclusiveOptionsを単独で選んでいれば有効になる', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q5_enjoy: ['回答しない']
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.invalidCombinations.indexOf('Q5:exclusive_options'), -1);
+});
+
+test('conflictPairs（Q6「縛る・縛られる両方」と「縛られる側」）を同時送信すると無効になる', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q6_role: ['縛る・縛られる両方に興味がある', '縛られる側に興味がある']
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.valid, false);
+  assert.ok(res.invalidCombinations.indexOf('Q6:conflict_pair') !== -1, JSON.stringify(res.invalidCombinations));
+});
+
+test('conflictPairsに該当しない組合せは有効', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q6_role: ['縛られる側に興味がある', '見るだけで楽しみたい']
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.invalidCombinations.indexOf('Q6:conflict_pair'), -1);
+});
+
+test('q20CrossExclusive: Q20Dの「回答しない」とQ20Aの選択肢を同時送信すると無効になる', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q7_sports: ['野球・ソフトボール'], q8_exercise: '定期的にスポーツをしている', q9_gym: '週2〜3回',
+    q11_uniform: ['野球'], q15_gate: 'はい', q17_experience: ['未経験'], q18_combo: 'ぜひ体験したい',
+    q22_visit: '日程が合えば', q24_price: '3,000円程度', q25_intent: '日程が合えば参加したい',
+    q20a: ['ユニフォーム姿のまま格好よく縛られたい'], q20d: ['回答しない']
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.valid, false);
+  assert.ok(res.invalidCombinations.indexOf('Q20:cross_exclusive') !== -1, JSON.stringify(res.invalidCombinations));
+});
+
+test('q20CrossExclusive: Q20Dの「回答しない」だけを送り、A〜Cが空なら有効', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q7_sports: ['野球・ソフトボール'], q8_exercise: '定期的にスポーツをしている', q9_gym: '週2〜3回',
+    q11_uniform: ['野球'], q15_gate: 'はい', q17_experience: ['未経験'], q18_combo: 'ぜひ体験したい',
+    q22_visit: '日程が合えば', q24_price: '3,000円程度', q25_intent: '日程が合えば参加したい',
+    q20d: ['回答しない']
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.invalidCombinations.indexOf('Q20:cross_exclusive'), -1, JSON.stringify(res.invalidCombinations));
+});
+
 test('rawAnswersがnull/undefinedでも例外を投げず、全フィールドが空で返る', function () {
   assert.doesNotThrow(function () { norm.buildStorageRow(schema, null); });
   var res = norm.buildStorageRow(schema, undefined);

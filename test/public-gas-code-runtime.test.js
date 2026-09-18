@@ -182,7 +182,7 @@ test('必須設問が未回答のPOSTは保存されず、ok:falseとmissingが�
   }));
   var json = JSON.parse(out.getContent());
   assert.strictEqual(json.ok, false);
-  assert.strictEqual(json.error, 'missing_required');
+  assert.strictEqual(json.error, 'invalid_answers');
   ['Q7', 'Q8', 'Q9', 'Q11', 'Q15'].forEach(function (id) {
     assert.ok(json.missing.indexOf(id) !== -1, id + ' がmissingに含まれる: ' + JSON.stringify(json.missing));
   });
@@ -259,6 +259,63 @@ test('17歳以下のPOSTを繰り返しても保存されず、有効な回答�
   assert.strictEqual(json.ok, true);
   var sheet = ctx.spreadsheet.getSheetByName('responses');
   assert.strictEqual(sheet._rows.length, 2, '17歳以下の分は保存されず、有効な1件だけがヘッダ+1行として残る');
+});
+
+/* ── レビュー対応その2：exclusiveOptions・conflictPairs・q20CrossExclusive・自由記述必須 ── */
+
+test('Q2「その他」を選んだのに自由記述が空だと保存を拒否する', function () {
+  var ctx = loadCodeGsSandbox();
+  var out = ctx.sandbox.doPost(makePostEvent({
+    action: 'save_response',
+    answers: femaleAnswers({ q2_gender: 'その他', q2_gender_other: '' })
+  }));
+  var json = JSON.parse(out.getContent());
+  assert.strictEqual(json.ok, false);
+  assert.strictEqual(json.error, 'invalid_answers');
+  assert.ok(json.missing.indexOf('q2_gender_other') !== -1, JSON.stringify(json.missing));
+});
+
+test('Q5のexclusiveOptions（「回答しない」）を通常選択肢と同時送信すると保存を拒否する', function () {
+  var ctx = loadCodeGsSandbox();
+  var out = ctx.sandbox.doPost(makePostEvent({
+    action: 'save_response',
+    answers: femaleAnswers({ q5_enjoy: ['回答しない', '縄の感触を感じたい'] })
+  }));
+  var json = JSON.parse(out.getContent());
+  assert.strictEqual(json.ok, false);
+  assert.ok(json.invalidCombinations.indexOf('Q5:exclusive_options') !== -1, JSON.stringify(json.invalidCombinations));
+});
+
+test('Q6のconflictPairs（「両方」と「縛られる側」）を同時送信すると保存を拒否する', function () {
+  var ctx = loadCodeGsSandbox();
+  var out = ctx.sandbox.doPost(makePostEvent({
+    action: 'save_response',
+    answers: femaleAnswers({ q6_role: ['縛る・縛られる両方に興味がある', '縛られる側に興味がある'] })
+  }));
+  var json = JSON.parse(out.getContent());
+  assert.strictEqual(json.ok, false);
+  assert.ok(json.invalidCombinations.indexOf('Q6:conflict_pair') !== -1, JSON.stringify(json.invalidCombinations));
+});
+
+test('Q20Dの「回答しない」とQ20Aを同時送信すると保存を拒否する', function () {
+  var ctx = loadCodeGsSandbox();
+  var out = ctx.sandbox.doPost(makePostEvent({
+    action: 'save_response',
+    answers: maleGatePassedAnswers({ q20a: ['ユニフォーム姿のまま格好よく縛られたい'], q20d: ['回答しない'] })
+  }));
+  var json = JSON.parse(out.getContent());
+  assert.strictEqual(json.ok, false);
+  assert.ok(json.invalidCombinations.indexOf('Q20:cross_exclusive') !== -1, JSON.stringify(json.invalidCombinations));
+});
+
+test('フロントで成立する正常な回答（矛盾・欠落なし）は問題なく保存される', function () {
+  var ctx = loadCodeGsSandbox();
+  var out = ctx.sandbox.doPost(makePostEvent({
+    action: 'save_response',
+    answers: maleGatePassedAnswers({ q5_enjoy: ['縄の感触を感じたい'], q6_role: ['縛られる側に興味がある'], q20d: ['縄だけを楽しみたい'] })
+  }));
+  var json = JSON.parse(out.getContent());
+  assert.strictEqual(json.ok, true, JSON.stringify(json));
 });
 
 /* ── 公開集計への影響 ── */

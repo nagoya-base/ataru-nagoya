@@ -2263,6 +2263,20 @@ var FullSurveySchema = {
       "q20SubGroup": null
     }
   },
+  "q20CrossExclusive": {
+    "group": "Q20",
+    "exclusiveValues": [
+      "まだ分からない",
+      "回答しない"
+    ],
+    "memberQuestionIds": [
+      "Q20A",
+      "Q20B",
+      "Q20C",
+      "Q20D"
+    ],
+    "note": "Q20D の「まだ分からない」「回答しない」はQ20A〜Dの他の全選択肢と同時選択不可。"
+  },
   "responsesManagementColumns": [
     {
       "name": "response_id",

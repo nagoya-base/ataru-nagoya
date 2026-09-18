@@ -9,9 +9,15 @@
  * 保存前に破棄する。性自認分岐・Q15分岐・Q4低関心分岐を個別に手書きしない
  * （schemaのconditionsを評価するだけで、あらゆる分岐に同じロジックで対応する）。
  *
- * 公開Web Appは匿名で誰でもPOSTできるため、ブラウザUIの必須バリデーションだけに
- * 依存しない。到達した設問のうち required:true の設問が未回答のままでは保存しない
- * （buildStorageRow()の戻り値のvalid/missingRequiredで呼び出し側が判定する）。
+ * 公開Web Appは匿名で誰でもPOSTできるため、ブラウザUIのバリデーションだけに依存しない。
+ * 以下はすべてschema定義から機械的に再検証し、フロントで成立しない回答状態を保存しない
+ * （PR #110レビュー対応）。
+ *  - 到達した設問のうち required:true の設問が未回答
+ *  - 「その他」等のトリガー選択肢を選んだのに対応する自由記述（freeTextFields）が空
+ *  - exclusiveOptions（例: Q5の「回答しない」）を、他の通常選択肢と同時選択している
+ *  - conflictPairs（例: Q6の「両方」と「縛られる側」）を同時選択している
+ *  - q20CrossExclusive（Q20Dの「まだ分からない」「回答しない」とQ20A〜Cの他の選択肢の
+ *    同時選択）に違反している
  *
  * Node（テスト・sync script）とGAS（scripts/sync-survey-schema.js が埋め込んで生成する
  * gas/ataru_survey_public/ResponseNormalize.gs）の両方から同じロジックで使う。
@@ -86,6 +92,48 @@ function isFilled(question, value) {
   return question.type === 'multi' ? (Array.isArray(value) && value.length > 0) : !!value;
 }
 
+/* exclusiveOptions（例: Q5の「まだ分からない/特にない/回答しない」）は、選ばれた場合
+   他のどの選択肢とも同時選択できない（survey.jsのapplyExclusive()と同じ制約）。 */
+function violatesExclusiveOptions(question, value) {
+  if (!question.exclusiveOptions || !question.exclusiveOptions.length || !Array.isArray(value)) return false;
+  var hasExclusive = value.some(function (v) { return question.exclusiveOptions.indexOf(v) !== -1; });
+  return hasExclusive && value.length > 1;
+}
+
+/* conflictPairs（例: Q6の「縛る・縛られる両方」と「縛られる側」）は、ペア単位で
+   同時選択できない（survey.jsのapplyConflictPairs()と同じ制約）。 */
+function violatesConflictPairs(question, value) {
+  if (!question.conflictPairs || !question.conflictPairs.length || !Array.isArray(value)) return false;
+  return question.conflictPairs.some(function (pair) {
+    return value.indexOf(pair[0]) !== -1 && value.indexOf(pair[1]) !== -1;
+  });
+}
+
+/* q20CrossExclusive：Q20A〜DのいずれかにexclusiveValues（「まだ分からない」「回答しない」）が
+   含まれる場合、Q20A〜Dの他のどの選択肢（他の設問・自分自身の他の値問わず）も
+   同時に選択できない（survey.jsのenforceQ20CrossExclusive()と同じ制約）。
+   どのメンバー設問がexclusiveValuesを持つかを決め打ちせず、spec（schema定義）だけから
+   汎用的に判定する。 */
+function violatesQ20CrossExclusive(schema, row) {
+  var spec = schema.q20CrossExclusive;
+  if (!spec) return false;
+  var byId = {};
+  schema.questions.forEach(function (q) { byId[q.id] = q; });
+  var memberValues = spec.memberQuestionIds.map(function (id) {
+    var q = byId[id];
+    return q ? (row[q.storageField] || []) : [];
+  });
+  var hasExclusive = memberValues.some(function (arr) {
+    return arr.some(function (v) { return spec.exclusiveValues.indexOf(v) !== -1; });
+  });
+  if (!hasExclusive) return false;
+  var nonExclusiveCount = 0;
+  memberValues.forEach(function (arr) {
+    arr.forEach(function (v) { if (spec.exclusiveValues.indexOf(v) === -1) nonExclusiveCount += 1; });
+  });
+  return nonExclusiveCount > 0;
+}
+
 /*
  * schema.questions を先頭から順に処理し、各設問のdisplayConditionを
  * 「ここまでに確定した行データ」だけを根拠に評価する。survey-schema.jsonの設問順は
@@ -94,12 +142,13 @@ function isFilled(question, value) {
  *
  * schema: 完全なschema（admin_only含む。survey-schema.json相当の全設問定義）。
  * rawAnswers: クライアントから届いた回答オブジェクト（信頼しない）。
- * 戻り値: { row, completionStage, excluded, excludedReason, valid, missingRequired }
+ * 戻り値: { row, completionStage, excluded, excludedReason, valid, missingRequired, invalidCombinations }
  */
 function buildStorageRow(schema, rawAnswers) {
   var row = {};
   var safeRaw = rawAnswers && typeof rawAnswers === 'object' ? rawAnswers : {};
   var missingRequired = [];
+  var invalidCombinations = [];
 
   schema.questions.forEach(function (q) {
     var visible = conditionEval.evaluateCondition(schema.conditions, q.displayCondition, row);
@@ -114,7 +163,12 @@ function buildStorageRow(schema, rawAnswers) {
     row[q.storageField] = value;
     (q.freeTextFields || []).forEach(function (ft) {
       var triggered = q.type === 'multi' ? (Array.isArray(value) && value.indexOf(ft.trigger) !== -1) : value === ft.trigger;
-      row[ft.field] = triggered ? clampText(safeRaw[ft.field], 2000) : '';
+      var freeTextValue = triggered ? clampText(safeRaw[ft.field], 2000) : '';
+      row[ft.field] = freeTextValue;
+      /* 「その他」等のトリガーを選んだのに自由記述が空欄なのは、survey.js側では
+         「〜を入力してください」で先へ進めない状態。GAS直POSTではこの制約も
+         再検証する（クライアント値を信用しない）。 */
+      if (triggered && !freeTextValue) missingRequired.push(ft.field);
     });
 
     /* Q12はsurvey.js（q11DerivedOptions(a).length > 1）と同じ動的条件でのみ
@@ -125,7 +179,11 @@ function buildStorageRow(schema, rawAnswers) {
     if (q.id === 'Q12') required = dynamicAllowed.length > 1;
 
     if (required && !isFilled(q, value)) missingRequired.push(q.id);
+    if (violatesExclusiveOptions(q, value)) invalidCombinations.push(q.id + ':exclusive_options');
+    if (violatesConflictPairs(q, value)) invalidCombinations.push(q.id + ':conflict_pair');
   });
+
+  if (violatesQ20CrossExclusive(schema, row)) invalidCombinations.push('Q20:cross_exclusive');
 
   var completionStage = resolveCompletionStage(schema.conditions, row);
   var excluded = row.q1_age === '17歳以下';
@@ -135,8 +193,9 @@ function buildStorageRow(schema, rawAnswers) {
     completionStage: completionStage,
     excluded: excluded,
     excludedReason: excluded ? 'underage' : '',
-    valid: missingRequired.length === 0,
-    missingRequired: missingRequired
+    valid: missingRequired.length === 0 && invalidCombinations.length === 0,
+    missingRequired: missingRequired,
+    invalidCombinations: invalidCombinations
   };
 }
 
@@ -145,5 +204,8 @@ module.exports = {
   q11DerivedOptions: q11DerivedOptions,
   normalizeQuestionValue: normalizeQuestionValue,
   resolveCompletionStage: resolveCompletionStage,
+  violatesExclusiveOptions: violatesExclusiveOptions,
+  violatesConflictPairs: violatesConflictPairs,
+  violatesQ20CrossExclusive: violatesQ20CrossExclusive,
   buildStorageRow: buildStorageRow
 };

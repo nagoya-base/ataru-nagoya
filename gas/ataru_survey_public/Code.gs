@@ -106,12 +106,17 @@ function parsePostBody_(e) {
    （clientResponseId。相関目的の参考値に過ぎない）は保存用IDとして採用しない
    （Issue #104 追加指示4）。
 
-   公開Web Appは匿名で誰でもPOSTできるため、ブラウザUIの必須バリデーション・
-   17歳以下ブロックだけに依存しない（レビュー指摘対応）。
+   公開Web Appは匿名で誰でもPOSTできるため、ブラウザUIのバリデーション・17歳以下
+   ブロックだけに依存しない（レビュー指摘対応）。
    - 17歳以下は行を追加せず保存自体を拒否する（有効回答数には含まれないだけでなく、
      未成年の回答をresponsesシートへ一切残さない）
    - 到達した設問のうちrequired:trueが未回答なら保存を拒否する
-     （buildStorageRow()がdisplayCondition・Q12の動的必須条件まで含めて判定する） */
+     （buildStorageRow()がdisplayCondition・Q12の動的必須条件まで含めて判定する）
+   - 「その他」等のトリガー選択肢を選んだのに対応する自由記述が空、exclusiveOptions
+     （例: Q5の「回答しない」）を他の選択肢と同時選択、conflictPairs（例: Q6の
+     「両方」と「縛られる側」）の同時選択、q20CrossExclusive（Q20Dの「まだ分からない」
+     等とQ20A〜Cの同時選択）のいずれかに該当する場合も保存を拒否する
+     （フロントUIでは成立しない回答状態を匿名直POSTで作れないようにする） */
 function saveResponse_(payload) {
   var normalized = buildStorageRow(FullSurveySchema, payload && payload.answers);
 
@@ -119,7 +124,7 @@ function saveResponse_(payload) {
     return { ok: false, error: 'underage_not_saved' };
   }
   if (!normalized.valid) {
-    return { ok: false, error: 'missing_required', missing: normalized.missingRequired };
+    return { ok: false, error: 'invalid_answers', missing: normalized.missingRequired, invalidCombinations: normalized.invalidCombinations };
   }
 
   var responseId = Utilities.getUuid();

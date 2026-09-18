@@ -75,8 +75,14 @@ Issue #104 で追加する、`survey.html` / `survey.js` のPOST先となる**�
 （`scripts/lib/response-normalize.js` / `ResponseNormalize.gs`）。
 
 - 到達した設問（displayConditionを満たす設問。Q12はさらにQ11の動的候補数>1の場合のみ）の
-  うち `required: true` が未回答なら保存を拒否する：
-  `{ "ok": false, "error": "missing_required", "missing": ["Q7", "Q11", ...] }`
+  うち `required: true` が未回答、または「その他」等のトリガー選択肢を選んだのに対応する
+  自由記述（freeTextFields）が空なら保存を拒否する：
+  `{ "ok": false, "error": "invalid_answers", "missing": ["Q7", "Q11", "q2_gender_other", ...], "invalidCombinations": [] }`
+- `exclusiveOptions`（例: Q5の「回答しない」を他の選択肢と同時選択）・`conflictPairs`
+  （例: Q6の「縛る・縛られる両方」と「縛られる側」の同時選択）・`q20CrossExclusive`
+  （Q20Dの「まだ分からない」「回答しない」とQ20A〜Cの同時選択）のいずれかに違反する場合も
+  保存を拒否する：
+  `{ "ok": false, "error": "invalid_answers", "missing": [], "invalidCombinations": ["Q6:conflict_pair", "Q20:cross_exclusive", ...] }`
 - `q1_age` が「17歳以下」の場合は行を一切追加せず保存を拒否する
   （responsesシートへ未成年の回答を残さない）：
   `{ "ok": false, "error": "underage_not_saved" }`
