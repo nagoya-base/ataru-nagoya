@@ -367,7 +367,13 @@ function buildDetail(effRows, schema) {
     var masked = q.type === 'single'
       ? maskSingleSelect(optionLabels, tally.counts, tally.targetCount)
       : maskMultiSelect(optionLabels, tally.counts, tally.targetCount);
-    detail[q.id] = applyHalfRule(masked, optionLabels.length);
+    var block = applyHalfRule(masked, optionLabels.length);
+    /* 設問名（label/subLabel）はこのdetailオブジェクト経由でのみ公開する。detail自体が
+       gateOpen=trueのときしかレスポンスへ含まれないため、100件以下ではQ5〜Q23の設問名も
+       一切露出しない。survey-results.js（フロント）は設問名をハードコードしない
+       （Issue #104 追加指示8・PR #110レビュー対応）。 */
+    block.label = q.subLabel ? q.label + '（' + q.subLabel + '）' : q.label;
+    detail[q.id] = block;
   });
   return detail;
 }

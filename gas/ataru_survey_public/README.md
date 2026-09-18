@@ -70,7 +70,21 @@ Issue #104 で追加する、`survey.html` / `survey.js` のPOST先となる**�
 
 `response_id` は常にサーバー側で新規生成する（`Utilities.getUuid()`）。
 `clientResponseId` は相関用の参考値に過ぎず、保存用IDとしては採用しない。
-戻り値：`{ "ok": true, "response_id": "...", "saved_at": "...", "completion_stage": "...", "excluded": false }`
+
+公開Web Appは匿名で誰でもPOSTできるため、ブラウザUIのバリデーションだけに依存しない
+（`scripts/lib/response-normalize.js` / `ResponseNormalize.gs`）。
+
+- 到達した設問（displayConditionを満たす設問。Q12はさらにQ11の動的候補数>1の場合のみ）の
+  うち `required: true` が未回答なら保存を拒否する：
+  `{ "ok": false, "error": "missing_required", "missing": ["Q7", "Q11", ...] }`
+- `q1_age` が「17歳以下」の場合は行を一切追加せず保存を拒否する
+  （responsesシートへ未成年の回答を残さない）：
+  `{ "ok": false, "error": "underage_not_saved" }`
+- Q12 / Q13-A / Q13-B（`optionsSource: "dynamic:Q11"`）は、固定の許可リストではなく
+  「その回答者が実際にQ11で選んだ値（＋「その他」の自由記述込み表示ラベル）」だけを
+  許可値として検証する（survey.jsの`q11DerivedOptions()`と同じ導出ロジックをGAS側でも使う）。
+
+成功時の戻り値：`{ "ok": true, "response_id": "...", "saved_at": "...", "completion_stage": "...", "excluded": false }`
 
 ```json
 { "action": "save_lead", "response_id": "...(任意。localStorageの値)", "x_account": "...", "email": "...", "requested_content": "..." }

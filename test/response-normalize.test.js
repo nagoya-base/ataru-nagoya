@@ -109,3 +109,89 @@ test('rawAnswersがnull/undefinedでも例外を投げず、全フィールド�
   var res = norm.buildStorageRow(schema, undefined);
   assert.strictEqual(res.row.q1_age, '');
 });
+
+/* ── 匿名直POSTによる必須未回答の蓄積防止（PR #110レビュー対応） ── */
+
+test('到達した必須設問(required:true)が未回答だとvalid=falseになり、missingRequiredにIDが入る', function () {
+  var raw = { q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある' };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.valid, false);
+  ['Q7', 'Q8', 'Q9', 'Q11', 'Q15'].forEach(function (id) {
+    assert.ok(res.missingRequired.indexOf(id) !== -1, id + ' がmissingRequiredに含まれる: ' + JSON.stringify(res.missingRequired));
+  });
+});
+
+test('非到達の必須設問はmissingRequiredに含まれない（女性はQ7〜Q26が非到達のため必須違反にならない）', function () {
+  var raw = { q1_age: '25〜29歳', q2_gender: '女性', q3_region: '東京都', q4_interest: '興味がある' };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.valid, true);
+  assert.deepStrictEqual(res.missingRequired, []);
+});
+
+test('Q15「興味はない」の男性はQ16以降が未回答でもvalid=true（Q7〜Q9・Q11・Q15が揃っていれば良い）', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q7_sports: ['野球・ソフトボール'], q8_exercise: '定期的にスポーツをしている', q9_gym: '週2〜3回',
+    q11_uniform: ['野球'], q15_gate: '興味はない'
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.valid, true, JSON.stringify(res.missingRequired));
+});
+
+test('Q11の候補が2件以上あるのにQ12が未回答だとmissingRequiredにQ12が入る（動的必須条件）', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q7_sports: ['野球・ソフトボール'], q8_exercise: '定期的にスポーツをしている', q9_gym: '週2〜3回',
+    q11_uniform: ['野球', 'サッカー'], q15_gate: '興味はない'
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.ok(res.missingRequired.indexOf('Q12') !== -1, JSON.stringify(res.missingRequired));
+});
+
+test('Q11の候補が1件のみならQ12は必須にならない（クライアントの自動補完と同じ挙動）', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q7_sports: ['野球・ソフトボール'], q8_exercise: '定期的にスポーツをしている', q9_gym: '週2〜3回',
+    q11_uniform: ['野球'], q15_gate: '興味はない'
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.ok(res.missingRequired.indexOf('Q12') === -1, JSON.stringify(res.missingRequired));
+});
+
+/* ── Q12/Q13-A/Q13-B: Q11由来の動的許可リストでの検証（PR #110レビュー対応） ── */
+
+test('q11DerivedOptions()はQ11で選んだ値をそのまま返し、「その他」は自由記述込みのラベルへ変換する', function () {
+  assert.deepStrictEqual(norm.q11DerivedOptions({ q11_uniform: ['野球', 'サッカー'] }), ['野球', 'サッカー']);
+  assert.deepStrictEqual(norm.q11DerivedOptions({ q11_uniform: ['その他'], q11_other: 'カヌー部の服' }), ['その他：カヌー部の服']);
+  assert.deepStrictEqual(norm.q11DerivedOptions({ q11_uniform: ['その他'] }), ['その他']);
+  assert.deepStrictEqual(norm.q11DerivedOptions({}), []);
+});
+
+test('Q12はQ11で実際に選んだ値のみを許可し、それ以外は空文字列に丸められる', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q11_uniform: ['野球', 'サッカー'], q12_favorite: 'ラグビー・アメフト'
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.row.q12_favorite, '', 'Q11で選んでいない値は無効化される');
+  assert.ok(res.missingRequired.indexOf('Q12') !== -1, '結果として必須未回答扱いになる');
+});
+
+test('Q12はQ11の「その他」自由記述込みラベルとの完全一致でのみ許可される', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q11_uniform: ['その他', '野球'], q11_other: 'カヌー部の服', q12_favorite: 'その他：カヌー部の服'
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.row.q12_favorite, 'その他：カヌー部の服');
+});
+
+test('Q13-A/Q13-BもQ11由来の許可リストでフィルタされる（必須ではないが範囲外の値は除外される）', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q11_uniform: ['野球'], q13a_wear_self: ['野球', 'サッカー'], q13b_wear_others: ['サッカー']
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.deepStrictEqual(res.row.q13a_wear_self, ['野球'], 'Q11で選んでいない「サッカー」は除外される');
+  assert.deepStrictEqual(res.row.q13b_wear_others, [], 'Q11で選んでいない値だけの場合は空配列になる');
+});

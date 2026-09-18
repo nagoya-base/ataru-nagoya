@@ -140,12 +140,16 @@ function buildPublicGs(schema) {
     .filter(function (q) { return q.publicationClass === 'base_public' || q.publicationClass === 'gated_public'; })
     .map(function (q) {
       return {
-        id: q.id, storageField: q.storageField, type: q.type, required: q.required,
+        id: q.id, label: q.label, subLabel: q.subLabel || null,
+        storageField: q.storageField, type: q.type, required: q.required,
         options: q.options, optionsSource: q.optionsSource || null,
         displayCondition: q.displayCondition, targetCountCondition: q.targetCountCondition,
         publicationClass: q.publicationClass, publicBlock: q.publicBlock,
         group: q.group, q20SubGroup: q.q20SubGroup
-        /* otherField・freeTextFieldsは公開系定義に含めない（自由記述本文は常にnever_public）。 */
+        /* otherField・freeTextFieldsは公開系定義に含めない（自由記述本文は常にnever_public）。
+           label/subLabelは含める：gated_publicの設問名は101件以上でのみ公開APIレスポンスへ
+           露出させ（buildDetail()参照）、survey-results.js側に設問名をハードコードしない
+           （Issue #104 追加指示8・PR #110レビュー対応）。 */
       };
     });
   var publicQuestionIds = {};

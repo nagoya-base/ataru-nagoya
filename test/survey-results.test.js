@@ -97,15 +97,15 @@ test('gateOpen=trueかつdetailがある場合、DETAIL_ORDERにあるキーだ�
     effectiveCount: 150, gateOpen: true, overviewLowN: false,
     overview: { Q1: { hidden: false, targetCount: 150, options: [], otherSmall: null }, Q3: { hidden: false, targetCount: 150, options: [], otherSmall: null }, Q4: { hidden: false, targetCount: 150, options: [], otherSmall: null } },
     detail: {
-      Q7: { hidden: false, targetCount: 60, options: [{ value: '野球・ソフトボール', count: 10, pct: 0.1667 }] },
-      Q20B: { hidden: true, targetCount: 5 }
+      Q7: { hidden: false, targetCount: 60, options: [{ value: '野球・ソフトボール', count: 10, pct: 0.1667 }], label: '現在または過去に経験したスポーツ' },
+      Q20B: { hidden: true, targetCount: 5, label: '男性向け企画で関心のある詳細内容（B. 吊り・強度）' }
     },
     suppressionApplied: false
   };
   ctx.R.renderResultData(root, data);
   var headings = findAll(root, function (el) { return el.tagName === 'H2'; }).map(textOf);
   assert.ok(headings.indexOf('詳細結果') !== -1);
-  assert.ok(headings.indexOf('現在または過去に経験したスポーツ（男性）') !== -1, 'Q7のラベルが表示される');
+  assert.ok(headings.indexOf('現在または過去に経験したスポーツ') !== -1, 'APIレスポンスのdetail.Q7.labelがそのまま見出しに使われる');
   var fullText = textOf(root);
   assert.ok(fullText.indexOf('対象回答者：60人') !== -1, 'targetCountが表示される');
   assert.ok(fullText.indexOf('分岐条件によりこの質問へ到達した人だけを分母') !== -1);
@@ -143,6 +143,17 @@ test('fetch失敗時はエラー表示になり、result-rootは表示されな�
       done();
     } catch (e) { done(e); }
   }, 10);
+});
+
+test('survey-results.jsのソース自体に、Q5〜Q23相当の詳細設問名がハードコードされていない（PR #110レビュー対応）', function () {
+  var source = fs.readFileSync(path.join(__dirname, '..', 'survey-results.js'), 'utf8');
+  /* 100件以下でも誰でも取得できる静的ファイルなので、非公開設問の存在自体（設問名）を
+     このファイル自身が知っていてはならない。survey-schema.jsonのgated_public設問の
+     labelから抜粋した固有の文言が一切含まれないことを確認する。 */
+  ['緊縛の楽しみ方', 'ユニフォーム・ウェア', 'SM・性的な責め', '緊縛・ロープの経験', '名古屋での参加可能性'].forEach(function (phrase) {
+    assert.strictEqual(source.indexOf(phrase), -1, phrase + ' がsurvey-results.jsに埋め込まれている');
+  });
+  assert.strictEqual(/DETAIL_LABELS|DETAIL_ORDER/.test(source), false, '静的なラベル・順序一覧を持たない（APIレスポンスのlabel/キー順をそのまま使う）');
 });
 
 test('APIレスポンスを正常取得した場合、init()経由でresult-rootが表示される', function (t, done) {

@@ -129,6 +129,8 @@ var PublicSurveySchema = {
   "questions": [
     {
       "id": "Q1",
+      "label": "年齢",
+      "subLabel": null,
       "storageField": "q1_age",
       "type": "single",
       "required": true,
@@ -153,6 +155,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q3",
+      "label": "居住地域",
+      "subLabel": null,
       "storageField": "q3_region",
       "type": "single",
       "required": true,
@@ -186,6 +190,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q4",
+      "label": "緊縛・ロープ表現への関心",
+      "subLabel": null,
       "storageField": "q4_interest",
       "type": "single",
       "required": true,
@@ -209,6 +215,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q5",
+      "label": "緊縛では、どんな楽しみ方に関心がありますか",
+      "subLabel": null,
       "storageField": "q5_enjoy",
       "type": "multi",
       "required": false,
@@ -238,6 +246,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q6",
+      "label": "緊縛では、どの立場に関心がありますか",
+      "subLabel": null,
       "storageField": "q6_role",
       "type": "multi",
       "required": false,
@@ -261,6 +271,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q6-A",
+      "label": "今後の企画との関わり方",
+      "subLabel": null,
       "storageField": "q6a_involvement",
       "type": "multi",
       "required": false,
@@ -284,6 +296,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q7",
+      "label": "現在または過去に経験したスポーツ",
+      "subLabel": null,
       "storageField": "q7_sports",
       "type": "multi",
       "required": true,
@@ -311,6 +325,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q8",
+      "label": "現在の運動状況",
+      "subLabel": null,
       "storageField": "q8_exercise",
       "type": "single",
       "required": true,
@@ -332,6 +348,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q9",
+      "label": "ジム・筋力トレーニング頻度",
+      "subLabel": null,
       "storageField": "q9_gym",
       "type": "single",
       "required": true,
@@ -354,6 +372,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q10",
+      "label": "スポーツ・身体づくりの動機",
+      "subLabel": null,
       "storageField": "q10_motivation",
       "type": "multi",
       "required": false,
@@ -380,6 +400,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q11",
+      "label": "好きなユニフォーム・ウェア",
+      "subLabel": null,
       "storageField": "q11_uniform",
       "type": "multi",
       "required": true,
@@ -410,6 +432,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q12",
+      "label": "最も好きなユニフォーム",
+      "subLabel": null,
       "storageField": "q12_favorite",
       "type": "single",
       "required": true,
@@ -424,6 +448,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q13",
+      "label": "ユニフォームの楽しみ方",
+      "subLabel": null,
       "storageField": "q13_enjoy",
       "type": "multi",
       "required": false,
@@ -451,6 +477,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q13-A",
+      "label": "自分で着たいユニフォーム",
+      "subLabel": null,
       "storageField": "q13a_wear_self",
       "type": "multi",
       "required": false,
@@ -465,6 +493,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q13-B",
+      "label": "人に着てほしい・見たいユニフォーム",
+      "subLabel": null,
       "storageField": "q13b_wear_others",
       "type": "multi",
       "required": false,
@@ -479,6 +509,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q14A",
+      "label": "自分に当てはまる特徴",
+      "subLabel": null,
       "storageField": "q14a_self",
       "type": "multi",
       "required": false,
@@ -507,6 +539,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q14B",
+      "label": "相手の見た目についての好み",
+      "subLabel": null,
       "storageField": "q14b_pref",
       "type": "multi",
       "required": false,
@@ -535,6 +569,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q15",
+      "label": "続く企画についての質問へ回答しますか",
+      "subLabel": null,
       "storageField": "q15_gate",
       "type": "single",
       "required": true,
@@ -553,6 +589,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q16",
+      "label": "興味のある企画",
+      "subLabel": null,
       "storageField": "q16_interest",
       "type": "multi",
       "required": false,
@@ -579,6 +617,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q17",
+      "label": "緊縛・ロープの経験",
+      "subLabel": null,
       "storageField": "q17_experience",
       "type": "multi",
       "required": true,
@@ -604,6 +644,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q18",
+      "label": "ユニフォーム姿と緊縛を組み合わせた撮影",
+      "subLabel": null,
       "storageField": "q18_combo",
       "type": "single",
       "required": true,
@@ -625,6 +667,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q19",
+      "label": "興味のある緊縛範囲",
+      "subLabel": null,
       "storageField": "q19_range",
       "type": "multi",
       "required": false,
@@ -651,6 +695,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q20A",
+      "label": "男性向け企画で関心のある詳細内容",
+      "subLabel": "A. ユニフォーム・作品表現",
       "storageField": "q20a",
       "type": "multi",
       "required": false,
@@ -673,6 +719,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q20B",
+      "label": "男性向け企画で関心のある詳細内容",
+      "subLabel": "B. 吊り・強度",
       "storageField": "q20b",
       "type": "multi",
       "required": false,
@@ -690,6 +738,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q20C",
+      "label": "男性向け企画で関心のある詳細内容",
+      "subLabel": "C. SM・性的な責め",
       "storageField": "q20c",
       "type": "multi",
       "required": false,
@@ -708,6 +758,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q20D",
+      "label": "男性向け企画で関心のある詳細内容",
+      "subLabel": "D. その他",
       "storageField": "q20d",
       "type": "multi",
       "required": false,
@@ -728,6 +780,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q21",
+      "label": "体験時に重視する条件",
+      "subLabel": null,
       "storageField": "q21_conditions",
       "type": "multi",
       "required": false,
@@ -757,6 +811,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q22",
+      "label": "名古屋での参加可能性",
+      "subLabel": null,
       "storageField": "q22_visit",
       "type": "single",
       "required": true,
@@ -779,6 +835,8 @@ var PublicSurveySchema = {
     },
     {
       "id": "Q23",
+      "label": "参加しやすい曜日・時間",
+      "subLabel": null,
       "storageField": "q23_schedule",
       "type": "multi",
       "required": false,

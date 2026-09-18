@@ -20,43 +20,14 @@ window.__SurveyResults = {};
      デプロイ後に実際のURLへ置き換えること（手動設定が必要）。 */
   var GAS_RESULTS_ENDPOINT = 'https://script.google.com/macros/s/REPLACE_WITH_DEPLOYED_ATARU_SURVEY_PUBLIC_ID/exec';
 
-  /* 101件以上で公開API側が返し得る詳細設問の表示ラベル。公開集計APIレスポンス自体には
-     ラベルを含めない（レスポンスを構造的に最小化するため）。この一覧はgateOpen=trueの
-     ときにAPIが実際に返したキーだけを描画するために使う（未知のキーを推測して表示しない）。
-     survey-schema.json（正本）のlabel/subLabelと同じ文言。 */
-  var DETAIL_ORDER = [
-    'Q5', 'Q6', 'Q6-A',
-    'Q7', 'Q8', 'Q9', 'Q10', 'Q11', 'Q12', 'Q13', 'Q13-A', 'Q13-B', 'Q14A', 'Q14B',
-    'Q15', 'Q16', 'Q17', 'Q18', 'Q19', 'Q20A', 'Q20B', 'Q20C', 'Q20D', 'Q21', 'Q22', 'Q23'
-  ];
-  var DETAIL_LABELS = {
-    'Q5': '緊縛では、どんな楽しみ方に関心がありますか',
-    'Q6': '緊縛では、どの立場に関心がありますか',
-    'Q6-A': '今後の企画との関わり方',
-    'Q7': '現在または過去に経験したスポーツ（男性）',
-    'Q8': '現在の運動状況（男性）',
-    'Q9': 'ジム・筋力トレーニング頻度（男性）',
-    'Q10': 'スポーツ・身体づくりの動機（男性）',
-    'Q11': '好きなユニフォーム・ウェア（男性）',
-    'Q12': '最も好きなユニフォーム（男性）',
-    'Q13': 'ユニフォームの楽しみ方（男性）',
-    'Q13-A': '自分で着たいユニフォーム（男性）',
-    'Q13-B': '人に着てほしい・見たいユニフォーム（男性）',
-    'Q14A': '自分に当てはまる特徴（男性）',
-    'Q14B': '相手の見た目についての好み（男性）',
-    'Q15': '続く企画への回答意向',
-    'Q16': '興味のある企画',
-    'Q17': '緊縛・ロープの経験',
-    'Q18': 'ユニフォーム姿と緊縛を組み合わせた撮影',
-    'Q19': '興味のある緊縛範囲',
-    'Q20A': '男性向け企画で関心のある詳細内容（A. ユニフォーム・作品表現）',
-    'Q20B': '男性向け企画で関心のある詳細内容（B. 吊り・強度）',
-    'Q20C': '男性向け企画で関心のある詳細内容（C. SM・性的な責め）',
-    'Q20D': '男性向け企画で関心のある詳細内容（D. その他）',
-    'Q21': '体験時に重視する条件',
-    'Q22': '名古屋での参加可能性',
-    'Q23': '参加しやすい曜日・時間'
-  };
+  /* 詳細設問の表示ラベル・表示順は、このファイルにハードコードしない。
+     公開集計APIは有効回答数が100件以下の間は`detail`キー自体をレスポンスに含めず、
+     101件を超えてから初めて `detail.Q5.label` のように設問ごとのラベルを返す
+     （scripts/lib/public-aggregate.js の buildDetail() 参照）。そのため、100件以下の
+     クライアントに対しては設問名を推測できる情報がこのスクリプト自身にも一切存在しない
+     （Issue #104 追加指示8・PR #110レビュー対応）。表示順は `data.detail` オブジェクトの
+     キー挿入順（=schemaのQ5〜Q23の定義順。buildDetail()がschema.questionsを順に走査して
+     組み立てるため）をそのまま使う。 */
 
   function h(tag, props) {
     var node = document.createElement(tag);
@@ -111,8 +82,7 @@ window.__SurveyResults = {};
   }
 
   function renderDetailBlock(id, block) {
-    var label = DETAIL_LABELS[id] || id;
-    var section = h('div', { class: 'q-block' }, h('h2', { text: label }));
+    var section = h('div', { class: 'q-block' }, h('h2', { text: block.label || id }));
     if (block.hidden) {
       section.appendChild(h('p', { class: 'hidden-note', text: 'この設問は、まだ内訳を公開できる人数に達していません。' }));
       return section;
@@ -153,8 +123,9 @@ window.__SurveyResults = {};
 
     if (data.detail) {
       var detailWrap = h('div', { class: 'card', style: 'margin-top:1rem;padding:1.5rem;' }, h('h2', { text: '詳細結果' }));
-      DETAIL_ORDER.forEach(function (id) {
-        if (!data.detail[id]) return;
+      /* data.detail のキー順は公開API側（buildDetail()）がschemaの定義順で組み立てたもの。
+         フロント側で表示順を別途持たない。 */
+      Object.keys(data.detail).forEach(function (id) {
         detailWrap.appendChild(renderDetailBlock(id, data.detail[id]));
       });
       root.appendChild(detailWrap);

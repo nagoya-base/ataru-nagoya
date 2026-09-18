@@ -104,9 +104,24 @@ function parsePostBody_(e) {
 /* ── 回答保存（doPost action=save_response） ──
    response_idは常にサーバー側で新規生成する。クライアントが送ってきた値
    （clientResponseId。相関目的の参考値に過ぎない）は保存用IDとして採用しない
-   （Issue #104 追加指示4）。 */
+   （Issue #104 追加指示4）。
+
+   公開Web Appは匿名で誰でもPOSTできるため、ブラウザUIの必須バリデーション・
+   17歳以下ブロックだけに依存しない（レビュー指摘対応）。
+   - 17歳以下は行を追加せず保存自体を拒否する（有効回答数には含まれないだけでなく、
+     未成年の回答をresponsesシートへ一切残さない）
+   - 到達した設問のうちrequired:trueが未回答なら保存を拒否する
+     （buildStorageRow()がdisplayCondition・Q12の動的必須条件まで含めて判定する） */
 function saveResponse_(payload) {
   var normalized = buildStorageRow(FullSurveySchema, payload && payload.answers);
+
+  if (normalized.excluded && normalized.excludedReason === 'underage') {
+    return { ok: false, error: 'underage_not_saved' };
+  }
+  if (!normalized.valid) {
+    return { ok: false, error: 'missing_required', missing: normalized.missingRequired };
+  }
+
   var responseId = Utilities.getUuid();
   var savedAt = new Date().toISOString();
 

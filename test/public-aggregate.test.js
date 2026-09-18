@@ -197,6 +197,13 @@ test('詳細ブロックにはtargetCount（到達対象者数）が含まれる
   assert.strictEqual(typeof result.detail.Q7.targetCount, 'number');
 });
 
+test('101件以上のdetailブロックにはAPI側で組み立てたlabel（Q20はsubLabel込み）が含まれ、survey-results.js側で別途ラベルを持つ必要がない', function () {
+  var rows = rowsOf(150);
+  var result = pub.buildPublicResult(rows, schema);
+  assert.strictEqual(result.detail.Q7.label, '現在または過去に経験したスポーツ');
+  assert.strictEqual(result.detail.Q20C.label, '男性向け企画で関心のある詳細内容（C. SM・性的な責め）');
+});
+
 test('低N（大部分が5人未満マスキング）の場合、overviewLowNフラグが立つ', function () {
   var rows = rowsOf(2, { q1_age: '25〜29歳', q3_region: '東京都', q4_interest: '興味がある' })
     .concat(rowsOf(1, { q1_age: '30〜34歳', q3_region: '関西', q4_interest: '苦手' }));
