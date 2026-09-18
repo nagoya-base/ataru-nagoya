@@ -1,0 +1,10 @@
+{
+  "name": "ataru-nagoya",
+  "private": true,
+  "description": "ataru-nagoya サイト・アンケートスキーマ・管理者ダッシュボードのテスト/同期スクリプト（依存パッケージなし）",
+  "scripts": {
+    "test": "node --test",
+    "sync": "node scripts/sync-survey-schema.js",
+    "sync:check": "node scripts/sync-survey-schema.js --check"
+  }
+}

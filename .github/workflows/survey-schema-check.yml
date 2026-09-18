@@ -1,0 +1,32 @@
+name: survey-schema-check
+
+on:
+  pull_request:
+    paths:
+      - 'survey-schema.json'
+      - 'survey.js'
+      - 'survey.html'
+      - 'scripts/**'
+      - 'schema/**'
+      - 'generated/**'
+      - 'gas/ataru_survey_admin/**'
+      - 'test/**'
+      - '.github/workflows/survey-schema-check.yml'
+  push:
+    branches: [main]
+
+jobs:
+  schema-sync-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify survey-schema.json generates no diff (sync check)
+        run: node scripts/sync-survey-schema.js --check
+
+      - name: Run tests (schema / sync / targetCount / crossTargetCount / privacy / admin read-only / front consistency)
+        run: node --test

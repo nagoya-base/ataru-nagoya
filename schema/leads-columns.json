@@ -1,0 +1,49 @@
+{
+  "$notice": "AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.\n生成元: survey-schema.json\n再生成: node scripts/sync-survey-schema.js\nこのファイルを直接編集しても、次回の同期で上書きされる。",
+  "sheetName": "leads",
+  "note": "responsesとは物理的に別シート。公開系定義（survey-schema.public.gs）からは参照できない。",
+  "columns": [
+    {
+      "name": "lead_id",
+      "type": "string",
+      "required": true,
+      "description": "連絡先レコードの一意ID。"
+    },
+    {
+      "name": "response_id",
+      "type": "string",
+      "required": false,
+      "description": "紐付けられたresponse_id。未紐付けの再訪リードは空欄可。"
+    },
+    {
+      "name": "received_at",
+      "type": "datetime",
+      "required": true,
+      "description": "連絡先受信時刻（ISO8601）。"
+    },
+    {
+      "name": "x_account",
+      "type": "string",
+      "required": false,
+      "description": "Xアカウント（任意）。"
+    },
+    {
+      "name": "email",
+      "type": "string",
+      "required": false,
+      "description": "メールアドレス（任意）。"
+    },
+    {
+      "name": "requested_content",
+      "type": "string",
+      "required": false,
+      "description": "希望内容（開催案内／個別相談／両方）。"
+    },
+    {
+      "name": "link_status",
+      "type": "string",
+      "required": true,
+      "description": "linked または unlinked。"
+    }
+  ]
+}

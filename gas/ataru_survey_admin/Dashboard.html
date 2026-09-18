@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ataru-nagoya 管理者ダッシュボード</title>
+  <?!= include('DashboardStyles'); ?>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="brand">ATARU-NAGOYA / 管理者専用・非公開・読み取り専用</p>
+      <h1>アンケート集計ダッシュボード</h1>
+      <p class="loading" id="loading">読み込み中…</p>
+      <p class="error" id="load-error" hidden></p>
+    </header>
+
+    <section id="section-summary" class="card" hidden>
+      <h2>基本</h2>
+      <div class="stat-row" id="stat-row"></div>
+      <div id="stage-counts"></div>
+    </section>
+
+    <section id="section-simple" class="card" hidden>
+      <h2>単純集計（Q1〜Q26）</h2>
+      <p class="hint">5人未満マスキングは適用していません（管理者専用）。各カードの対象回答者数（targetCount）は、その設問に到達し得た有効回答者数です。</p>
+      <div id="simple-cards"></div>
+    </section>
+
+    <section id="section-cross" class="card" hidden>
+      <h2>固定クロス集計</h2>
+      <p class="hint">crossTargetCountは、両軸の到達条件を両方満たす有効回答者数です（全有効回答数ではありません）。</p>
+      <div id="fixed-cross-tables"></div>
+    </section>
+
+    <section id="section-cross-axis" class="card" hidden>
+      <h2>設問別クロス集計（年代・地域・緊縛関心・立場・運動状況・ジム頻度）</h2>
+      <div id="axis-cross-accordion"></div>
+    </section>
+
+    <section id="section-leads" class="card" hidden>
+      <h2>連絡先（集計値のみ）</h2>
+      <p class="hint">Xアカウント・メールアドレスは表示しません。回答内容とのクロス集計も行いません。</p>
+      <div id="leads-summary"></div>
+    </section>
+
+    <section id="section-freetext" class="card" hidden>
+      <details>
+        <summary>自由記述（Q27・各設問の「その他」本文）</summary>
+        <div id="freetext-body"></div>
+      </details>
+    </section>
+  </div>
+  <?!= include('DashboardScript'); ?>
+</body>
+</html>

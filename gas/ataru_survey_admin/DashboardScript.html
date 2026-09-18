@@ -1,0 +1,169 @@
+<script>
+  /* 読み取り専用ダッシュボードのクライアント側描画。
+     google.script.run はすべて getDashboardData() の呼び出しのみで、
+     サーバー側へ値を書き戻すAPIは呼ばない（実装もしていない）。 */
+  (function () {
+    'use strict';
+
+    function el(tag, props) {
+      var node = document.createElement(tag);
+      var children = Array.prototype.slice.call(arguments, 2);
+      if (props) Object.keys(props).forEach(function (k) {
+        if (k === 'class') node.className = props[k];
+        else if (k === 'text') node.textContent = props[k];
+        else node.setAttribute(k, props[k]);
+      });
+      children.forEach(function (c) { if (c) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+      return node;
+    }
+
+    function badgeFor(publicationClass) {
+      var map = { base_public: ['badge-base', '公開(base)'], gated_public: ['badge-gated', '公開(gated)'], admin_only: ['badge-admin', '管理者専用'] };
+      var m = map[publicationClass];
+      if (!m) return null;
+      return el('span', { class: 'badge ' + m[0], text: m[1] });
+    }
+
+    function renderSummary(summary) {
+      var row = document.getElementById('stat-row');
+      [
+        ['総保存回答数', summary.totalSaved],
+        ['有効回答数', summary.effectiveCount],
+        ['除外回答数', summary.excludedCount],
+        ['最終回答日時', summary.lastResponseAt ? new Date(summary.lastResponseAt).toLocaleString('ja-JP') : '-']
+      ].forEach(function (pair) {
+        row.appendChild(el('div', { class: 'stat-box' }, el('div', { class: 'num', text: String(pair[1]) }), el('div', { class: 'label', text: pair[0] })));
+      });
+
+      var stageBox = document.getElementById('stage-counts');
+      var table = el('table', { class: 'agg-table' }, el('tr', {}, el('th', { text: 'completion_stage' }), el('th', { text: '件数' })));
+      Object.keys(summary.completionStageCounts).forEach(function (stage) {
+        table.appendChild(el('tr', {}, el('td', { text: stage }), el('td', { text: String(summary.completionStageCounts[stage]) })));
+      });
+      stageBox.appendChild(table);
+
+      var dateTable = el('table', { class: 'agg-table' }, el('tr', {}, el('th', { text: '日付' }), el('th', { text: '回答数' })));
+      Object.keys(summary.byDate).sort().forEach(function (d) {
+        dateTable.appendChild(el('tr', {}, el('td', { text: d }), el('td', { text: String(summary.byDate[d]) })));
+      });
+      stageBox.appendChild(dateTable);
+    }
+
+    function renderSimpleAggregates(simpleAggregates, questions) {
+      var container = document.getElementById('simple-cards');
+      questions.forEach(function (q) {
+        var agg = simpleAggregates[q.id];
+        if (!agg) return;
+        var card = el('div', { class: 'q-card' });
+        var title = el('h3', {}, q.id + '. ' + q.label + (q.subLabel ? '（' + q.subLabel + '）' : ''));
+        var badge = badgeFor(q.publicationClass);
+        if (badge) title.appendChild(badge);
+        card.appendChild(title);
+        card.appendChild(el('div', { class: 'target', text: '対象回答者数（targetCount）: ' + agg.targetCount + '人' }));
+        var table = el('table', { class: 'agg-table' }, el('tr', {}, el('th', { text: '選択肢' }), el('th', { text: '人数' }), el('th', { text: '割合' })));
+        Object.keys(agg.counts).forEach(function (opt) {
+          var count = agg.counts[opt];
+          var pct = agg.targetCount ? Math.round((count / agg.targetCount) * 1000) / 10 : 0;
+          table.appendChild(el('tr', {}, el('td', { text: opt }), el('td', { text: String(count) }), el('td', { text: pct + '%' })));
+        });
+        card.appendChild(table);
+        container.appendChild(card);
+      });
+    }
+
+    function renderCrossTable(label, crossTargetCount, cells) {
+      var wrap = el('div', { class: 'cross-table-wrap' });
+      wrap.appendChild(el('h3', { text: label + '（crossTargetCount: ' + crossTargetCount + '人）' }));
+      var colKeys = {};
+      Object.keys(cells).forEach(function (a) { Object.keys(cells[a]).forEach(function (b) { colKeys[b] = true; }); });
+      var cols = Object.keys(colKeys);
+      var table = el('table', { class: 'agg-table' });
+      var headRow = el('tr', {}, el('th', { text: '' }));
+      cols.forEach(function (c) { headRow.appendChild(el('th', { text: c })); });
+      table.appendChild(headRow);
+      Object.keys(cells).forEach(function (a) {
+        var row = el('tr', {}, el('td', { text: a }));
+        cols.forEach(function (c) { row.appendChild(el('td', { text: String(cells[a][c] || 0) })); });
+        table.appendChild(row);
+      });
+      wrap.appendChild(table);
+      return wrap;
+    }
+
+    function renderFixedCrossTabs(fixed) {
+      var container = document.getElementById('fixed-cross-tables');
+      fixed.forEach(function (t) {
+        container.appendChild(renderCrossTable(t.label, t.crossTargetCount, t.cells));
+      });
+    }
+
+    function renderAxisCrossTabs(byAxis, questions) {
+      var container = document.getElementById('axis-cross-accordion');
+      var byQuestion = {};
+      byAxis.forEach(function (t) {
+        if (!byQuestion[t.questionId]) byQuestion[t.questionId] = [];
+        byQuestion[t.questionId].push(t);
+      });
+      var qLabel = {};
+      questions.forEach(function (q) { qLabel[q.id] = q.label; });
+      Object.keys(byQuestion).forEach(function (qId) {
+        var details = el('details', { class: 'accordion-item' });
+        details.appendChild(el('summary', { text: qId + '. ' + (qLabel[qId] || '') }));
+        byQuestion[qId].forEach(function (t) {
+          details.appendChild(renderCrossTable(qId + ' × ' + t.axisId, t.crossTargetCount, t.cells));
+        });
+        container.appendChild(details);
+      });
+    }
+
+    function renderLeadsSummary(leadsSummary) {
+      var box = document.getElementById('leads-summary');
+      var row = el('div', { class: 'stat-row' });
+      [['連絡先件数', leadsSummary.total], ['linked件数', leadsSummary.linked], ['unlinked件数', leadsSummary.unlinked]].forEach(function (pair) {
+        row.appendChild(el('div', { class: 'stat-box' }, el('div', { class: 'num', text: String(pair[1]) }), el('div', { class: 'label', text: pair[0] })));
+      });
+      box.appendChild(row);
+      var table = el('table', { class: 'agg-table' }, el('tr', {}, el('th', { text: '希望内容' }), el('th', { text: '件数' })));
+      Object.keys(leadsSummary.byRequestedContent).forEach(function (k) {
+        table.appendChild(el('tr', {}, el('td', { text: k }), el('td', { text: String(leadsSummary.byRequestedContent[k]) })));
+      });
+      box.appendChild(table);
+    }
+
+    function renderFreeText(freeText) {
+      var box = document.getElementById('freetext-body');
+      box.appendChild(el('h3', { text: 'Q27（' + freeText.q27Messages.length + '件）' }));
+      box.appendChild(el('pre', { class: 'freetext-list', text: freeText.q27Messages.join('\n---\n') || '（なし）' }));
+      Object.keys(freeText.otherFreeText).forEach(function (key) {
+        var values = freeText.otherFreeText[key];
+        box.appendChild(el('h3', { text: key + '（' + values.length + '件）' }));
+        box.appendChild(el('pre', { class: 'freetext-list', text: values.join('\n---\n') }));
+      });
+    }
+
+    function showAll() {
+      ['section-summary', 'section-simple', 'section-cross', 'section-cross-axis', 'section-leads', 'section-freetext']
+        .forEach(function (id) { document.getElementById(id).hidden = false; });
+      document.getElementById('loading').hidden = true;
+    }
+
+    function onSuccess(data) {
+      renderSummary(data.summary);
+      renderSimpleAggregates(data.simpleAggregates, data.questions);
+      renderFixedCrossTabs(data.crossTabs.fixed);
+      renderAxisCrossTabs(data.crossTabs.byAxis, data.questions);
+      renderLeadsSummary(data.leadsSummary);
+      renderFreeText(data.freeText);
+      showAll();
+    }
+
+    function onFailure(err) {
+      document.getElementById('loading').hidden = true;
+      var e = document.getElementById('load-error');
+      e.hidden = false;
+      e.textContent = '読み込みに失敗しました: ' + (err && err.message ? err.message : err);
+    }
+
+    google.script.run.withSuccessHandler(onSuccess).withFailureHandler(onFailure).getDashboardData();
+  })();
+</script>

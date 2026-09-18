@@ -1,0 +1,558 @@
+{
+  "$notice": "AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.\n生成元: survey-schema.json\n再生成: node scripts/sync-survey-schema.js\nこのファイルを直接編集しても、次回の同期で上書きされる。",
+  "sheetName": "responses",
+  "multiValueDelimiter": "|",
+  "hiddenQuestionPolicy": "表示条件(displayCondition)を満たさない設問の値は保存しない。空文字列（single/text）または空配列（multi）として保存する。",
+  "contradictionPolicy": "Q20C（性的な責め等）とQ21の選択肢「性的な接触なし」は論理的な矛盾として補正・除外しない。両方をそのまま保存し、集計時も除外しない。",
+  "columns": [
+    {
+      "name": "response_id",
+      "type": "string",
+      "required": true,
+      "questionId": null,
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "匿名回答ごとの一意ID。個人識別情報ではない。"
+    },
+    {
+      "name": "survey_version",
+      "type": "string",
+      "required": true,
+      "questionId": null,
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "回答時点の survey-schema.json の surveyVersion。"
+    },
+    {
+      "name": "saved_at",
+      "type": "datetime",
+      "required": true,
+      "questionId": null,
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "GAS保存成功時刻（ISO8601）。"
+    },
+    {
+      "name": "completion_stage",
+      "type": "string",
+      "required": true,
+      "questionId": null,
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "到達した最終段階（例: underage_end / female_other_end / gate_not_interested / completed 等）。"
+    },
+    {
+      "name": "excluded",
+      "type": "boolean",
+      "required": true,
+      "questionId": null,
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "true の場合、有効集計・公開集計から除外する。行自体は削除しない。"
+    },
+    {
+      "name": "excluded_reason",
+      "type": "string",
+      "required": false,
+      "questionId": null,
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "excluded=true の理由（テスト回答・異常回答など）。"
+    },
+    {
+      "name": "q1_age",
+      "type": "single",
+      "required": true,
+      "questionId": "Q1",
+      "publicationClass": "base_public",
+      "multiValue": false,
+      "description": "年齢"
+    },
+    {
+      "name": "q2_gender",
+      "type": "single",
+      "required": true,
+      "questionId": "Q2",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "性自認"
+    },
+    {
+      "name": "q2_gender_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q2",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q2 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q3_region",
+      "type": "single",
+      "required": true,
+      "questionId": "Q3",
+      "publicationClass": "base_public",
+      "multiValue": false,
+      "description": "居住地域"
+    },
+    {
+      "name": "q3_country",
+      "type": "string",
+      "required": false,
+      "questionId": "Q3",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q3 「海外」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q3_region_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q3",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q3 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q4_interest",
+      "type": "single",
+      "required": true,
+      "questionId": "Q4",
+      "publicationClass": "base_public",
+      "multiValue": false,
+      "description": "緊縛・ロープ表現への関心"
+    },
+    {
+      "name": "q5_enjoy",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q5",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "緊縛では、どんな楽しみ方に関心がありますか"
+    },
+    {
+      "name": "q5_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q5",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q5 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q6_role",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q6",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "緊縛では、どの立場に関心がありますか"
+    },
+    {
+      "name": "q6_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q6",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q6 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q6a_involvement",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q6-A",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "今後の企画との関わり方"
+    },
+    {
+      "name": "q6a_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q6-A",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q6-A 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q7_sports",
+      "type": "multi",
+      "required": true,
+      "questionId": "Q7",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "現在または過去に経験したスポーツ"
+    },
+    {
+      "name": "q7_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q7",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q7 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q8_exercise",
+      "type": "single",
+      "required": true,
+      "questionId": "Q8",
+      "publicationClass": "gated_public",
+      "multiValue": false,
+      "description": "現在の運動状況"
+    },
+    {
+      "name": "q8_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q8",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q8 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q9_gym",
+      "type": "single",
+      "required": true,
+      "questionId": "Q9",
+      "publicationClass": "gated_public",
+      "multiValue": false,
+      "description": "ジム・筋力トレーニング頻度"
+    },
+    {
+      "name": "q9_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q9",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q9 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q10_motivation",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q10",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "スポーツ・身体づくりの動機"
+    },
+    {
+      "name": "q10_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q10",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q10 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q11_uniform",
+      "type": "multi",
+      "required": true,
+      "questionId": "Q11",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "好きなユニフォーム・ウェア"
+    },
+    {
+      "name": "q11_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q11",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q11 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q12_favorite",
+      "type": "single",
+      "required": true,
+      "questionId": "Q12",
+      "publicationClass": "gated_public",
+      "multiValue": false,
+      "description": "最も好きなユニフォーム"
+    },
+    {
+      "name": "q13_enjoy",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q13",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "ユニフォームの楽しみ方"
+    },
+    {
+      "name": "q13_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q13",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q13 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q13a_wear_self",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q13-A",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "自分で着たいユニフォーム"
+    },
+    {
+      "name": "q13b_wear_others",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q13-B",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "人に着てほしい・見たいユニフォーム"
+    },
+    {
+      "name": "q14a_self",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q14A",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "自分に当てはまる特徴"
+    },
+    {
+      "name": "q14a_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q14A",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q14A 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q14b_pref",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q14B",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "相手の見た目についての好み"
+    },
+    {
+      "name": "q14b_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q14B",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q14B 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q15_gate",
+      "type": "single",
+      "required": true,
+      "questionId": "Q15",
+      "publicationClass": "gated_public",
+      "multiValue": false,
+      "description": "続く企画についての質問へ回答しますか"
+    },
+    {
+      "name": "q16_interest",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q16",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "興味のある企画"
+    },
+    {
+      "name": "q16_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q16",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q16 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q17_experience",
+      "type": "multi",
+      "required": true,
+      "questionId": "Q17",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "緊縛・ロープの経験"
+    },
+    {
+      "name": "q17_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q17",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q17 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q18_combo",
+      "type": "single",
+      "required": true,
+      "questionId": "Q18",
+      "publicationClass": "gated_public",
+      "multiValue": false,
+      "description": "ユニフォーム姿と緊縛を組み合わせた撮影"
+    },
+    {
+      "name": "q19_range",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q19",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "興味のある緊縛範囲"
+    },
+    {
+      "name": "q19_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q19",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q19 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q20a",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q20A",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "男性向け企画で関心のある詳細内容（A. ユニフォーム・作品表現）"
+    },
+    {
+      "name": "q20b",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q20B",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "男性向け企画で関心のある詳細内容（B. 吊り・強度）"
+    },
+    {
+      "name": "q20c",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q20C",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "男性向け企画で関心のある詳細内容（C. SM・性的な責め）"
+    },
+    {
+      "name": "q20d",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q20D",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "男性向け企画で関心のある詳細内容（D. その他）"
+    },
+    {
+      "name": "q20d_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q20D",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q20D 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q21_conditions",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q21",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "体験時に重視する条件"
+    },
+    {
+      "name": "q21_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q21",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q21 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q22_visit",
+      "type": "single",
+      "required": true,
+      "questionId": "Q22",
+      "publicationClass": "gated_public",
+      "multiValue": false,
+      "description": "名古屋での参加可能性"
+    },
+    {
+      "name": "q23_schedule",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q23",
+      "publicationClass": "gated_public",
+      "multiValue": true,
+      "description": "参加しやすい曜日・時間"
+    },
+    {
+      "name": "q23_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q23",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q23 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q24_price",
+      "type": "single",
+      "required": true,
+      "questionId": "Q24",
+      "publicationClass": "admin_only",
+      "multiValue": false,
+      "description": "初心者向け短時間体験の参加しやすい価格"
+    },
+    {
+      "name": "q25_intent",
+      "type": "single",
+      "required": true,
+      "questionId": "Q25",
+      "publicationClass": "admin_only",
+      "multiValue": false,
+      "description": "現在の参加意向"
+    },
+    {
+      "name": "q26_format",
+      "type": "multi",
+      "required": false,
+      "questionId": "Q26",
+      "publicationClass": "admin_only",
+      "multiValue": true,
+      "description": "希望参加形式"
+    },
+    {
+      "name": "q26_other",
+      "type": "string",
+      "required": false,
+      "questionId": "Q26",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "Q26 「その他」選択時の自由記述本文（never_public）"
+    },
+    {
+      "name": "q27_message",
+      "type": "text",
+      "required": false,
+      "questionId": "Q27",
+      "publicationClass": "never_public",
+      "multiValue": false,
+      "description": "その他、ご意見・ご要望・激励・応援メッセージ"
+    }
+  ]
+}
