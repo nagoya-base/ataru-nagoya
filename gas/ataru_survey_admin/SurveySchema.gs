@@ -57,6 +57,12 @@ function evaluateIntersection(conditions, conditionIdA, conditionIdB, row) {
   return evaluateCondition(conditions, conditionIdA, row) && evaluateCondition(conditions, conditionIdB, row);
 }
 
+
+var conditionEval = {
+  evaluateCondition: evaluateCondition,
+  evaluateIntersection: evaluateIntersection
+};
+
 /*
  * targetCount / crossTargetCount / 単純集計を、survey-schema.json の
  * conditions・questions定義だけから機械的に計算する共通実装。

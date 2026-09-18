@@ -143,6 +143,13 @@ function buildPublicGs(schema) {
         /* otherField・freeTextFieldsは公開系定義に含めない（自由記述本文は常にnever_public）。 */
       };
     });
+  var publicQuestionIds = {};
+  publicQuestions.forEach(function (q) { publicQuestionIds[q.id] = true; });
+  /* fixedCrossTabsは両軸ともbase_public/gated_publicの設問だけを残す。
+     admin_only（Q24〜Q26）を軸に持つクロス（Q22×Q24, Q24×Q25）は公開系定義へ混入させない。 */
+  var publicFixedCrossTabs = schema.fixedCrossTabs.filter(function (spec) {
+    return publicQuestionIds[spec.axisA] && publicQuestionIds[spec.axisB];
+  });
   var evaluator = embedLibSource(readText(path.join(ROOT, 'scripts/lib/condition-eval.js')));
   var payload = {
     surveyVersion: schema.surveyVersion,
@@ -150,7 +157,7 @@ function buildPublicGs(schema) {
     conditions: schema.conditions,
     questions: publicQuestions,
     crossAxes: schema.crossAxes,
-    fixedCrossTabs: schema.fixedCrossTabs
+    fixedCrossTabs: publicFixedCrossTabs
   };
   return (
     '/*\n * ' + AUTO_GEN_NOTICE.split('\n').join('\n * ') + '\n' +
@@ -169,6 +176,17 @@ function buildPublicGs(schema) {
 function buildAdminGs(schema) {
   var evaluator = embedLibSource(readText(path.join(ROOT, 'scripts/lib/condition-eval.js')));
   var aggregate = embedLibSource(readText(path.join(ROOT, 'scripts/lib/aggregate.js')));
+  /* aggregate.js はNode側で `var conditionEval = require('./condition-eval'); conditionEval.evaluateCondition(...)`
+     という参照方式のまま書かれている。embedLibSource()はrequire()行とmodule.exportsだけを取り除くため、
+     evaluateCondition/evaluateIntersectionはトップレベル関数として展開されるが、aggregate側の
+     `conditionEval.evaluateCondition(...)` という呼び出し自体は書き換えていない。
+     そのままではGAS実行時に `conditionEval is not defined` になるため、
+     evaluator関数を指すconditionEvalオブジェクトをここで補う。 */
+  var conditionEvalShim =
+    '\nvar conditionEval = {\n' +
+    '  evaluateCondition: evaluateCondition,\n' +
+    '  evaluateIntersection: evaluateIntersection\n' +
+    '};\n';
   var questionsById = {};
   schema.questions.forEach(function (q) { questionsById[q.id] = q; });
   var payload = {
@@ -190,6 +208,7 @@ function buildAdminGs(schema) {
     ' * 集計ロジック（targetCount / crossTargetCount / 単純集計）。admin_only設問・leads列定義を含む。\n' +
     ' * このファイルにSpreadsheetへの書き込みAPI（appendRow/setValue等）は一切含まれない。\n */\n\n' +
     evaluator + '\n' +
+    conditionEvalShim + '\n' +
     aggregate + '\n' +
     'var SurveySchema = ' + JSON.stringify(payload, null, 2) + ';\n'
   );

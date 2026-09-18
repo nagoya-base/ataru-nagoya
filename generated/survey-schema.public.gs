@@ -851,18 +851,6 @@ var PublicSurveySchema = {
       "axisA": "Q5",
       "axisB": "Q6",
       "label": "緊縛の楽しみ方 × 立場"
-    },
-    {
-      "id": "q22_x_q24",
-      "axisA": "Q22",
-      "axisB": "Q24",
-      "label": "名古屋参加可能性 × 価格"
-    },
-    {
-      "id": "q24_x_q25",
-      "axisA": "Q24",
-      "axisB": "Q25",
-      "label": "価格 × 参加意向"
     }
   ]
 };
