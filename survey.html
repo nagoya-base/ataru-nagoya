@@ -104,6 +104,9 @@ textarea.q27 { width: 100%; padding: 0.8rem; border: 1px solid var(--border); bo
       <p>回答しただけで企画への申込みにはなりません。</p>
     </div>
     <button type="button" class="btn btn-primary" id="btn-start">はじめる</button>
+    <div class="btn-row">
+      <a class="btn btn-outline" href="survey-results.html" data-ga-event="cta_click" data-ga-location="survey_intro" data-ga-type="results_link">結果を見る</a>
+    </div>
   </section>
 
   <!-- ── UNDERAGE END ── -->
@@ -132,11 +135,14 @@ textarea.q27 { width: 100%; padding: 0.8rem; border: 1px solid var(--border); bo
     </div>
   </section>
 
-  <!-- ── COMPLETE ── -->
+  <!-- ── COMPLETE / 回答済み再訪 ── -->
   <section id="screen-complete" class="card" hidden>
     <div class="result-box result-box--success">
-      <strong class="big">ご回答ありがとうございました。</strong>
-      <p><strong>アンケートの回答はすでに送信済みです。</strong>これ以降、何も入力しなくても回答は完了しています。</p>
+      <strong class="big" id="complete-heading">ご回答ありがとうございました。</strong>
+      <p id="complete-body">アンケートの回答はすでに送信済みです。これ以降、何も入力しなくても回答は完了しています。</p>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-outline" href="survey-results.html" data-ga-event="cta_click" data-ga-location="survey_complete" data-ga-type="results_link">結果を見る</a>
     </div>
     <div class="lead-toggle">
       <button type="button" class="btn btn-outline" id="btn-lead-toggle">開催案内・個別相談を希望する（任意）</button>

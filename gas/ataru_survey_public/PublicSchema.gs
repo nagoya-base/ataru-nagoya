@@ -5,9 +5,9 @@
  * このファイルを直接編集しても、次回の同期で上書きされる。
  *
  * Issue #104（回答保存Web App・公開集計API）が将来import/コピーして使うための
- * 生成済みschema定義。本ファイルはIssue #106の範囲外であるendpoint・doGet/doPostを
- * 一切実装しない。base_public / gated_public の設問のみを含み、admin_only /
- * never_public の設問・leadsは含まない。
+ * 生成済みschema定義。doGet/doPost実装は gas/ataru_survey_public/Code.gs にある。
+ * base_public / gated_public の設問のみを含み、admin_only / never_public の設問・
+ * leadsは含まない（このファイル自体にSpreadsheetアクセスは一切ない）。
  */
 
 /*

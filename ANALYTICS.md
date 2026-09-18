@@ -112,19 +112,23 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 | イベント名 | 発火条件 |
 | --- | --- |
 | `form_start`（`form_name: ataru_survey`） | 最初の設問に回答（選択・入力）した時、1回 |
-| `survey_submit`（`form_name: ataru_survey`） | アンケート回答のPOSTが成功した時だけ、1回。参加確定を意味しないため`generate_lead`とは分けて送る。回答内容・分岐・スコアは含めない |
-| `generate_lead`（`lead_type: ataru_survey_lead`） | 完了画面の任意連絡先フォームのPOSTが成功した時だけ、1回。既存の`ataru_booking` / `ataru_consultation`と同じ`trackGenerateLead`ヘルパーを使う |
+| `survey_submit`（`form_name: ataru_survey`） | 回答保存Web App（`gas/ataru_survey_public/`）へのPOSTが保存成功を返した時だけ、1回。参加確定を意味しないため`generate_lead`とは分けて送る。回答内容・分岐・スコア・`response_id`は含めない |
+| `generate_lead`（`lead_type: ataru_survey_lead`） | 完了画面（回答済み再訪画面を含む）の任意連絡先フォームが、回答保存Web AppへのリードPOSTで保存成功を返した時だけ、1回。既存の`ataru_booking` / `ataru_consultation`と同じ`trackGenerateLead`ヘルパーを使う |
 | `form_error`（`form_name`, `error_type: required` / `server` / `network`） | アンケート・連絡先フォームそれぞれのバリデーションエラー・送信失敗時 |
+| `cta_click`（`cta_name: results_link`） | 「結果を見る」リンク（アンケート開始前・回答完了後・回答済み再訪画面）のクリック時。既存の`cta_click`をそのまま使い、新規イベント名は追加していない |
 
 段階表示のステップごとの閲覧イベント（step_view相当）は、既存の共通設計に
 存在しないため追加していない。ページ表示自体はGA4標準の`page_view`で計測される。
 
-アンケート回答と任意の連絡先は別々のPOST（別件名のメール）に送信し、
-個人情報を含まないランダムな `response_id` でのみ関連づける。ただし現状は
-アンケート・連絡先とも同一のFormSubmit宛先（同じ受信メールアドレス）であり、
-メール本文が分かれるだけで受信先自体は分離していない。センシティブな回答と
-連絡先を別の受信先で管理したい場合は、連絡先用に別のメールアドレスを
-FormSubmitで有効化する運用対応が別途必要。
+**Issue #104での変更**：回答完了・重複回答抑止（Cookie/localStorage）・`survey_submit`の
+基準は、GAS（`gas/ataru_survey_public/`）への保存成功に一本化した。`response_id`も
+常にGAS側で新規発行する（クライアント生成のIDは相関用の参考値に過ぎない）。
+FormSubmitは通知補助のベストエフォート送信へ完全に下げており、GAS保存成功後に
+送信する（失敗しても回答完了状態・GA4計測には一切影響しない）。
+アンケート回答と任意の連絡先は別々のPOSTで送信し、個人情報を含まない`response_id`
+でのみ関連づける。再訪リードの`response_id`は、Cookie/localStorageから復元できる
+値をクライアントが「申告」するだけで、実際にresponsesシートに存在するかはGAS側が
+確認してから`link_status`（`linked` / `unlinked`）を決める。
 
 内部トリアージ用スコア・判定は送信データ（メール本文）にのみ含め、
 回答者の画面やGA4には一切表示・送信しない。連絡先フォーム送信時（+3点）は

@@ -35,7 +35,11 @@ test('生成物すべてに AUTO-GENERATED 明記がある', function () {
     path.join(ROOT, 'schema/leads-columns.json'),
     path.join(ROOT, 'generated/survey-schema.front.js'),
     path.join(ROOT, 'generated/survey-schema.public.gs'),
-    path.join(ROOT, 'gas/ataru_survey_admin/SurveySchema.gs')
+    path.join(ROOT, 'gas/ataru_survey_admin/SurveySchema.gs'),
+    path.join(ROOT, 'gas/ataru_survey_public/PublicSchema.gs'),
+    path.join(ROOT, 'gas/ataru_survey_public/PublicAggregate.gs'),
+    path.join(ROOT, 'gas/ataru_survey_public/FullSchema.gs'),
+    path.join(ROOT, 'gas/ataru_survey_public/ResponseNormalize.gs')
   ];
   files.forEach(function (f) {
     var content = fs.readFileSync(f, 'utf8');
@@ -76,5 +80,21 @@ test('front / admin 生成物の options / required / branch condition / publica
     assert.strictEqual(f.targetCountCondition, q.targetCountCondition, q.id + '.targetCountCondition');
     assert.strictEqual(f.publicationClass, q.publicationClass, q.id + '.publicationClass');
   });
+});
+
+test('gas/ataru_survey_public/ の生成物（PublicSchema.gs / FullSchema.gs）のquestion id集合が正しい（Issue #104）', function () {
+  var schema = sync.loadSchema();
+  var expectedPublicIds = schema.questions.filter(function (q) {
+    return q.publicationClass === 'base_public' || q.publicationClass === 'gated_public';
+  }).map(function (q) { return q.id; }).sort();
+  var allIds = schema.questions.map(function (q) { return q.id; }).sort();
+
+  var publicSchemaContent = fs.readFileSync(path.join(ROOT, 'gas/ataru_survey_public/PublicSchema.gs'), 'utf8');
+  var publicIds = extractGsObject(publicSchemaContent, 'PublicSurveySchema').questions.map(function (q) { return q.id; }).sort();
+  assert.deepStrictEqual(publicIds, expectedPublicIds, 'gas/ataru_survey_public/PublicSchema.gs のquestion id集合が base_public/gated_public と不一致');
+
+  var fullSchemaContent = fs.readFileSync(path.join(ROOT, 'gas/ataru_survey_public/FullSchema.gs'), 'utf8');
+  var fullIds = extractGsObject(fullSchemaContent, 'FullSurveySchema').questions.map(function (q) { return q.id; }).sort();
+  assert.deepStrictEqual(fullIds, allIds, 'gas/ataru_survey_public/FullSchema.gs のquestion id集合が正本と不一致');
 });
 

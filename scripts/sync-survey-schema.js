@@ -8,6 +8,11 @@
  *   4. generated/survey-schema.public.gs … 将来Issue #104が使う公開/保存GAS向け定義
  *      （admin_only / never_public 設問・leadsは含まない）
  *   5. gas/ataru_survey_admin/SurveySchema.gs … 管理者GAS向けの完全な定義+集計ロジック
+ *   6. gas/ataru_survey_public/PublicSchema.gs      … 公開集計API(Issue #104)が読む定義（3と同一内容）
+ *   7. gas/ataru_survey_public/PublicAggregate.gs   … 公開集計API(Issue #104)向けの集計・マスキングロジック
+ *   8. gas/ataru_survey_public/FullSchema.gs        … 回答保存Web App(Issue #104)が使う完全なschema定義
+ *      （admin_only含む。公開集計APIの関数からは一切参照しない＝leads/admin_only分離を構造で保証）
+ *   9. gas/ataru_survey_public/ResponseNormalize.gs … 回答保存時のサーバー側表示条件再検証ロジック
  *
  * 使い方:
  *   node scripts/sync-survey-schema.js          生成物を書き込む
@@ -135,12 +140,16 @@ function buildPublicGs(schema) {
     .filter(function (q) { return q.publicationClass === 'base_public' || q.publicationClass === 'gated_public'; })
     .map(function (q) {
       return {
-        id: q.id, storageField: q.storageField, type: q.type, required: q.required,
+        id: q.id, label: q.label, subLabel: q.subLabel || null,
+        storageField: q.storageField, type: q.type, required: q.required,
         options: q.options, optionsSource: q.optionsSource || null,
         displayCondition: q.displayCondition, targetCountCondition: q.targetCountCondition,
         publicationClass: q.publicationClass, publicBlock: q.publicBlock,
         group: q.group, q20SubGroup: q.q20SubGroup
-        /* otherField・freeTextFieldsは公開系定義に含めない（自由記述本文は常にnever_public）。 */
+        /* otherField・freeTextFieldsは公開系定義に含めない（自由記述本文は常にnever_public）。
+           label/subLabelは含める：gated_publicの設問名は101件以上でのみ公開APIレスポンスへ
+           露出させ（buildDetail()参照）、survey-results.js側に設問名をハードコードしない
+           （Issue #104 追加指示8・PR #110レビュー対応）。 */
       };
     });
   var publicQuestionIds = {};
@@ -214,13 +223,123 @@ function buildAdminGs(schema) {
   );
 }
 
+/* ── 6. gas/ataru_survey_public/PublicSchema.gs ──
+   公開/保存GAS（Issue #104: gas/ataru_survey_public/）が実際に使うschema定義。
+   generated/survey-schema.public.gs と内容は同一（生成元・生成ロジックを共有し、
+   条件評価・公開区分の正本を二重に手書きしない）。 */
+function buildPublicSchemaForPublicApp(schema) {
+  return buildPublicGs(schema).replace(
+    '生成済みschema定義。本ファイルはIssue #106の範囲外であるendpoint・doGet/doPostを\n' +
+    ' * 一切実装しない。base_public / gated_public の設問のみを含み、admin_only /\n' +
+    ' * never_public の設問・leadsは含まない。',
+    '生成済みschema定義。doGet/doPost実装は gas/ataru_survey_public/Code.gs にある。\n' +
+    ' * base_public / gated_public の設問のみを含み、admin_only / never_public の設問・\n' +
+    ' * leadsは含まない（このファイル自体にSpreadsheetアクセスは一切ない）。'
+  );
+}
+
+/* ── 7. gas/ataru_survey_public/PublicAggregate.gs ──
+   公開集計API（Issue #104）が使う、5人未満マスキング・補完的抑制・Q1/Q3バケット化・
+   100件ゲート判定・Q20 A〜D独立サブブロック化を含む集計ロジック本体。
+   scripts/lib/public-aggregate.js をそのまま埋め込む（GAS側への個別手書きを禁止する）。 */
+function buildPublicAggregateGs(schema) {
+  var conditionEvaluator = embedLibSource(readText(path.join(ROOT, 'scripts/lib/condition-eval.js')));
+  var aggregate = embedLibSource(readText(path.join(ROOT, 'scripts/lib/aggregate.js')));
+  var conditionEvalShim =
+    '\nvar conditionEval = {\n' +
+    '  evaluateCondition: evaluateCondition,\n' +
+    '  evaluateIntersection: evaluateIntersection\n' +
+    '};\n';
+  var publicAggregateSource = embedLibSource(readText(path.join(ROOT, 'scripts/lib/public-aggregate.js')));
+  /* public-aggregate.js は Node側で
+       var conditionEval = require('./condition-eval');
+       var aggregateLib = require('./aggregate');
+     という参照方式のまま書かれている。embedLibSource()はrequire()行とmodule.exportsだけを
+     取り除くため、aggregateLib.effectiveRows(...) 等の呼び出しがそのまま残る。
+     GAS実行時に `aggregateLib is not defined` にならないよう、aggregate.js が展開する
+     トップレベル関数を指す aggregateLib オブジェクトをここで補う
+     （test/admin-gs-runtime.test.js と同種の埋め込み変換をpublic-aggregate.js側にも適用）。 */
+  var aggregateLibShim =
+    '\nvar aggregateLib = {\n' +
+    '  isExcluded: isExcluded,\n' +
+    '  effectiveRows: effectiveRows,\n' +
+    '  valuesOf: valuesOf,\n' +
+    '  countTarget: countTarget,\n' +
+    '  crossTargetCount: crossTargetCount,\n' +
+    '  tallySingleQuestion: tallySingleQuestion,\n' +
+    '  crossTab: crossTab\n' +
+    '};\n';
+
+  return (
+    '/*\n * ' + AUTO_GEN_NOTICE.split('\n').join('\n * ') + '\n' +
+    ' *\n * Issue #104 公開集計API向けの集計・マスキングロジック本体。\n' +
+    ' * scripts/lib/public-aggregate.js をそのまま埋め込んだもので、5人未満マスキング・\n' +
+    ' * 補完的抑制・Q1/Q3公開表示バケット化・100件ゲート判定・Q20 A〜D独立サブブロック化を\n' +
+    ' * 個別に手書きしない。呼び出し側（Code.gs）は buildPublicResult(rows, PublicSurveySchema)\n' +
+    ' * だけを呼ぶ。\n */\n\n' +
+    conditionEvaluator + '\n' +
+    conditionEvalShim + '\n' +
+    aggregate + '\n' +
+    aggregateLibShim + '\n' +
+    publicAggregateSource + '\n'
+  );
+}
+
+/* ── 8. gas/ataru_survey_public/FullSchema.gs ──
+   回答保存Web App（doPost）が使う完全なschema定義（admin_only含む。全34設問＋leads列）。
+   条件評価関数は埋め込まない（PublicAggregate.gsが同一GASプロジェクト内で既に定義するため、
+   同じ関数をファイル間で二重宣言しない）。公開集計API（buildPublicResult）はこのファイルの
+   変数（FullSurveySchema）を一切参照しない＝構造的にadmin_only/leadsを公開集計から分離する。 */
+function buildFullSchemaForPublicApp(schema) {
+  var questionsById = {};
+  schema.questions.forEach(function (q) { questionsById[q.id] = q; });
+  var payload = {
+    surveyVersion: schema.surveyVersion,
+    multiValueDelimiter: schema.multiValueDelimiter,
+    conditions: schema.conditions,
+    questions: schema.questions,
+    questionsById: questionsById,
+    q20CrossExclusive: schema.q20CrossExclusive,
+    responsesManagementColumns: schema.responsesManagementColumns,
+    leadsColumns: schema.leadsColumns
+  };
+  return (
+    '/*\n * ' + AUTO_GEN_NOTICE.split('\n').join('\n * ') + '\n' +
+    ' *\n * 回答保存Web App（gas/ataru_survey_public/Code.gs の doPost）が使う完全なschema定義。\n' +
+    ' * admin_only設問（Q24〜Q26）とleadsColumnsを含む＝保存には全設問の定義が必要なため。\n' +
+    ' * 公開集計API（buildPublicResult, PublicAggregate.gs）はこの変数を一切参照しない。\n' +
+    ' * このファイル自体はデータ定義のみで、条件評価関数は含まない\n' +
+    ' * （PublicAggregate.gsが同一GASプロジェクト内で定義するevaluateCondition等を共用する）。\n */\n\n' +
+    'var FullSurveySchema = ' + JSON.stringify(payload, null, 2) + ';\n'
+  );
+}
+
+/* ── 9. gas/ataru_survey_public/ResponseNormalize.gs ──
+   回答保存時に、クライアントが送ってきた値をdisplayConditionだけを根拠に再検証し、
+   非到達設問の値を破棄してから保存行を組み立てるロジック（Issue #104 追加指示3）。 */
+function buildResponseNormalizeGs(schema) {
+  var normalizeSource = embedLibSource(readText(path.join(ROOT, 'scripts/lib/response-normalize.js')));
+  return (
+    '/*\n * ' + AUTO_GEN_NOTICE.split('\n').join('\n * ') + '\n' +
+    ' *\n * 回答保存Web Appが、クライアントの回答をdisplayCondition基準で再検証し、\n' +
+    ' * 非到達設問の値を破棄してから保存行を組み立てるための唯一の実装。\n' +
+    ' * 性自認分岐・Q15分岐・Q4低関心分岐等を個別に手書きしない（schemaのconditionsを\n' +
+    ' * 評価するだけで対応する）。conditionEval（PublicAggregate.gsが定義）に依存する。\n */\n\n' +
+    normalizeSource + '\n'
+  );
+}
+
 function targets(schema) {
   return [
     { file: path.join(ROOT, 'schema/responses-columns.json'), content: JSON.stringify(buildResponsesColumns(schema), null, 2) + '\n' },
     { file: path.join(ROOT, 'schema/leads-columns.json'), content: JSON.stringify(buildLeadsColumns(schema), null, 2) + '\n' },
     { file: path.join(ROOT, 'generated/survey-schema.front.js'), content: buildFrontJs(schema) },
     { file: path.join(ROOT, 'generated/survey-schema.public.gs'), content: buildPublicGs(schema) },
-    { file: path.join(ROOT, 'gas/ataru_survey_admin/SurveySchema.gs'), content: buildAdminGs(schema) }
+    { file: path.join(ROOT, 'gas/ataru_survey_admin/SurveySchema.gs'), content: buildAdminGs(schema) },
+    { file: path.join(ROOT, 'gas/ataru_survey_public/PublicSchema.gs'), content: buildPublicSchemaForPublicApp(schema) },
+    { file: path.join(ROOT, 'gas/ataru_survey_public/PublicAggregate.gs'), content: buildPublicAggregateGs(schema) },
+    { file: path.join(ROOT, 'gas/ataru_survey_public/FullSchema.gs'), content: buildFullSchemaForPublicApp(schema) },
+    { file: path.join(ROOT, 'gas/ataru_survey_public/ResponseNormalize.gs'), content: buildResponseNormalizeGs(schema) }
   ];
 }
 
