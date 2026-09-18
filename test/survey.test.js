@@ -388,9 +388,10 @@ test('分岐で非表示になった設問の値はrecomputePlanでクリアさ�
   assert.deepEqual(a.q7_sports, [], '非表示になったQ7の値はクリアされる');
 });
 
-test('computeScore() / rankFromScore() は新保存キーのみで動作する', function () {
+test('computeScore() / rankFromScore() は新保存キーのみで動作する（男性のみスコアを算出）', function () {
   var ctx = dom.loadSurvey();
   var answers = ctx.S.engine.defaultAnswers();
+  answers.q2_gender = '男性';
   answers.q1_age = '25〜29歳';
   answers.q8_exercise = '定期的にスポーツをしている';
   answers.q9_gym = '週4回以上';
@@ -409,9 +410,62 @@ test('computeScore() / rankFromScore() は新保存キーのみで動作する',
   assert.equal(score, 28);
   assert.equal(ctx.S.scoring.rankFromScore(score), '最優先');
 
-  var lowScore = ctx.S.scoring.computeScore(ctx.S.engine.defaultAnswers());
+  var lowScore = ctx.S.scoring.computeScore(Object.assign(ctx.S.engine.defaultAnswers(), { q2_gender: '男性' }));
   assert.equal(lowScore, 0);
   assert.equal(ctx.S.scoring.rankFromScore(lowScore), '一般回答');
+});
+
+/* PR #108レビュー指摘: Q4/Q6が全ジェンダー共通設問になったことで、女性・その他の回答にも
+   Q4/Q6由来の加点だけが乗ってしまい、「男性ユニ見込み層」という本来の意味を持たない
+   スコア・ランクが生成される副作用があった。女性・その他にはスコア自体を算出しないことで防ぐ。 */
+test('女性・その他にはcomputeScore()/rankFromScore()がスコア・ランクを生成しない（内部判定の副作用防止）', function () {
+  ['女性', 'その他'].forEach(function (gender) {
+    var ctx = dom.loadSurvey();
+    var answers = ctx.S.engine.defaultAnswers();
+    // レビューコメントで指摘された再現条件そのもの：
+    // 25〜29歳(+2) + 緊縛に興味がある(+3) + 縛られる側に興味がある(+2) = 男性なら7点になってしまう入力
+    answers.q2_gender = gender;
+    answers.q1_age = '25〜29歳';
+    answers.q4_interest = '興味がある';
+    answers.q6_role = ['縛られる側に興味がある'];
+
+    var score = ctx.S.scoring.computeScore(answers);
+    assert.equal(score, null, gender + 'の回答にはスコアを算出しない');
+    assert.equal(ctx.S.scoring.rankFromScore(score), null, gender + 'の回答にはランクを算出しない');
+
+    // 連絡先送信時の+3点加点（safeComputeScore経由）でも同様にnullのまま
+    var baseScore = ctx.S.scoring.safeComputeScore(answers);
+    var finalScore = baseScore === null ? null : baseScore + 3;
+    assert.equal(finalScore, null, '連絡先送信の加点後も' + gender + 'にはスコアが生成されない（誤って「育成候補」等にならない）');
+  });
+});
+
+test('女性・その他としてアンケートを送信すると、送信データに内部スコア／内部判定が含まれない', function (t, done) {
+  var ctx = dom.loadSurvey();
+  var a = ctx.S.engine.answers;
+  driveToGenderBranch(ctx, { gender: '女性', q4: '興味がある' });
+  // Q6（立場）はdriveToGenderBranch内では未回答のまま次へ進んでいるので、ここで明示的に選ぶ
+  var q6Step = ctx.S.STEPS.filter(function (s) { return s.id === 'q6'; })[0];
+  // すでにq6は通過済みなので、直接値を入れておく（値自体はrecomputePlanでは消えない）
+  a.q6_role = ['縛られる側に興味がある'];
+
+  assertCurrentIs(ctx, 'female_other_end');
+  clickNext(ctx);
+  assertCurrentIs(ctx, 'q27');
+  clickNext(ctx); // 送信実行
+
+  setTimeout(function () {
+    try {
+      assert.equal(ctx.fetchCalls.length, 1);
+      var fd = ctx.fetchCalls[0].opts.body;
+      var keys = fd._data.map(function (pair) { return pair[0]; });
+      assert.equal(keys.indexOf('内部スコア'), -1, '女性・その他の送信には内部スコアを含めない');
+      assert.equal(keys.indexOf('内部判定'), -1, '女性・その他の送信には内部判定を含めない');
+      done();
+    } catch (e) {
+      done(e);
+    }
+  }, 10);
 });
 
 /* computeScore()は全フィールドを `|| []` 等で防御しているため、通常の入力では
@@ -430,6 +484,7 @@ function injectThrowingField(answers, field) {
 test('スコア計算で例外が発生してもsafeComputeScore/safeRankFromScoreはnullを返す', function () {
   var ctx = dom.loadSurvey();
   var answers = ctx.S.engine.defaultAnswers();
+  answers.q2_gender = '男性'; // 性自認ガード(男性以外はnull即返し)より先に、例外パス自体を確実に通す
   injectThrowingField(answers, 'q14a_self');
 
   var score = ctx.S.scoring.safeComputeScore(answers);
@@ -445,14 +500,35 @@ test('スコア計算例外時でもアンケート送信（POST）自体は実�
   var ctx = dom.loadSurvey();
   var a = ctx.S.engine.answers;
 
-  driveToGenderBranch(ctx, { gender: '女性' });
-  assertCurrentIs(ctx, 'female_other_end');
+  // 男性・Q15「興味はない」でQ16〜Q26をスキップする最短経路でQ27まで進める
+  // （女性・その他だと性自認ガードでcomputeScore()がq14a_selfへ触れる前にnullを返してしまい、
+  //   例外パス自体を検証できないため）。
+  driveToGenderBranch(ctx, { gender: '男性' });
+  a.q7_sports = ['野球・ソフトボール'];
+  clickNext(ctx);
+  a.q8_exercise = '定期的にスポーツをしている';
+  clickNext(ctx);
+  a.q9_gym = '週2〜3回';
+  clickNext(ctx);
+  clickNext(ctx); // q10
+  a.q11_uniform = ['野球'];
+  clickNext(ctx); // -> q13（候補1件なのでq12は自動スキップ）
+  clickNext(ctx); // q13
+  clickNext(ctx); // q13a
+  clickNext(ctx); // q13b
+  clickNext(ctx); // q14a
+  clickNext(ctx); // q14b
+  clickNext(ctx); // q15_intro
+  a.q15_gate = '興味はない';
   clickNext(ctx);
   assertCurrentIs(ctx, 'q27');
 
-  // recomputePlan()やnavigationが参照しないフィールド(q14a_self)だけを故障させる。
-  // 送信直前に注入することで、ここまでのナビゲーションが正常に進むことも保証する。
-  injectThrowingField(a, 'q14a_self');
+  // q22_visitはcomputeScore()が参照するフィールドだが、Q15「興味はない」の分岐では
+  // Q22ステップ自体が計画に含まれないため、collectFieldsForPlan()（送信データの組み立て）
+  // からは触れられない。computeScore()内部だけをピンポイントで故障させるために選んでいる
+  // （q14a_selfのように計画に含まれるフィールドだと、collectFieldsForPlan側が先に
+  // 例外を拾ってしまい、検証したい「スコア計算だけの例外耐性」を確認できない）。
+  injectThrowingField(a, 'q22_visit');
 
   clickNext(ctx); // 送信実行 -> realSubmit() -> computeScore()は例外、それでもfetch()は呼ばれるはず
 
