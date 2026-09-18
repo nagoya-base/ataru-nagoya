@@ -440,13 +440,11 @@ test('女性・その他にはcomputeScore()/rankFromScore()がスコア・ラ�
   });
 });
 
-test('女性・その他としてアンケートを送信すると、送信データに内部スコア／内部判定が含まれない', function (t, done) {
+test('女性・その他としてアンケートを送信すると、GASへの保存POSTのみが行われ、メール通知は送信されない', function (t, done) {
   var ctx = dom.loadSurvey();
   var a = ctx.S.engine.answers;
   driveToGenderBranch(ctx, { gender: '女性', q4: '興味がある' });
   // Q6（立場）はdriveToGenderBranch内では未回答のまま次へ進んでいるので、ここで明示的に選ぶ
-  var q6Step = ctx.S.STEPS.filter(function (s) { return s.id === 'q6'; })[0];
-  // すでにq6は通過済みなので、直接値を入れておく（値自体はrecomputePlanでは消えない）
   a.q6_role = ['縛られる側に興味がある'];
 
   assertCurrentIs(ctx, 'female_other_end');
@@ -456,16 +454,10 @@ test('女性・その他としてアンケートを送信すると、送信デ�
 
   setTimeout(function () {
     try {
-      /* GAS保存成功後、通知補助としてFormSubmitへもPOSTする（Issue #104）。
-         GAS保存成功が先に1件、その後FormSubmit通知が1件の計2件になる。 */
-      assert.equal(ctx.fetchCalls.length, 2);
-      assert.equal(ctx.fetchCalls[0].url, ctx.S.GAS_ENDPOINT, '1件目はGAS保存POST');
-      var formCall = ctx.fetchCalls.filter(function (c) { return c.url === ctx.S.FORM_ENDPOINT; })[0];
-      assert.ok(formCall, 'FormSubmitへの通知POSTがある');
-      var fd = formCall.opts.body;
-      var keys = fd._data.map(function (pair) { return pair[0]; });
-      assert.equal(keys.indexOf('内部スコア'), -1, '女性・その他の送信には内部スコアを含めない');
-      assert.equal(keys.indexOf('内部判定'), -1, '女性・その他の送信には内部判定を含めない');
+      /* アンケート回答の送信はGASへの保存POSTのみで完結し、回答内容をメール通知する
+         処理（旧FormSubmit連携）は行わない。 */
+      assert.equal(ctx.fetchCalls.length, 1, 'GASへの保存POST以外は送信されない');
+      assert.equal(ctx.fetchCalls[0].url, ctx.S.GAS_ENDPOINT, '唯一のPOST先はGAS保存エンドポイント');
       done();
     } catch (e) {
       done(e);
@@ -474,9 +466,9 @@ test('女性・その他としてアンケートを送信すると、送信デ�
 });
 
 /* computeScore()は全フィールドを `|| []` 等で防御しているため、通常の入力では
-   例外が起きない（これ自体が正しい実装）。「それでも万一例外が起きた場合に
-   送信を止めない」という安全網(#12)をテストするため、特定フィールドへの
-   アクセス自体が例外を投げるgetterを注入してcomputeScore内部だけを
+   例外が起きない（これ自体が正しい実装）。「それでも万一例外が起きた場合にnullを
+   返す」というsafeComputeScore/safeRankFromScoreの安全網をテストするため、特定
+   フィールドへのアクセス自体が例外を投げるgetterを注入してcomputeScore内部だけを
    ピンポイントで故障させる。Array.prototype.indexOfを丸ごと壊すと、
    recomputePlan()（ナビゲーション自体）まで巻き込んで壊れてしまうため使わない。 */
 function injectThrowingField(answers, field) {
@@ -499,59 +491,6 @@ test('スコア計算で例外が発生してもsafeComputeScore/safeRankFromSco
 
   // 素のcomputeScore()は例外をそのまま投げる（safe版でだけ吸収する設計）ことも確認する
   assert.throws(function () { ctx.S.scoring.computeScore(answers); });
-});
-
-test('スコア計算例外時でもアンケート送信（POST）自体は実行され、完了画面まで到達する', function (t, done) {
-  var ctx = dom.loadSurvey();
-  var a = ctx.S.engine.answers;
-
-  // 男性・Q15「興味はない」でQ16〜Q26をスキップする最短経路でQ27まで進める
-  // （女性・その他だと性自認ガードでcomputeScore()がq14a_selfへ触れる前にnullを返してしまい、
-  //   例外パス自体を検証できないため）。
-  driveToGenderBranch(ctx, { gender: '男性' });
-  a.q7_sports = ['野球・ソフトボール'];
-  clickNext(ctx);
-  a.q8_exercise = '定期的にスポーツをしている';
-  clickNext(ctx);
-  a.q9_gym = '週2〜3回';
-  clickNext(ctx);
-  clickNext(ctx); // q10
-  a.q11_uniform = ['野球'];
-  clickNext(ctx); // -> q13（候補1件なのでq12は自動スキップ）
-  clickNext(ctx); // q13
-  clickNext(ctx); // q13a
-  clickNext(ctx); // q13b
-  clickNext(ctx); // q14a
-  clickNext(ctx); // q14b
-  clickNext(ctx); // q15_intro
-  a.q15_gate = '興味はない';
-  clickNext(ctx);
-  assertCurrentIs(ctx, 'q27');
-
-  // q22_visitはcomputeScore()が参照するフィールドだが、Q15「興味はない」の分岐では
-  // Q22ステップ自体が計画に含まれないため、collectFieldsForPlan()（送信データの組み立て）
-  // からは触れられない。computeScore()内部だけをピンポイントで故障させるために選んでいる
-  // （q14a_selfのように計画に含まれるフィールドだと、collectFieldsForPlan側が先に
-  // 例外を拾ってしまい、検証したい「スコア計算だけの例外耐性」を確認できない）。
-  injectThrowingField(a, 'q22_visit');
-
-  clickNext(ctx); // 送信実行 -> realSubmit() -> computeScore()は例外、それでもfetch()は呼ばれるはず
-
-  // fetchは非同期(Promise)なので、マイクロタスクの完了を待ってから検証する
-  setTimeout(function () {
-    try {
-      assert.equal(ctx.fetchCalls.length, 2, 'スコア計算例外があっても送信(fetch)は実行される（GAS保存＋FormSubmit通知）');
-      var formCall = ctx.fetchCalls.filter(function (c) { return c.url === ctx.S.FORM_ENDPOINT; })[0];
-      assert.ok(formCall, 'FormSubmitへの通知POSTがある');
-      var fd = formCall.opts.body;
-      var keys = fd._data.map(function (pair) { return pair[0]; });
-      assert.equal(keys.indexOf('内部スコア'), -1, 'スコア計算失敗時は内部スコアを含めない');
-      assert.equal(ctx.S.nav.screens.complete.hidden, false, '送信成功後に完了画面が表示される');
-      done();
-    } catch (e) {
-      done(e);
-    }
-  }, 10);
 });
 
 test('GA4へ送るtrackイベントのparamsには回答内容が含まれない（form_name/error_typeのみ）', function () {

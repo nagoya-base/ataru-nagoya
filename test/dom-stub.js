@@ -151,8 +151,8 @@ function loadSurvey(opts) {
     fetchCalls.push({ url: url, opts: opts });
     if (typeof fetchImpl === 'function') return fetchImpl(url, opts);
     /* GAS_ENDPOINT宛のPOSTはデフォルトで保存成功のJSONを返す（テストごとに
-       setFetchImpl()で上書きしない限り、GAS保存成功→FormSubmit通知の流れを
-       そのまま再現できるようにするため）。それ以外（FormSubmit等）は従来通り空JSON。 */
+       setFetchImpl()で上書きしない限り、GAS保存成功の流れをそのまま再現できる
+       ようにするため）。それ以外（リード連絡希望のFormSubmit通知等）は従来通り空JSON。 */
     if (url === sandbox.window.__Survey.GAS_ENDPOINT) {
       return Promise.resolve({ ok: true, json: function () { return Promise.resolve({ ok: true, response_id: 'stub-server-response-id', saved_at: new Date().toISOString(), completion_stage: 'completed_full', excluded: false }); } });
     }
