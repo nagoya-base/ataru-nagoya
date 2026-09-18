@@ -18,7 +18,7 @@ window.__SurveyResults = {};
 
   /* gas/ataru_survey_public/ をWebアプリとしてデプロイしたURL（survey.jsのGAS_ENDPOINTと同一）。
      デプロイ後に実際のURLへ置き換えること（手動設定が必要）。 */
-  var GAS_RESULTS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw0l3yLTjJEjIo0KBpP4LarkpMKyGd_7zbcEgXEcNmyCZuNgz5F-iYvfZqMThARnBf3KQ/exec';
+  var GAS_RESULTS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx4AZkbIbJwpMUeraaKQGOtbd7dEYGWjXAgSlkAd-AR1f39XMxVCxaXSVfm6wEWl7qy2Q/exec';
 
   /* 詳細設問の表示ラベル・表示順は、このファイルにハードコードしない。
      公開集計APIは有効回答数が100件以下の間は`detail`キー自体をレスポンスに含めず、
