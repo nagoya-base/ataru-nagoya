@@ -3,7 +3,7 @@
  * - GAS保存成功後だけCookie/localStorageへ回答済み状態を保存する
  * - Cookie / localStorageのどちらか一方だけでも再訪時に通常フォームを開始させない
  * - GAS失敗時は完了画面・回答済み状態・survey_submitを発生させず、入力内容を保持する
- * - GAS成功・FormSubmit失敗でも完了扱いになり、再回答を要求しない
+ * - GAS保存成功後、回答内容をメール通知する処理（旧FormSubmit連携）は一切行わない
  * - CookieのPathがsurvey.html相当の最小スコープに限定され、Path=/ではない
  */
 'use strict';
@@ -109,21 +109,18 @@ test('GAS保存失敗時は完了画面・回答済み状態・survey_submitの�
   }, 10);
 });
 
-test('GAS保存成功・FormSubmit失敗でも完了扱いになり、再回答を要求しない', function (t, done) {
+test('GAS保存成功後、アンケート回答の送信はGASへの1回のPOSTのみで完結し、メール通知は送信されない', function (t, done) {
   var ctx = dom.loadSurvey();
-  ctx.setFetchImpl(function (url) {
-    if (url === ctx.S.GAS_ENDPOINT) {
-      return Promise.resolve({ ok: true, json: function () { return Promise.resolve({ ok: true, response_id: 'srv-id-1' }); } });
-    }
-    return Promise.reject(new Error('FormSubmit down'));
-  });
-
   driveToSubmit(ctx);
 
   setTimeout(function () {
     try {
-      assert.equal(ctx.S.nav.screens.complete.hidden, false, 'FormSubmit失敗でも完了画面を表示する');
+      assert.equal(ctx.S.nav.screens.complete.hidden, false, '完了画面を表示する');
       assert.match(ctx.document.cookie || '', /ataru_survey_v1_answered=1/);
+      /* 回答内容をFormSubmit等でメール通知する処理は廃止済み。GASへの保存POST
+         以外のfetchが発生しないことを確認する（回答内容の正本はresponsesシートのみ）。 */
+      assert.equal(ctx.fetchCalls.length, 1, 'GASへの保存POST以外は送信されない');
+      assert.equal(ctx.fetchCalls[0].url, ctx.S.GAS_ENDPOINT, '唯一のPOST先はGAS保存エンドポイント');
       done();
     } catch (e) { done(e); }
   }, 10);

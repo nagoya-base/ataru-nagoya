@@ -2,12 +2,12 @@
  * survey.html 用のステップフォームエンジン。
  * 個人情報・回答内容はGA4へ送らない（form_name等のカテゴリ値のみ）。
  *
- * アンケート回答と任意連絡先は別々のPOST（別件名のメール）に分離し、
- * 個人情報を含まないresponse_idのみで突き合わせる。ただし現状は同一の
- * FormSubmitエンドポイント（同じ受信メールアドレス）宛てであり、メール本文が
- * 分かれるだけで、別サービス・別受信先への分離ではない。真に別の送信先が
- * 必要な場合は、連絡先用の別メールアドレスをFormSubmitで有効化した上で
- * FORM_ENDPOINT_LEAD 定数を分ける対応が必要（要運用判断）。
+ * アンケート回答（Q1〜Q27の内容）は、公開/保存Web App（gas/ataru_survey_public/）への
+ * POSTでresponsesシートへ保存するのみで、メールでの通知は一切行わない（回答内容の正本は
+ * responsesシートのみ）。任意連絡先（Xアカウント・メールアドレス等）はresponsesとは別に
+ * leadsへ保存され、連絡希望があったことをFormSubmitへベストエフォートで通知する
+ * （回答者本人が入力した連絡先の希望内容の通知であり、アンケート回答内容の通知ではない）。
+ * 両者はresponse_id（個人情報を含まない）のみで突き合わせる。
  *
  * ─────────────────────────────────────────────────────────────
  * Issue #107: 全ジェンダー共通の緊縛設問＋男性向けスポーツ／ユニ分岐への改修
@@ -70,12 +70,14 @@ window.__Survey = {};
 (function () {
   'use strict';
 
+  /* 任意連絡先（Xアカウント・メールアドレス）の連絡希望があったことをベストエフォートで
+     通知するためだけに使う。アンケート回答内容（Q1〜Q27）の通知には使わない。 */
   var FORM_ENDPOINT = 'https://formsubmit.co/ajax/nagoyabase2023@gmail.com';
 
   /* gas/ataru_survey_public/ をWebアプリとしてデプロイしたURL。
      デプロイ後に実際のURLへ置き換えること（手動設定が必要。README.md参照）。
-     回答保存・リード保存の正本はこのGASであり、FORM_ENDPOINTは通知補助に過ぎない
-     （Issue #104 追加指示5）。 */
+     回答保存・リード保存の正本はこのGASであり、FORM_ENDPOINTはリード連絡希望の
+     通知補助に過ぎない（Issue #104 追加指示5）。 */
   var GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx4AZkbIbJwpMUeraaKQGOtbd7dEYGWjXAgSlkAd-AR1f39XMxVCxaXSVfm6wEWl7qy2Q/exec';
 
   /* GASへのPOSTは text/plain でJSON文字列を送る（Content-Type: application/jsonにすると
@@ -275,118 +277,117 @@ window.__Survey = {};
   }
 
   var STEPS = [
-    { id: 'q1', section: SECTION.basic, type: 'radio', title: 'Q1. 年齢', required: true, options: OPT.q1, field: 'q1_age', emailKey: 'Q1_年齢', visible: function () { return true; } },
+    { id: 'q1', section: SECTION.basic, type: 'radio', title: 'Q1. 年齢', required: true, options: OPT.q1, field: 'q1_age', visible: function () { return true; } },
 
-    { id: 'q2', section: SECTION.basic, type: 'radio', title: 'Q2. 性自認', required: true, options: OPT.q2, field: 'q2_gender', emailKey: 'Q2_性自認',
-      subTexts: [{ trigger: 'その他', field: 'q2_gender_other', label: '性自認（自由記述）', emailKey: 'Q2_性自認その他' }],
+    { id: 'q2', section: SECTION.basic, type: 'radio', title: 'Q2. 性自認', required: true, options: OPT.q2, field: 'q2_gender',
+      subTexts: [{ trigger: 'その他', field: 'q2_gender_other', label: '性自認（自由記述）' }],
       visible: function () { return true; } },
 
-    { id: 'q3', section: SECTION.basic, type: 'radio', title: 'Q3. 居住地域', required: true, options: OPT.q3, field: 'q3_region', emailKey: 'Q3_居住地域',
+    { id: 'q3', section: SECTION.basic, type: 'radio', title: 'Q3. 居住地域', required: true, options: OPT.q3, field: 'q3_region',
       subTexts: [
-        { trigger: '海外', field: 'q3_country', label: '国名', emailKey: 'Q3_海外国名' },
-        { trigger: 'その他', field: 'q3_region_other', label: '地域名', emailKey: 'Q3_地域その他' }
+        { trigger: '海外', field: 'q3_country', label: '国名' },
+        { trigger: 'その他', field: 'q3_region_other', label: '地域名' }
       ],
       visible: function () { return true; } },
 
     { id: 'bondage_intro', section: SECTION.bondage, type: 'info', title: 'ここからのご案内', body: TXT.bondageIntro,
       visible: function () { return true; } },
 
-    { id: 'q4', section: SECTION.bondage, type: 'radio', title: 'Q4. 緊縛・ロープ表現への関心', required: true, options: OPT.q4, field: 'q4_interest', emailKey: 'Q4_緊縛への関心',
+    { id: 'q4', section: SECTION.bondage, type: 'radio', title: 'Q4. 緊縛・ロープ表現への関心', required: true, options: OPT.q4, field: 'q4_interest',
       visible: function () { return true; } },
 
-    { id: 'q5', section: SECTION.bondage, type: 'checkbox', title: 'Q5. 緊縛では、どんな楽しみ方に関心がありますか', required: false, options: OPT.q5, otherField: 'q5_other', field: 'q5_enjoy', exclusive: ['まだ分からない', '特にない', '回答しない'], emailKey: 'Q5_楽しみ方', otherEmailKey: 'Q5_その他',
+    { id: 'q5', section: SECTION.bondage, type: 'checkbox', title: 'Q5. 緊縛では、どんな楽しみ方に関心がありますか', required: false, options: OPT.q5, otherField: 'q5_other', field: 'q5_enjoy', exclusive: ['まだ分からない', '特にない', '回答しない'],
       visible: function () { return true; } },
 
     { id: 'q6', section: SECTION.bondage, type: 'checkbox', title: 'Q6. 緊縛では、どの立場に関心がありますか', required: false, options: OPT.q6, otherField: 'q6_other', field: 'q6_role', exclusive: ['まだ分からない', '回答しない'],
       conflictPairs: [['縛る・縛られる両方に興味がある', '縛られる側に興味がある'], ['縛る・縛られる両方に興味がある', '縛る側に興味がある']],
-      emailKey: 'Q6_興味のある立場', otherEmailKey: 'Q6_その他',
       visible: function () { return true; } },
 
-    { id: 'q6a', section: SECTION.bondage, type: 'checkbox', title: 'Q6-A. 今後の企画との関わり方', required: false, options: OPT.q6a, otherField: 'q6a_other', field: 'q6a_involvement', exclusive: ['今回はアンケート回答のみ', 'まだ分からない'], emailKey: 'Q6A_今後の関わり方', otherEmailKey: 'Q6A_その他',
+    { id: 'q6a', section: SECTION.bondage, type: 'checkbox', title: 'Q6-A. 今後の企画との関わり方', required: false, options: OPT.q6a, otherField: 'q6a_other', field: 'q6a_involvement', exclusive: ['今回はアンケート回答のみ', 'まだ分からない'],
       visible: function () { return true; } },
 
     { id: 'female_other_end', section: SECTION.end, type: 'info', title: 'ご案内', body: TXT.femaleOtherEnd,
       visible: function (a) { return isFemaleOther(a); } },
 
-    { id: 'q7', section: SECTION.sports, type: 'checkbox', title: 'Q7. 現在または過去に経験したスポーツ', required: true, options: OPT.q7, field: 'q7_sports', otherField: 'q7_other', emailKey: 'Q7_経験スポーツ', otherEmailKey: 'Q7_その他',
+    { id: 'q7', section: SECTION.sports, type: 'checkbox', title: 'Q7. 現在または過去に経験したスポーツ', required: true, options: OPT.q7, field: 'q7_sports', otherField: 'q7_other',
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q8', section: SECTION.sports, type: 'radio', title: 'Q8. 現在の運動状況', required: true, options: OPT.q8, field: 'q8_exercise', otherField: 'q8_other', emailKey: 'Q8_運動状況', otherEmailKey: 'Q8_その他',
+    { id: 'q8', section: SECTION.sports, type: 'radio', title: 'Q8. 現在の運動状況', required: true, options: OPT.q8, field: 'q8_exercise', otherField: 'q8_other',
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q9', section: SECTION.sports, type: 'radio', title: 'Q9. ジム・筋力トレーニング頻度', required: true, options: OPT.q9, field: 'q9_gym', otherField: 'q9_other', emailKey: 'Q9_ジム頻度', otherEmailKey: 'Q9_その他',
+    { id: 'q9', section: SECTION.sports, type: 'radio', title: 'Q9. ジム・筋力トレーニング頻度', required: true, options: OPT.q9, field: 'q9_gym', otherField: 'q9_other',
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q10', section: SECTION.sports, type: 'checkbox', title: 'Q10. スポーツ・身体づくりの動機', required: false, options: OPT.q10, field: 'q10_motivation', otherField: 'q10_other', emailKey: 'Q10_動機', otherEmailKey: 'Q10_その他',
+    { id: 'q10', section: SECTION.sports, type: 'checkbox', title: 'Q10. スポーツ・身体づくりの動機', required: false, options: OPT.q10, field: 'q10_motivation', otherField: 'q10_other',
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q11', section: SECTION.uniform, type: 'checkbox', title: 'Q11. 好きなユニフォーム・ウェア', required: true, options: OPT.q11, field: 'q11_uniform', otherField: 'q11_other', emailKey: 'Q11_好きなユニフォーム', otherEmailKey: 'Q11_その他',
+    { id: 'q11', section: SECTION.uniform, type: 'checkbox', title: 'Q11. 好きなユニフォーム・ウェア', required: true, options: OPT.q11, field: 'q11_uniform', otherField: 'q11_other',
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q12', section: SECTION.uniform, type: 'radio', title: 'Q12. 最も好きなもの', required: true, field: 'q12_favorite', emailKey: 'Q12_最も好きなもの',
+    { id: 'q12', section: SECTION.uniform, type: 'radio', title: 'Q12. 最も好きなもの', required: true, field: 'q12_favorite',
       dynamicOptions: q11DerivedOptions,
       visible: function (a) { return isMaleAny(a) && q11DerivedOptions(a).length > 1; } },
 
-    { id: 'q13', section: SECTION.uniform, type: 'checkbox', title: 'Q13. ユニフォームの楽しみ方', required: false, options: OPT.q13, field: 'q13_enjoy', otherField: 'q13_other', emailKey: 'Q13_楽しみ方', otherEmailKey: 'Q13_その他',
+    { id: 'q13', section: SECTION.uniform, type: 'checkbox', title: 'Q13. ユニフォームの楽しみ方', required: false, options: OPT.q13, field: 'q13_enjoy', otherField: 'q13_other',
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q13a', section: SECTION.uniform, type: 'checkbox', title: 'Q13-A. 自分で着たいユニフォーム', hint: '任意です。Q11で選んだものの中から選べます。', required: false, field: 'q13a_wear_self', emailKey: 'Q13A_自分で着たいユニフォーム',
+    { id: 'q13a', section: SECTION.uniform, type: 'checkbox', title: 'Q13-A. 自分で着たいユニフォーム', hint: '任意です。Q11で選んだものの中から選べます。', required: false, field: 'q13a_wear_self',
       dynamicOptions: q11DerivedOptions,
       visible: function (a) { return isMaleAny(a) && q11DerivedOptions(a).length > 0; } },
 
-    { id: 'q13b', section: SECTION.uniform, type: 'checkbox', title: 'Q13-B. 人に着てほしい・見たいユニフォーム', hint: '任意です。Q11で選んだものの中から選べます。', required: false, field: 'q13b_wear_others', emailKey: 'Q13B_人に着てほしいユニフォーム',
+    { id: 'q13b', section: SECTION.uniform, type: 'checkbox', title: 'Q13-B. 人に着てほしい・見たいユニフォーム', hint: '任意です。Q11で選んだものの中から選べます。', required: false, field: 'q13b_wear_others',
       dynamicOptions: q11DerivedOptions,
       visible: function (a) { return isMaleAny(a) && q11DerivedOptions(a).length > 0; } },
 
-    { id: 'q14a', section: SECTION.body, type: 'checkbox', title: 'Q14-A. 自分に当てはまる特徴', required: false, options: OPT.q14a, otherField: 'q14a_other', field: 'q14a_self', exclusive: ['回答しない'], emailKey: 'Q14A_自分の特徴', otherEmailKey: 'Q14A_その他',
+    { id: 'q14a', section: SECTION.body, type: 'checkbox', title: 'Q14-A. 自分に当てはまる特徴', required: false, options: OPT.q14a, otherField: 'q14a_other', field: 'q14a_self', exclusive: ['回答しない'],
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q14b', section: SECTION.body, type: 'checkbox', title: 'Q14-B. 相手の見た目についての好み', required: false, options: OPT.q14b, otherField: 'q14b_other', field: 'q14b_pref', exclusive: ['回答しない'], emailKey: 'Q14B_相手の好み', otherEmailKey: 'Q14B_その他',
+    { id: 'q14b', section: SECTION.body, type: 'checkbox', title: 'Q14-B. 相手の見た目についての好み', required: false, options: OPT.q14b, otherField: 'q14b_other', field: 'q14b_pref', exclusive: ['回答しない'],
       visible: function (a) { return isMaleAny(a); } },
 
     { id: 'q15_intro', section: SECTION.men, type: 'info', title: 'ここでの確認', body: TXT.q15GateIntro,
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q15', section: SECTION.men, type: 'radio', title: 'Q15. 続く企画についての質問へ回答しますか', required: true, options: OPT.q15, field: 'q15_gate', emailKey: 'Q15_企画ゲート',
+    { id: 'q15', section: SECTION.men, type: 'radio', title: 'Q15. 続く企画についての質問へ回答しますか', required: true, options: OPT.q15, field: 'q15_gate',
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q16', section: SECTION.men, type: 'checkbox', title: 'Q16. 興味のある企画', required: false, options: OPT.q16, otherField: 'q16_other', field: 'q16_interest', emailKey: 'Q16_興味のある企画', otherEmailKey: 'Q16_その他',
+    { id: 'q16', section: SECTION.men, type: 'checkbox', title: 'Q16. 興味のある企画', required: false, options: OPT.q16, otherField: 'q16_other', field: 'q16_interest',
       visible: function (a) { return gatePassed(a); } },
 
-    { id: 'q17', section: SECTION.men, type: 'checkbox', title: 'Q17. 緊縛・ロープの経験', required: true, options: OPT.q17, otherField: 'q17_other', field: 'q17_experience', exclusive: ['未経験', '回答しない'], emailKey: 'Q17_緊縛経験', otherEmailKey: 'Q17_その他',
+    { id: 'q17', section: SECTION.men, type: 'checkbox', title: 'Q17. 緊縛・ロープの経験', required: true, options: OPT.q17, otherField: 'q17_other', field: 'q17_experience', exclusive: ['未経験', '回答しない'],
       visible: function (a) { return gatePassed(a); } },
 
-    { id: 'q18', section: SECTION.men, type: 'radio', title: 'Q18. ユニフォーム姿と緊縛を組み合わせた撮影', required: true, options: OPT.q18, field: 'q18_combo', emailKey: 'Q18_ユニフォーム緊縛撮影',
+    { id: 'q18', section: SECTION.men, type: 'radio', title: 'Q18. ユニフォーム姿と緊縛を組み合わせた撮影', required: true, options: OPT.q18, field: 'q18_combo',
       visible: function (a) { return showDetailBlock(a); } },
 
-    { id: 'q19', section: SECTION.men, type: 'checkbox', title: 'Q19. 興味のある緊縛範囲', required: false, options: OPT.q19, otherField: 'q19_other', field: 'q19_range', emailKey: 'Q19_緊縛範囲', otherEmailKey: 'Q19_その他',
+    { id: 'q19', section: SECTION.men, type: 'checkbox', title: 'Q19. 興味のある緊縛範囲', required: false, options: OPT.q19, otherField: 'q19_other', field: 'q19_range',
       visible: function (a) { return showDetailBlock(a); } },
 
     { id: 'play_intro', section: SECTION.play, type: 'info', title: 'ここからのご案内', body: TXT.playSectionIntro,
       visible: function (a) { return showDetailBlock(a); } },
 
-    { id: 'q20a', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'A. ユニフォーム・作品表現', required: false, options: OPT.q20a, field: 'q20a', emailKey: 'Q20A_ユニフォーム作品表現', q20Group: 'A',
+    { id: 'q20a', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'A. ユニフォーム・作品表現', required: false, options: OPT.q20a, field: 'q20a', q20Group: 'A',
       visible: function (a) { return showDetailBlock(a); }, crossExclusive: 'q20' },
 
-    { id: 'q20b', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'B. 吊り・強度', required: false, options: OPT.q20b, field: 'q20b', emailKey: 'Q20B_吊り強度', q20Group: 'B',
+    { id: 'q20b', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'B. 吊り・強度', required: false, options: OPT.q20b, field: 'q20b', q20Group: 'B',
       visible: function (a) { return showDetailBlock(a); }, crossExclusive: 'q20' },
 
-    { id: 'q20c', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'C. SM・性的な責め', notice: TXT.q20cNotice, required: false, options: OPT.q20c, field: 'q20c', emailKey: 'Q20C_SM性的責め', q20Group: 'C',
+    { id: 'q20c', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'C. SM・性的な責め', notice: TXT.q20cNotice, required: false, options: OPT.q20c, field: 'q20c', q20Group: 'C',
       visible: function (a) { return showDetailBlock(a); }, crossExclusive: 'q20' },
 
-    { id: 'q20d', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'D. その他', required: false, options: OPT.q20d, otherField: 'q20d_other', field: 'q20d', exclusive: ['まだ分からない', '回答しない'], emailKey: 'Q20D_その他選択', otherEmailKey: 'Q20D_その他', q20Group: 'D',
+    { id: 'q20d', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'D. その他', required: false, options: OPT.q20d, otherField: 'q20d_other', field: 'q20d', exclusive: ['まだ分からない', '回答しない'], q20Group: 'D',
       visible: function (a) { return showDetailBlock(a); }, crossExclusive: 'q20' },
 
-    { id: 'q21', section: SECTION.play, type: 'checkbox', title: 'Q21. 体験時に重視する条件', required: false, options: OPT.q21, otherField: 'q21_other', field: 'q21_conditions', emailKey: 'Q21_重視条件', otherEmailKey: 'Q21_その他',
+    { id: 'q21', section: SECTION.play, type: 'checkbox', title: 'Q21. 体験時に重視する条件', required: false, options: OPT.q21, otherField: 'q21_other', field: 'q21_conditions',
       visible: function (a) { return showDetailBlock(a); } },
 
-    { id: 'q22', section: SECTION.visit, type: 'radio', title: 'Q22. 名古屋での参加可能性', required: true, options: OPT.q22, field: 'q22_visit', emailKey: 'Q22_名古屋参加可能性',
+    { id: 'q22', section: SECTION.visit, type: 'radio', title: 'Q22. 名古屋での参加可能性', required: true, options: OPT.q22, field: 'q22_visit',
       visible: function (a) { return gatePassed(a); } },
 
-    { id: 'q23', section: SECTION.visit, type: 'checkbox', title: 'Q23. 参加しやすい曜日・時間', required: false, options: OPT.q23, otherField: 'q23_other', field: 'q23_schedule', emailKey: 'Q23_参加曜日時間', otherEmailKey: 'Q23_その他',
+    { id: 'q23', section: SECTION.visit, type: 'checkbox', title: 'Q23. 参加しやすい曜日・時間', required: false, options: OPT.q23, otherField: 'q23_other', field: 'q23_schedule',
       visible: function (a) { return gatePassed(a); } },
 
-    { id: 'q24', section: SECTION.visit, type: 'radio', title: 'Q24. 初心者向け短時間体験の参加しやすい価格', required: true, options: OPT.q24, field: 'q24_price', emailKey: 'Q24_価格',
+    { id: 'q24', section: SECTION.visit, type: 'radio', title: 'Q24. 初心者向け短時間体験の参加しやすい価格', required: true, options: OPT.q24, field: 'q24_price',
       visible: function (a) { return gatePassed(a); } },
 
     /* Q24（価格）回答完了後に初めて3,000円企画を表示する（価格アンカリング回避）。
@@ -394,13 +395,13 @@ window.__Survey = {};
     { id: 'price_announce', section: SECTION.invite, type: 'info', title: '体験のご案内', body: TXT.priceAnnounce,
       visible: function (a) { return gatePassed(a) && !!a.q24_price; } },
 
-    { id: 'q25', section: SECTION.invite, type: 'radio', title: 'Q25. 現在の参加意向', required: true, options: OPT.q25, field: 'q25_intent', emailKey: 'Q25_参加意向',
+    { id: 'q25', section: SECTION.invite, type: 'radio', title: 'Q25. 現在の参加意向', required: true, options: OPT.q25, field: 'q25_intent',
       visible: function (a) { return gatePassed(a); } },
 
-    { id: 'q26', section: SECTION.invite, type: 'checkbox', title: 'Q26. 希望参加形式', required: false, options: OPT.q26, otherField: 'q26_other', field: 'q26_format', emailKey: 'Q26_参加形式', otherEmailKey: 'Q26_その他',
+    { id: 'q26', section: SECTION.invite, type: 'checkbox', title: 'Q26. 希望参加形式', required: false, options: OPT.q26, otherField: 'q26_other', field: 'q26_format',
       visible: function (a) { return gatePassed(a); } },
 
-    { id: 'q27', section: SECTION.end, type: 'text', title: 'Q27. その他、ご意見・ご要望・激励・応援メッセージ', hint: TXT.q27Hint, required: false, field: 'q27_message', emailKey: 'Q27_メッセージ',
+    { id: 'q27', section: SECTION.end, type: 'text', title: 'Q27. その他、ご意見・ご要望・激励・応援メッセージ', hint: TXT.q27Hint, required: false, field: 'q27_message',
       visible: function () { return true; } }
   ];
 
@@ -602,7 +603,7 @@ window.__Survey = {};
     var radios = [];
     var subBlocks = {};
     /* otherField（ラジオ用の簡易「その他」指定）は、内部的にsubTextsと同じ仕組みへ正規化する */
-    var subTexts = step.subTexts || (step.otherField ? [{ trigger: 'その他', field: step.otherField, label: 'その他', emailKey: step.otherEmailKey }] : null);
+    var subTexts = step.subTexts || (step.otherField ? [{ trigger: 'その他', field: step.otherField, label: 'その他' }] : null);
 
     function syncSubTexts() {
       if (!subTexts) return;
@@ -929,7 +930,6 @@ window.__Survey = {};
   var S = window.__Survey;
   var E = S.engine;
   var answers = E.answers;
-  var FORM_ENDPOINT = S.FORM_ENDPOINT;
 
   var btnNext = document.getElementById('btn-next');
   var btnBack = document.getElementById('btn-back');
@@ -937,27 +937,6 @@ window.__Survey = {};
   var screenComplete = document.getElementById('screen-complete');
 
   var submitting = false;
-
-  function collectFieldsForPlan(plan) {
-    var fd = new FormData();
-    plan.forEach(function (step) {
-      if (step.type === 'info') return;
-      if (step.field !== undefined && step.emailKey) {
-        var v = answers[step.field];
-        if (Array.isArray(v)) { if (v.length) fd.append(step.emailKey, v.join('、')); }
-        else if (v) { fd.append(step.emailKey, v); }
-      }
-      if (step.otherField && step.otherEmailKey && answers[step.otherField]) {
-        fd.append(step.otherEmailKey, answers[step.otherField]);
-      }
-      if (step.subTexts) {
-        step.subTexts.forEach(function (st) {
-          if (answers[st.field]) fd.append(st.emailKey, answers[st.field]);
-        });
-      }
-    });
-    return fd;
-  }
 
   /* 内部トリアージ用スコア。新Q番号の保存キーのみを参照する（旧保存キーは参照しない）。
      配列フィールドは `|| []` で必ず配列化してから .indexOf() を呼び、
@@ -1031,39 +1010,6 @@ window.__Survey = {};
      回答者の画面には一切表示しない（管理側のメール本文にのみ含める）。 */
   S.scoring = { computeScore: computeScore, rankFromScore: rankFromScore, safeComputeScore: safeComputeScore, safeRankFromScore: safeRankFromScore };
 
-  function branchLabel(a) {
-    if (a.q1_age === '17歳以下') return 'underage';
-    if (a.q2_gender === '女性' || a.q2_gender === 'その他') return 'female_other';
-    if (a.q2_gender === '男性') {
-      if (a.q15_gate === '興味はない') return 'male_gate_no';
-      if (S.helpers.isLowInterest(a)) return 'male_low_interest';
-      if (S.helpers.gatePassed(a)) return 'male_full';
-      return 'male_no_gate_answer';
-    }
-    return 'unknown';
-  }
-
-  /* FormSubmitは通知補助に完全に下げる（Issue #104 追加指示5）。GAS保存成功後にのみ、
-     ベストエフォートで送る。失敗しても回答完了状態・UIには一切影響させない。 */
-  function notifyFormSubmitBestEffort(serverResponseId) {
-    try {
-      var plan = E.recomputePlan();
-      var fd = collectFieldsForPlan(plan);
-      var score = safeComputeScore(answers);
-      var rank = safeRankFromScore(score);
-      fd.append('_subject', '【アタル】アンケート回答');
-      fd.append('_template', 'table');
-      fd.append('_captcha', 'false');
-      fd.append('_honey', '');
-      fd.append('response_id', serverResponseId);
-      fd.append('送信日時', new Date().toISOString());
-      fd.append('到達分岐', branchLabel(answers));
-      if (score !== null) fd.append('内部スコア', String(score));
-      if (rank !== null) fd.append('内部判定', rank);
-      fetch(FORM_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } }).catch(function () { /* 通知失敗は無視（正本はGAS保存） */ });
-    } catch (e) { /* 通知組み立て失敗も回答完了状態には影響させない */ }
-  }
-
   /* answersの各フィールドを個別にtry/catchしながらコピーする。computeScore()同様、
      単一フィールドへのアクセスで例外が起きても送信データの組み立て全体を止めない
      （defaultAnswers()のキー一覧を基準にするため、answers自体の列挙が壊れていても影響しない）。 */
@@ -1081,7 +1027,8 @@ window.__Survey = {};
 
   /* 回答完了の基準はGAS保存成功のみ（Issue #104 2章）。
      順序：①GASへ送信 → ②保存成功 → ③Cookie/localStorageへ回答済み保存 →
-     ④survey_submit発火 → ⑤完了画面表示 → ⑥FormSubmit通知（ベストエフォート）。
+     ④survey_submit発火 → ⑤完了画面表示。回答内容をメールで通知する処理は行わない
+     （回答の正本はresponsesシートのみ）。
      GAS失敗時は完了画面・回答済み状態・survey_submitのいずれも発生させず、
      現在のanswersを保持したまま再送できるようにする（入力内容はクリアしない）。 */
   function realSubmit() {
@@ -1109,7 +1056,6 @@ window.__Survey = {};
         if (heading) heading.textContent = 'ご回答ありがとうございました。';
         if (body) body.textContent = 'アンケートの回答はすでに送信済みです。これ以降、何も入力しなくても回答は完了しています。';
         S.nav.showOnly(screenComplete);
-        notifyFormSubmitBestEffort(serverResponseId);
       })
       .catch(function (err) {
         submitting = false;
