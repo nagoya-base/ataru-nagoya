@@ -8,6 +8,55 @@
  * 分かれるだけで、別サービス・別受信先への分離ではない。真に別の送信先が
  * 必要な場合は、連絡先用の別メールアドレスをFormSubmitで有効化した上で
  * FORM_ENDPOINT_LEAD 定数を分ける対応が必要（要運用判断）。
+ *
+ * ─────────────────────────────────────────────────────────────
+ * Issue #107: 全ジェンダー共通の緊縛設問＋男性向けスポーツ／ユニ分岐への改修
+ *
+ * 保存キー対応表（旧 PR #105 → 新 Issue #107）
+ * このファイル内の保存フィールド名は、旧番号を画面上だけ読み替えるのではなく、
+ * 新しいQ番号に完全に合わせて付け替えている。Issue #106でのスキーマ正本化を
+ * 見据え、フィールド名は "qN_項目名" 形式に統一した。
+ *
+ *   旧フィールド                新フィールド              備考
+ *   q1_age                  → q1_age                  変更なし
+ *   q2_gender/_other         → q2_gender/_other         変更なし
+ *   q3_region/_country/_other→ q3_region/_country/_other 変更なし
+ *   （新規）                  → q4_interest              旧Q15(緊縛への関心)を全ジェンダー共通の新Q4へ
+ *   （新規）                  → q5_enjoy/_other          新設（緊縛の楽しみ方）
+ *   （新規）                  → q6_role/_other           新設。旧Q16(立場)の選択肢を統合
+ *   （新規）                  → q6a_involvement/_other   新設（今後の企画との関わり方）
+ *   q4_sports/_other         → q7_sports/_other
+ *   q5_exercise/_other       → q8_exercise/_other
+ *   q6_gym/_other            → q9_gym/_other
+ *   q7_motivation/_other     → q10_motivation/_other
+ *   q8_uniform/_other        → q11_uniform/_other
+ *   q9_favorite              → q12_favorite
+ *   q10_enjoy/_other         → q13_enjoy/_other
+ *   q10_wear_self            → q13a_wear_self           独立フィールド
+ *   q10_wear_others          → q13b_wear_others         独立フィールド
+ *   q11a_self/_other         → q14a_self/_other         独立フィールド
+ *   q11b_pref/_other         → q14b_pref/_other         独立フィールド（選択肢を拡張）
+ *   q12_gate                 → q15_gate
+ *   q13_interest/_other      → q16_interest/_other      興味なし時の候補フィルタは廃止
+ *                                                       （Q15興味なしは丸ごとQ27へスキップするため不要）
+ *   q14_experience/_other    → q17_experience/_other
+ *   q17_combo                → q18_combo
+ *   q18_range/_other         → q19_range/_other
+ *   q19a〜q19f（6グループ）    → q20a〜q20d（4グループ）   A/B/C/Dへ再編。q19bの内容はQ5に統合、
+ *                                                       q19cの一部もQ20Aへ統合
+ *   q20_conditions/_other    → q21_conditions/_other
+ *   q21_visit                → q22_visit
+ *   q22_schedule/_other      → q23_schedule/_other
+ *   q23_price                → q24_price
+ *   q24_intent                → q25_intent
+ *   q25_format/_other        → q26_format/_other
+ *   q26_message              → q27_message
+ *
+ * computeScore() / rankFromScore() もすべて上表の新フィールド名のみを参照する
+ * （旧フィールド名は一切残していない）。配列フィールドは `|| []` で安全に扱い、
+ * undefined.indexOf() のような例外を起こさない。さらに、スコア計算自体で例外が
+ * 発生しても回答送信を止めないよう、呼び出し側（realSubmit）でtry/catchする。
+ * ─────────────────────────────────────────────────────────────
  */
 window.__Survey = {};
 
@@ -20,48 +69,57 @@ window.__Survey = {};
     q1: ['17歳以下','18〜24歳','25〜29歳','30〜34歳','35〜39歳','40〜49歳','50〜59歳','60歳以上','回答しない'],
     q2: ['男性','女性','その他'],
     q3: ['北海道','東北','関東（東京都以外）','東京都','甲信越・北陸','静岡県','愛知県・名古屋市','愛知県・尾張地域（名古屋市以外）','愛知県・三河地域','岐阜県','三重県','関西','中国','四国','九州','沖縄県','海外','その他'],
-    q4: ['野球・ソフトボール','サッカー・フットサル','ラグビー・アメリカンフットボール','バスケットボール','バレーボール','陸上競技','水泳','テニス・ラケット競技','格闘技・武道','筋力トレーニング・ボディメイク','特にない','その他'],
-    q5: ['定期的にスポーツをしている','不定期にスポーツをしている','ジムや自宅でトレーニングしている','スポーツとトレーニングの両方をしている','現在はしていない','その他'],
-    q6: ['週4回以上','週2〜3回','週1回程度','月に数回','ほとんどしていない','現在はしていない','その他'],
-    q7: ['健康を維持したい','筋肉をつけたい','体型を維持・改善したい','スポーツの競技力を高めたい','見た目に自信を持ちたい','モテたい','写真映えする身体になりたい','ユニフォームやスポーツウェアを格好よく着たい','同じ趣味の人と交流したい','特にない','その他'],
-    q8: ['野球','サッカー','ラグビー・アメフト','バスケットボール','バレーボール','陸上','競泳・競パン','レスリング・シングレット','ジャージ','体操服','学校・部活動制服','スーツ','作業着・職業制服','特にない','その他'],
-    q10: ['自分で着たい','人が着ている姿を見たい','ユニフォーム姿でスポーツをしたい','ユニフォーム姿を撮影したい','ユニフォーム姿で撮られたい','ユニフォームのフィット感や着心地を楽しみたい','背番号・ソックス・ベルト・サポーターなどの組合せを楽しみたい','試合前の緊張感や、練習後の汗・着崩れた雰囲気が好き','ロッカールーム・部室の雰囲気を楽しみたい','同じ趣味の人と交流したい','少しフェチ的な表現も楽しみたい','その他'],
-    q11a: ['現在、チーム・クラブ・競技団体に所属している','過去に運動部・チームへ所属していた','現在もスポーツを続けている','定期的にジムへ通っている','筋肉質だと思う','がっしりした体格だと思う','標準的な体格だと思う','細身だと思う','自分が短髪・ベリーショート','体育会系の雰囲気だと言われる','体育会系ではないが憧れがある','回答しない','その他'],
-    q11b: ['短髪・坊主・スポーツ刈りの男性が好き','短髪の男性を見たい','短髪の男性を撮影したい','特にこだわりはない','回答しない','その他'],
-    q12: ['はい','内容による','興味はない'],
-    q13: ['ユニフォーム交流','軽いスポーツ','選手名鑑風撮影','練習・試合前後風撮影','教室・部室・ロッカールーム風撮影','身体やユニフォームのラインを生かした撮影','フェチ撮影','ロープ撮影','緊縛撮影','特にない','その他'],
-    q14: ['未経験','写真・動画を見たことがある','緊縛を見学したことがある','着衣で軽く縛られたことがある','床縄・部分吊りを体験したことがある','本吊りを体験したことがある','人を縛ったことがある','緊縛を撮影したことがある','その他','回答しない'],
-    q15: ['とても好き','興味がある','軽い内容なら興味がある','写真や詳しい内容を見てから考えたい','自分では体験しないが見ることには興味がある','あまり興味はない','苦手','よく分からない'],
-    q16: ['縛られてみたい','縛ってみたい','縛る・縛られる両方に興味がある','見学したい','撮影する側として関わりたい','まだ分からない','その他'],
-    q17: ['ぜひ体験したい','軽い内容なら体験したい','詳細を見て判断','見学して判断','撮影側なら興味あり','興味なし'],
-    q18: ['手首など一部分だけロープを使う','ユニフォームを着たままの着衣緊縛','ユニフォームの上から軽く縛る','ユニフォーム姿のまま本格的に縛る','立った状態での緊縛','床や椅子を使った緊縛','部分吊り','本吊り','まず説明だけ聞きたい','まだ決められない','その他'],
-    q19a: ['美しく縛られたい','ユニフォーム姿のまま格好よく縛られたい','写真作品として格好よく撮られたい','縄とユニフォームの組合せを作品として残したい'],
-    q19b: ['縄の感触を心ゆくまで感じたい','縄の締まりや圧迫感を感じたい','強く拘束され、動けない感覚を味わいたい','相手に身を任せたい'],
-    q19c: ['ユニフォーム姿の男性を美しく縛りたい','縄をかける技術や構成を楽しみたい','縛られている男性を見たい','縛られている男性を撮影したい','緊縛作品の演出をしたい'],
-    q19d: ['吊られる感覚を体験したい','強度のある緊縛を体験したい'],
-    q19e: ['SM的な責めを受けたい','言葉責めをされたい','その他の性的なプレイにも興味がある'],
-    q19f: ['縄だけを楽しみたい','撮影だけを楽しみたい','まだ分からない','その他','回答しない'],
-    q20: ['完全個室','1対1','服を着たまま','性的な接触なし','吊りなし','顔を撮影しない','SNSへ掲載しない','内容や強さを自分で選べる','途中で中止できる','事前説明がある','NG項目を事前に伝えられる','友人と一緒に参加できる','見学してから決められる','その他'],
-    q21: ['日程が合えば','内容が合えば','参加者や雰囲気を確認できれば','友人と一緒なら','宿泊を伴っても','名古屋は難しい','分からない'],
-    q22: ['土曜昼','土曜夜','日曜昼','日曜夜','祝日昼','平日夜','個別相談','その他'],
-    q23: ['2,000円以下','3,000円程度','4,000円程度','5,000円程度','内容次第で5,000円以上','価格より内容・安全性','参加しない'],
-    q24: ['日程が合えば参加したい','東京・大阪など遠方からでも内容次第で参加したい','開催案内が欲しい','写真や詳しい説明を見て考えたい','個別相談したい','友人と一緒なら参加したい','見学してから考えたい','今回は参加しない'],
-    q25: ['1対1','友人と2人','3〜4人の体験会','見学後に判断','個別相談','まだ分からない','その他']
+
+    /* Q4〜Q6-A：18歳以上の全ジェンダー共通・緊縛/ロープへの関心 */
+    q4: ['とても好き','興味がある','軽い内容なら興味がある','写真や詳しい内容を見てから考えたい','自分では体験しないが見ることには興味がある','あまり興味はない','苦手','よく分からない'],
+    q5: ['縄の感触を感じたい','縄の締まりや圧迫感を感じたい','拘束されて動けない感覚を味わいたい','相手に身を任せる感覚を味わいたい','美しく縛られたい','美しく縛ることに興味がある','緊縛を見た目・作品として楽しみたい','緊縛されている人を見ることに興味がある','緊縛を撮影することに興味がある','縄をかける技術や構成を楽しみたい','まだ分からない','特にない','回答しない','その他'],
+    q6: ['縛られる側に興味がある','縛る側に興味がある','縛る・縛られる両方に興味がある','見るだけで楽しみたい','撮影する側として関わりたい','まだ分からない','回答しない','その他'],
+    q6a: ['自分で体験することに興味がある','縛る側として関わることに興味がある','見学したい','撮影する側として関わりたい','作品・活動を見るだけでよい','今回はアンケート回答のみ','まだ分からない','その他'],
+
+    /* Q7〜Q14B：男性のみ・スポーツ／ユニフォーム／身体特徴（旧Q4〜Q11B相当） */
+    q7: ['野球・ソフトボール','サッカー・フットサル','ラグビー・アメリカンフットボール','バスケットボール','バレーボール','陸上競技','水泳','テニス・ラケット競技','格闘技・武道','筋力トレーニング・ボディメイク','特にない','その他'],
+    q8: ['定期的にスポーツをしている','不定期にスポーツをしている','ジムや自宅でトレーニングしている','スポーツとトレーニングの両方をしている','現在はしていない','その他'],
+    q9: ['週4回以上','週2〜3回','週1回程度','月に数回','ほとんどしていない','現在はしていない','その他'],
+    q10: ['健康を維持したい','筋肉をつけたい','体型を維持・改善したい','スポーツの競技力を高めたい','見た目に自信を持ちたい','モテたい','写真映えする身体になりたい','ユニフォームやスポーツウェアを格好よく着たい','同じ趣味の人と交流したい','特にない','その他'],
+    q11: ['野球','サッカー','ラグビー・アメフト','バスケットボール','バレーボール','陸上','競泳・競パン','レスリング・シングレット','ジャージ','体操服','学校・部活動制服','スーツ','作業着・職業制服','特にない','その他'],
+    q13: ['自分で着たい','人が着ている姿を見たい','ユニフォーム姿でスポーツをしたい','ユニフォーム姿を撮影したい','ユニフォーム姿で撮られたい','ユニフォームのフィット感や着心地を楽しみたい','背番号・ソックス・ベルト・サポーターなどの組合せを楽しみたい','試合前の緊張感や、練習後の汗・着崩れた雰囲気が好き','ロッカールーム・部室の雰囲気を楽しみたい','同じ趣味の人と交流したい','少しフェチ的な表現も楽しみたい','その他'],
+    q14a: ['現在、チーム・クラブ・競技団体に所属している','過去に運動部・チームへ所属していた','現在もスポーツを続けている','定期的にジムへ通っている','筋肉質だと思う','がっしりした体格だと思う','標準的な体格だと思う','細身だと思う','自分が短髪・ベリーショート','体育会系の雰囲気だと言われる','体育会系ではないが憧れがある','回答しない','その他'],
+    q14b: ['短髪・坊主・スポーツ刈りの男性が好き','短髪の男性を見たい','短髪の男性を撮影したい','筋肉質・がっしりした体格に惹かれる','細身・引き締まった体格に惹かれる','体毛のある男性に惹かれる','体毛が少ない男性に惹かれる','若々しい雰囲気に惹かれる','落ち着いた年齢感に惹かれる','体育会系・ノンケ寄りの雰囲気に惹かれる','特にこだわりはない','回答しない','その他'],
+
+    /* Q15〜Q26：男性のみ・成人男性向け企画（旧Q12〜Q25相当） */
+    q15: ['はい','内容による','興味はない'],
+    q16: ['ユニフォーム交流','軽いスポーツ','選手名鑑風撮影','練習・試合前後風撮影','教室・部室・ロッカールーム風撮影','身体やユニフォームのラインを生かした撮影','フェチ撮影','ロープ撮影','緊縛撮影','特にない','その他'],
+    q17: ['未経験','写真・動画を見たことがある','緊縛を見学したことがある','着衣で軽く縛られたことがある','床縄・部分吊りを体験したことがある','本吊りを体験したことがある','人を縛ったことがある','緊縛を撮影したことがある','その他','回答しない'],
+    q18: ['ぜひ体験したい','軽い内容なら体験したい','詳細を見て判断','見学して判断','撮影側なら興味あり','興味なし'],
+    q19: ['手首など一部分だけロープを使う','ユニフォームを着たままの着衣緊縛','ユニフォームの上から軽く縛る','ユニフォーム姿のまま本格的に縛る','立った状態での緊縛','床や椅子を使った緊縛','部分吊り','本吊り','まず説明だけ聞きたい','まだ決められない','その他'],
+    q20a: ['ユニフォーム姿のまま格好よく縛られたい','写真作品として格好よく撮られたい','縄とユニフォームの組合せを作品として残したい','ユニフォーム姿の男性を美しく縛りたい','縛られている男性を見たい','縛られている男性を撮影したい','緊縛作品の演出をしたい'],
+    q20b: ['吊られる感覚を体験したい','強度のある緊縛を体験したい'],
+    q20c: ['SM的な責めを受けたい','言葉責めをされたい','その他の性的なプレイにも興味がある'],
+    q20d: ['縄だけを楽しみたい','撮影だけを楽しみたい','まだ分からない','その他','回答しない'],
+    q21: ['完全個室','1対1','服を着たまま','性的な接触なし','吊りなし','顔を撮影しない','SNSへ掲載しない','内容や強さを自分で選べる','途中で中止できる','事前説明がある','NG項目を事前に伝えられる','友人と一緒に参加できる','見学してから決められる','その他'],
+    q22: ['日程が合えば','内容が合えば','参加者や雰囲気を確認できれば','友人と一緒なら','宿泊を伴っても','名古屋は難しい','分からない'],
+    q23: ['土曜昼','土曜夜','日曜昼','日曜夜','祝日昼','平日夜','個別相談','その他'],
+    q24: ['2,000円以下','3,000円程度','4,000円程度','5,000円程度','内容次第で5,000円以上','価格より内容・安全性','参加しない'],
+    q25: ['日程が合えば参加したい','東京・大阪など遠方からでも内容次第で参加したい','開催案内が欲しい','写真や詳しい説明を見て考えたい','個別相談したい','友人と一緒なら参加したい','見学してから考えたい','今回は参加しない'],
+    q26: ['1対1','友人と2人','3〜4人の体験会','見学後に判断','個別相談','まだ分からない','その他']
   };
 
   var TXT = {
-    femaleOtherEnd: 'ご回答ありがとうございます。今回検討している詳しい撮影・体験企画は、成人男性を主な対象としているため、個別の嗜好に関する質問は以上です。最後に任意のメッセージ欄があります。',
-    adultMenIntro: 'ここから先は、成人男性同士で行う表現・撮影・体験についての質問です。希望しない場合は、詳しい質問を飛ばして回答を完了できます。',
+    bondageIntro: 'ここから、緊縛・ロープ表現への関心についてお聞きします。ご回答は任意です。答えたくない項目は「回答しない」等の選択肢がある場合はそちらを選べます。',
+    femaleOtherEnd: '緊縛・ロープについてのご回答ありがとうございます。今回の詳しい企画検討は、男性の身体表現・ユニフォームを中心にしています。見る・縛る・撮るなど、関わり方についてのご意見があれば、最後の自由記述でもぜひお聞かせください。',
+    q15GateIntro: '今回詳しく検討しているのは、成人男性がユニフォーム姿で参加する撮影・ロープ体験です。この前提で、続く企画について回答しますか。',
     playSectionIntro: '以下は関心・需要を把握するための質問です。選んだ内容の提供を約束するものではありません。実際に企画化する場合は、成人同士の明確な同意、安全性、法令、衛生面を確認したうえで内容を決定します。',
-    q19eNotice: '以下の性的な項目は任意です。興味がなければ選ばずに進めます。ここでの回答は需要調査のためのものであり、実際の提供内容を約束するものではありません。',
+    q20cNotice: '以下の性的な項目は任意です。興味がなければ選ばずに進めます。ここでの回答は需要調査のためのものであり、実際の提供内容を約束するものではありません。',
     priceAnnounce: '名古屋・上前津の完全個室スタジオで、ユニフォーム姿の初心者向けロープ撮影を3,000円から体験できる企画を検討しています。\nユニフォームを着たまま、吊りなし、顔出し・SNS掲載なしでも参加可能。希望しない内容は断れます。\n回答しただけで申込みにはなりません。',
-    q26Hint: '企画に期待すること、こんな内容なら参加したいというご要望、主催者への激励・応援メッセージなど、内容は自由です。'
+    q27Hint: '企画に期待すること、こんな内容なら参加したいというご要望、主催者への激励・応援メッセージなど、内容は自由です。'
   };
 
   var SECTION = {
     basic: '基本情報・地域',
+    bondage: '緊縛・ロープへの関心',
     sports: 'スポーツ・身体づくり',
     uniform: 'ユニフォーム嗜好',
+    body: '身体・好みについて',
     men: '成人男性向け設問',
     play: '望む体験・プレイ',
     visit: '名古屋への来訪・価格',
@@ -81,26 +139,23 @@ window.__Survey = {};
   var TXT = window.__Survey.TXT;
   var SECTION = window.__Survey.SECTION;
 
-  function proceededPastGate(a) { return a.q2_gender === '男性' && (a.q12_gate === 'はい' || a.q12_gate === '内容による'); }
-  function isLowInterest(a) { return a.q15_level === 'あまり興味はない' || a.q15_level === '苦手'; }
-  function isMaleFull(a) { return proceededPastGate(a) && !!a.q15_level && !isLowInterest(a); }
   function isMaleAny(a) { return a.q2_gender === '男性'; }
   function isFemaleOther(a) { return a.q2_gender === '女性' || a.q2_gender === 'その他'; }
 
-  /* Q12で「興味はない」を選んだ場合、Q13から緊縛系の項目（ロープ撮影・緊縛撮影）を
-     除いた一般項目だけを候補にする。「緊縛・プレイ詳細を飛ばし、一般企画の関心へ」
-     というIssueの意図どおり、興味なしと答えた直後に緊縛の話を再提示しないため。 */
-  var Q13_KINK_OPTIONS = ['ロープ撮影', '緊縛撮影'];
-  function q13Options(a) {
-    if (a.q12_gate === '興味はない') {
-      return OPT.q13.filter(function (v) { return Q13_KINK_OPTIONS.indexOf(v) === -1; });
-    }
-    return OPT.q13;
-  }
+  /* Q4（緊縛・ロープ表現への関心）が低関心3択の場合、Q18〜Q21（詳細な体験内容）を
+     スキップしてQ22（名古屋での参加可能性）へ進める。Q16/Q17は表示する。 */
+  function isLowInterest(a) { return ['あまり興味はない', '苦手', 'よく分からない'].indexOf(a.q4_interest) !== -1; }
 
-  function q8DerivedOptions(a) {
-    return (a.q8_uniform || []).map(function (v) {
-      return v === 'その他' ? (a.q8_other ? 'その他：' + a.q8_other : 'その他') : v;
+  /* Q15ゲートで「はい」「内容による」を選んだ場合のみ、Q16以降（〜Q26）へ進む。
+     「興味はない」はQ16〜Q26を一切表示せずQ27へ直行する。 */
+  function gatePassed(a) { return isMaleAny(a) && (a.q15_gate === 'はい' || a.q15_gate === '内容による'); }
+
+  /* Q18〜Q21（体験内容の詳細）は、ゲート通過かつQ4が低関心でない場合のみ表示する。 */
+  function showDetailBlock(a) { return gatePassed(a) && !isLowInterest(a); }
+
+  function q11DerivedOptions(a) {
+    return (a.q11_uniform || []).map(function (v) {
+      return v === 'その他' ? (a.q11_other ? 'その他：' + a.q11_other : 'その他') : v;
     });
   }
 
@@ -118,120 +173,124 @@ window.__Survey = {};
       ],
       visible: function () { return true; } },
 
-    { id: 'q4', section: SECTION.sports, type: 'checkbox', title: 'Q4. 現在または過去に経験したスポーツ', required: true, options: OPT.q4, field: 'q4_sports', otherField: 'q4_other', emailKey: 'Q4_経験スポーツ', otherEmailKey: 'Q4_その他',
+    { id: 'bondage_intro', section: SECTION.bondage, type: 'info', title: 'ここからのご案内', body: TXT.bondageIntro,
       visible: function () { return true; } },
 
-    { id: 'q5', section: SECTION.sports, type: 'radio', title: 'Q5. 現在の運動状況', required: true, options: OPT.q5, field: 'q5_exercise', otherField: 'q5_other', emailKey: 'Q5_運動状況', otherEmailKey: 'Q5_その他',
+    { id: 'q4', section: SECTION.bondage, type: 'radio', title: 'Q4. 緊縛・ロープ表現への関心', required: true, options: OPT.q4, field: 'q4_interest', emailKey: 'Q4_緊縛への関心',
       visible: function () { return true; } },
 
-    { id: 'q6', section: SECTION.sports, type: 'radio', title: 'Q6. ジム・筋力トレーニング頻度', required: true, options: OPT.q6, field: 'q6_gym', otherField: 'q6_other', emailKey: 'Q6_ジム頻度', otherEmailKey: 'Q6_その他',
+    { id: 'q5', section: SECTION.bondage, type: 'checkbox', title: 'Q5. 緊縛では、どんな楽しみ方に関心がありますか', required: false, options: OPT.q5, otherField: 'q5_other', field: 'q5_enjoy', exclusive: ['まだ分からない', '特にない', '回答しない'], emailKey: 'Q5_楽しみ方', otherEmailKey: 'Q5_その他',
       visible: function () { return true; } },
 
-    { id: 'q7', section: SECTION.sports, type: 'checkbox', title: 'Q7. スポーツ・身体づくりの動機', required: false, options: OPT.q7, field: 'q7_motivation', otherField: 'q7_other', emailKey: 'Q7_動機', otherEmailKey: 'Q7_その他',
+    { id: 'q6', section: SECTION.bondage, type: 'checkbox', title: 'Q6. 緊縛では、どの立場に関心がありますか', required: false, options: OPT.q6, otherField: 'q6_other', field: 'q6_role', exclusive: ['まだ分からない', '回答しない'],
+      conflictPairs: [['縛る・縛られる両方に興味がある', '縛られる側に興味がある'], ['縛る・縛られる両方に興味がある', '縛る側に興味がある']],
+      emailKey: 'Q6_興味のある立場', otherEmailKey: 'Q6_その他',
       visible: function () { return true; } },
 
-    { id: 'q8', section: SECTION.uniform, type: 'checkbox', title: 'Q8. 好きなユニフォーム・ウェア', required: true, options: OPT.q8, field: 'q8_uniform', otherField: 'q8_other', emailKey: 'Q8_好きなユニフォーム', otherEmailKey: 'Q8_その他',
+    { id: 'q6a', section: SECTION.bondage, type: 'checkbox', title: 'Q6-A. 今後の企画との関わり方', required: false, options: OPT.q6a, otherField: 'q6a_other', field: 'q6a_involvement', exclusive: ['今回はアンケート回答のみ', 'まだ分からない'], emailKey: 'Q6A_今後の関わり方', otherEmailKey: 'Q6A_その他',
       visible: function () { return true; } },
-
-    { id: 'q9', section: SECTION.uniform, type: 'radio', title: 'Q9. 最も好きなもの', required: true, field: 'q9_favorite', emailKey: 'Q9_最も好きなもの',
-      dynamicOptions: q8DerivedOptions,
-      visible: function (a) { return q8DerivedOptions(a).length > 1; } },
-
-    { id: 'q10', section: SECTION.uniform, type: 'checkbox', title: 'Q10. 楽しみ方', required: false, options: OPT.q10, field: 'q10_enjoy', otherField: 'q10_other', emailKey: 'Q10_楽しみ方', otherEmailKey: 'Q10_その他',
-      visible: function () { return true; } },
-
-    { id: 'q10a', section: SECTION.uniform, type: 'checkbox', title: 'Q10-A. 自分で着たいユニフォーム', hint: '任意です。Q8で選んだものの中から選べます。', required: false, field: 'q10_wear_self', emailKey: 'Q10_自分で着たいユニフォーム',
-      dynamicOptions: q8DerivedOptions,
-      visible: function (a) { return q8DerivedOptions(a).length > 0; } },
-
-    { id: 'q10b', section: SECTION.uniform, type: 'checkbox', title: 'Q10-B. 人に着てほしい・見たいユニフォーム', hint: '任意です。Q8で選んだものの中から選べます。', required: false, field: 'q10_wear_others', emailKey: 'Q10_人に着てほしいユニフォーム',
-      dynamicOptions: q8DerivedOptions,
-      visible: function (a) { return q8DerivedOptions(a).length > 0; } },
 
     { id: 'female_other_end', section: SECTION.end, type: 'info', title: 'ご案内', body: TXT.femaleOtherEnd,
       visible: function (a) { return isFemaleOther(a); } },
 
-    { id: 'adult_men_intro', section: SECTION.men, type: 'info', title: 'ここからのご案内', body: TXT.adultMenIntro,
-      visible: function (a) { return a.q2_gender === '男性'; } },
-
-    { id: 'q11a', section: SECTION.men, type: 'checkbox', title: 'Q11A. 自分に当てはまる特徴', required: false, options: OPT.q11a, otherField: 'q11a_other', field: 'q11a_self', exclusive: ['回答しない'], emailKey: 'Q11A_自分の特徴', otherEmailKey: 'Q11A_その他',
-      visible: function (a) { return a.q2_gender === '男性'; } },
-
-    { id: 'q11b', section: SECTION.men, type: 'checkbox', title: 'Q11B. 相手の見た目についての好み', required: false, options: OPT.q11b, otherField: 'q11b_other', field: 'q11b_pref', exclusive: ['回答しない'], emailKey: 'Q11B_相手の好み', otherEmailKey: 'Q11B_その他',
-      visible: function (a) { return a.q2_gender === '男性'; } },
-
-    { id: 'q12', section: SECTION.men, type: 'radio', title: 'Q12. 成人男性同士の企画を前提に、この先の質問へ回答しますか', required: true, options: OPT.q12, field: 'q12_gate', emailKey: 'Q12_成人男性企画ゲート',
-      visible: function (a) { return a.q2_gender === '男性'; } },
-
-    /* Q12で「興味はない」を選んだ場合でも、Q13は緊縛系以外の一般項目（ユニフォーム交流・
-       軽いスポーツ・撮影企画など）への関心を拾うための設問として表示を続ける。
-       緊縛系の項目を選ぶかどうかは回答者の任意選択に委ねる（Issueの選択肢構成どおり）。 */
-    { id: 'q13', section: SECTION.men, type: 'checkbox', title: 'Q13. 興味のある企画', required: false, dynamicOptions: q13Options, otherField: 'q13_other', field: 'q13_interest', emailKey: 'Q13_興味のある企画', otherEmailKey: 'Q13_その他',
-      visible: function (a) { return a.q2_gender === '男性' && !!a.q12_gate; } },
-
-    { id: 'q14', section: SECTION.men, type: 'checkbox', title: 'Q14. 緊縛・ロープの経験', required: true, options: OPT.q14, otherField: 'q14_other', field: 'q14_experience', exclusive: ['未経験', '回答しない'], emailKey: 'Q14_緊縛経験', otherEmailKey: 'Q14_その他',
-      visible: function (a) { return proceededPastGate(a); } },
-
-    { id: 'q15', section: SECTION.men, type: 'radio', title: 'Q15. 緊縛・ロープ表現への関心', required: true, options: OPT.q15, field: 'q15_level', emailKey: 'Q15_緊縛への関心',
-      visible: function (a) { return proceededPastGate(a); } },
-
-    { id: 'q16', section: SECTION.men, type: 'checkbox', title: 'Q16. 興味のある立場', required: false, options: OPT.q16, otherField: 'q16_other', field: 'q16_role', emailKey: 'Q16_興味のある立場', otherEmailKey: 'Q16_その他',
-      visible: function (a) { return isMaleFull(a); } },
-
-    { id: 'q17', section: SECTION.men, type: 'radio', title: 'Q17. ユニフォーム姿と緊縛を組み合わせた撮影', required: true, options: OPT.q17, field: 'q17_combo', emailKey: 'Q17_ユニフォーム緊縛撮影',
-      visible: function (a) { return isMaleFull(a); } },
-
-    { id: 'q18', section: SECTION.men, type: 'checkbox', title: 'Q18. 興味のある緊縛範囲', required: false, options: OPT.q18, otherField: 'q18_other', field: 'q18_range', emailKey: 'Q18_緊縛範囲', otherEmailKey: 'Q18_その他',
-      visible: function (a) { return isMaleFull(a); } },
-
-    { id: 'play_intro', section: SECTION.play, type: 'info', title: 'ここからのご案内', body: TXT.playSectionIntro,
-      visible: function (a) { return isMaleFull(a); } },
-
-    { id: 'q19a', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'A. 見た目・作品として楽しみたい', required: false, options: OPT.q19a, field: 'q19a', emailKey: 'Q19A_見た目作品', q19group: 1,
-      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
-
-    { id: 'q19b', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'B. 縄そのもの・拘束感を味わいたい', required: false, options: OPT.q19b, field: 'q19b', emailKey: 'Q19B_縄拘束感', q19group: 2,
-      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
-
-    { id: 'q19c', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'C. 縛る・見る・撮る側として楽しみたい', required: false, options: OPT.q19c, field: 'q19c', emailKey: 'Q19C_縛る見る撮る', q19group: 3,
-      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
-
-    { id: 'q19d', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'D. 吊り・強度を楽しみたい', required: false, options: OPT.q19d, field: 'q19d', emailKey: 'Q19D_吊り強度', q19group: 4,
-      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
-
-    { id: 'q19e', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'E. SM・性的な責めにも関心がある', notice: TXT.q19eNotice, required: false, options: OPT.q19e, field: 'q19e', emailKey: 'Q19E_SM性的責め', q19group: 5,
-      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
-
-    { id: 'q19f', section: SECTION.play, type: 'checkbox', title: 'Q19. 緊縛体験で求めるもの', subTitle: 'F. その他', required: false, options: OPT.q19f, otherField: 'q19f_other', field: 'q19f', exclusive: ['まだ分からない', '回答しない'], emailKey: 'Q19F_その他選択', otherEmailKey: 'Q19F_その他', q19group: 6,
-      visible: function (a) { return isMaleFull(a); } , crossExclusive: 'q19' },
-
-    { id: 'q20', section: SECTION.play, type: 'checkbox', title: 'Q20. 体験時に重視する条件', required: false, options: OPT.q20, otherField: 'q20_other', field: 'q20_conditions', emailKey: 'Q20_重視条件', otherEmailKey: 'Q20_その他',
-      visible: function (a) { return isMaleFull(a); } },
-
-    { id: 'q21', section: SECTION.visit, type: 'radio', title: 'Q21. 名古屋での参加可能性', required: true, options: OPT.q21, field: 'q21_visit', emailKey: 'Q21_名古屋参加可能性',
+    { id: 'q7', section: SECTION.sports, type: 'checkbox', title: 'Q7. 現在または過去に経験したスポーツ', required: true, options: OPT.q7, field: 'q7_sports', otherField: 'q7_other', emailKey: 'Q7_経験スポーツ', otherEmailKey: 'Q7_その他',
       visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q22', section: SECTION.visit, type: 'checkbox', title: 'Q22. 参加しやすい曜日・時間', required: false, options: OPT.q22, otherField: 'q22_other', field: 'q22_schedule', emailKey: 'Q22_参加曜日時間', otherEmailKey: 'Q22_その他',
-      visible: function (a) { return isMaleFull(a); } },
+    { id: 'q8', section: SECTION.sports, type: 'radio', title: 'Q8. 現在の運動状況', required: true, options: OPT.q8, field: 'q8_exercise', otherField: 'q8_other', emailKey: 'Q8_運動状況', otherEmailKey: 'Q8_その他',
+      visible: function (a) { return isMaleAny(a); } },
 
-    { id: 'q23', section: SECTION.visit, type: 'radio', title: 'Q23. 初心者向け短時間体験の参加しやすい価格', required: true, options: OPT.q23, field: 'q23_price', emailKey: 'Q23_価格',
-      visible: function (a) { return isMaleFull(a); } },
+    { id: 'q9', section: SECTION.sports, type: 'radio', title: 'Q9. ジム・筋力トレーニング頻度', required: true, options: OPT.q9, field: 'q9_gym', otherField: 'q9_other', emailKey: 'Q9_ジム頻度', otherEmailKey: 'Q9_その他',
+      visible: function (a) { return isMaleAny(a); } },
 
+    { id: 'q10', section: SECTION.sports, type: 'checkbox', title: 'Q10. スポーツ・身体づくりの動機', required: false, options: OPT.q10, field: 'q10_motivation', otherField: 'q10_other', emailKey: 'Q10_動機', otherEmailKey: 'Q10_その他',
+      visible: function (a) { return isMaleAny(a); } },
+
+    { id: 'q11', section: SECTION.uniform, type: 'checkbox', title: 'Q11. 好きなユニフォーム・ウェア', required: true, options: OPT.q11, field: 'q11_uniform', otherField: 'q11_other', emailKey: 'Q11_好きなユニフォーム', otherEmailKey: 'Q11_その他',
+      visible: function (a) { return isMaleAny(a); } },
+
+    { id: 'q12', section: SECTION.uniform, type: 'radio', title: 'Q12. 最も好きなもの', required: true, field: 'q12_favorite', emailKey: 'Q12_最も好きなもの',
+      dynamicOptions: q11DerivedOptions,
+      visible: function (a) { return isMaleAny(a) && q11DerivedOptions(a).length > 1; } },
+
+    { id: 'q13', section: SECTION.uniform, type: 'checkbox', title: 'Q13. ユニフォームの楽しみ方', required: false, options: OPT.q13, field: 'q13_enjoy', otherField: 'q13_other', emailKey: 'Q13_楽しみ方', otherEmailKey: 'Q13_その他',
+      visible: function (a) { return isMaleAny(a); } },
+
+    { id: 'q13a', section: SECTION.uniform, type: 'checkbox', title: 'Q13-A. 自分で着たいユニフォーム', hint: '任意です。Q11で選んだものの中から選べます。', required: false, field: 'q13a_wear_self', emailKey: 'Q13A_自分で着たいユニフォーム',
+      dynamicOptions: q11DerivedOptions,
+      visible: function (a) { return isMaleAny(a) && q11DerivedOptions(a).length > 0; } },
+
+    { id: 'q13b', section: SECTION.uniform, type: 'checkbox', title: 'Q13-B. 人に着てほしい・見たいユニフォーム', hint: '任意です。Q11で選んだものの中から選べます。', required: false, field: 'q13b_wear_others', emailKey: 'Q13B_人に着てほしいユニフォーム',
+      dynamicOptions: q11DerivedOptions,
+      visible: function (a) { return isMaleAny(a) && q11DerivedOptions(a).length > 0; } },
+
+    { id: 'q14a', section: SECTION.body, type: 'checkbox', title: 'Q14-A. 自分に当てはまる特徴', required: false, options: OPT.q14a, otherField: 'q14a_other', field: 'q14a_self', exclusive: ['回答しない'], emailKey: 'Q14A_自分の特徴', otherEmailKey: 'Q14A_その他',
+      visible: function (a) { return isMaleAny(a); } },
+
+    { id: 'q14b', section: SECTION.body, type: 'checkbox', title: 'Q14-B. 相手の見た目についての好み', required: false, options: OPT.q14b, otherField: 'q14b_other', field: 'q14b_pref', exclusive: ['回答しない'], emailKey: 'Q14B_相手の好み', otherEmailKey: 'Q14B_その他',
+      visible: function (a) { return isMaleAny(a); } },
+
+    { id: 'q15_intro', section: SECTION.men, type: 'info', title: 'ここでの確認', body: TXT.q15GateIntro,
+      visible: function (a) { return isMaleAny(a); } },
+
+    { id: 'q15', section: SECTION.men, type: 'radio', title: 'Q15. 続く企画についての質問へ回答しますか', required: true, options: OPT.q15, field: 'q15_gate', emailKey: 'Q15_企画ゲート',
+      visible: function (a) { return isMaleAny(a); } },
+
+    { id: 'q16', section: SECTION.men, type: 'checkbox', title: 'Q16. 興味のある企画', required: false, options: OPT.q16, otherField: 'q16_other', field: 'q16_interest', emailKey: 'Q16_興味のある企画', otherEmailKey: 'Q16_その他',
+      visible: function (a) { return gatePassed(a); } },
+
+    { id: 'q17', section: SECTION.men, type: 'checkbox', title: 'Q17. 緊縛・ロープの経験', required: true, options: OPT.q17, otherField: 'q17_other', field: 'q17_experience', exclusive: ['未経験', '回答しない'], emailKey: 'Q17_緊縛経験', otherEmailKey: 'Q17_その他',
+      visible: function (a) { return gatePassed(a); } },
+
+    { id: 'q18', section: SECTION.men, type: 'radio', title: 'Q18. ユニフォーム姿と緊縛を組み合わせた撮影', required: true, options: OPT.q18, field: 'q18_combo', emailKey: 'Q18_ユニフォーム緊縛撮影',
+      visible: function (a) { return showDetailBlock(a); } },
+
+    { id: 'q19', section: SECTION.men, type: 'checkbox', title: 'Q19. 興味のある緊縛範囲', required: false, options: OPT.q19, otherField: 'q19_other', field: 'q19_range', emailKey: 'Q19_緊縛範囲', otherEmailKey: 'Q19_その他',
+      visible: function (a) { return showDetailBlock(a); } },
+
+    { id: 'play_intro', section: SECTION.play, type: 'info', title: 'ここからのご案内', body: TXT.playSectionIntro,
+      visible: function (a) { return showDetailBlock(a); } },
+
+    { id: 'q20a', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'A. ユニフォーム・作品表現', required: false, options: OPT.q20a, field: 'q20a', emailKey: 'Q20A_ユニフォーム作品表現', q20Group: 'A',
+      visible: function (a) { return showDetailBlock(a); }, crossExclusive: 'q20' },
+
+    { id: 'q20b', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'B. 吊り・強度', required: false, options: OPT.q20b, field: 'q20b', emailKey: 'Q20B_吊り強度', q20Group: 'B',
+      visible: function (a) { return showDetailBlock(a); }, crossExclusive: 'q20' },
+
+    { id: 'q20c', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'C. SM・性的な責め', notice: TXT.q20cNotice, required: false, options: OPT.q20c, field: 'q20c', emailKey: 'Q20C_SM性的責め', q20Group: 'C',
+      visible: function (a) { return showDetailBlock(a); }, crossExclusive: 'q20' },
+
+    { id: 'q20d', section: SECTION.play, type: 'checkbox', title: 'Q20. 男性向け企画で関心のある詳細内容', subTitle: 'D. その他', required: false, options: OPT.q20d, otherField: 'q20d_other', field: 'q20d', exclusive: ['まだ分からない', '回答しない'], emailKey: 'Q20D_その他選択', otherEmailKey: 'Q20D_その他', q20Group: 'D',
+      visible: function (a) { return showDetailBlock(a); }, crossExclusive: 'q20' },
+
+    { id: 'q21', section: SECTION.play, type: 'checkbox', title: 'Q21. 体験時に重視する条件', required: false, options: OPT.q21, otherField: 'q21_other', field: 'q21_conditions', emailKey: 'Q21_重視条件', otherEmailKey: 'Q21_その他',
+      visible: function (a) { return showDetailBlock(a); } },
+
+    { id: 'q22', section: SECTION.visit, type: 'radio', title: 'Q22. 名古屋での参加可能性', required: true, options: OPT.q22, field: 'q22_visit', emailKey: 'Q22_名古屋参加可能性',
+      visible: function (a) { return gatePassed(a); } },
+
+    { id: 'q23', section: SECTION.visit, type: 'checkbox', title: 'Q23. 参加しやすい曜日・時間', required: false, options: OPT.q23, otherField: 'q23_other', field: 'q23_schedule', emailKey: 'Q23_参加曜日時間', otherEmailKey: 'Q23_その他',
+      visible: function (a) { return gatePassed(a); } },
+
+    { id: 'q24', section: SECTION.visit, type: 'radio', title: 'Q24. 初心者向け短時間体験の参加しやすい価格', required: true, options: OPT.q24, field: 'q24_price', emailKey: 'Q24_価格',
+      visible: function (a) { return gatePassed(a); } },
+
+    /* Q24（価格）回答完了後に初めて3,000円企画を表示する（価格アンカリング回避）。
+       !!a.q24_price を条件にすることで、Q24回答前はこのステップが計画に含まれない。 */
     { id: 'price_announce', section: SECTION.invite, type: 'info', title: '体験のご案内', body: TXT.priceAnnounce,
-      visible: function (a) { return isMaleFull(a); } },
+      visible: function (a) { return gatePassed(a) && !!a.q24_price; } },
 
-    { id: 'q24', section: SECTION.invite, type: 'radio', title: 'Q24. 現在の参加意向', required: true, options: OPT.q24, field: 'q24_intent', emailKey: 'Q24_参加意向',
-      visible: function (a) { return isMaleFull(a); } },
+    { id: 'q25', section: SECTION.invite, type: 'radio', title: 'Q25. 現在の参加意向', required: true, options: OPT.q25, field: 'q25_intent', emailKey: 'Q25_参加意向',
+      visible: function (a) { return gatePassed(a); } },
 
-    { id: 'q25', section: SECTION.invite, type: 'checkbox', title: 'Q25. 希望参加形式', required: false, options: OPT.q25, otherField: 'q25_other', field: 'q25_format', emailKey: 'Q25_参加形式', otherEmailKey: 'Q25_その他',
-      visible: function (a) { return isMaleFull(a); } },
+    { id: 'q26', section: SECTION.invite, type: 'checkbox', title: 'Q26. 希望参加形式', required: false, options: OPT.q26, otherField: 'q26_other', field: 'q26_format', emailKey: 'Q26_参加形式', otherEmailKey: 'Q26_その他',
+      visible: function (a) { return gatePassed(a); } },
 
-    { id: 'q26', section: SECTION.end, type: 'text', title: 'Q26. その他、ご意見・ご要望・激励・応援メッセージ', hint: TXT.q26Hint, required: false, field: 'q26_message', emailKey: 'Q26_メッセージ',
+    { id: 'q27', section: SECTION.end, type: 'text', title: 'Q27. その他、ご意見・ご要望・激励・応援メッセージ', hint: TXT.q27Hint, required: false, field: 'q27_message', emailKey: 'Q27_メッセージ',
       visible: function () { return true; } }
   ];
 
   window.__Survey.STEPS = STEPS;
-  window.__Survey.helpers = { proceededPastGate: proceededPastGate, isLowInterest: isLowInterest, isMaleFull: isMaleFull, isMaleAny: isMaleAny, isFemaleOther: isFemaleOther, q8DerivedOptions: q8DerivedOptions, q13Options: q13Options };
+  window.__Survey.helpers = { isMaleAny: isMaleAny, isFemaleOther: isFemaleOther, isLowInterest: isLowInterest, gatePassed: gatePassed, showDetailBlock: showDetailBlock, q11DerivedOptions: q11DerivedOptions };
 })();
 
 /* ── エンジン本体 ── */
@@ -244,32 +303,35 @@ window.__Survey = {};
     return {
       q1_age: '', q2_gender: '', q2_gender_other: '',
       q3_region: '', q3_country: '', q3_region_other: '',
-      q4_sports: [], q4_other: '',
-      q5_exercise: '', q5_other: '',
-      q6_gym: '', q6_other: '',
-      q7_motivation: [], q7_other: '',
-      q8_uniform: [], q8_other: '',
-      q9_favorite: '',
-      q10_enjoy: [], q10_other: '',
-      q10_wear_self: [], q10_wear_others: [],
-      q11a_self: [], q11a_other: '',
-      q11b_pref: [], q11b_other: '',
-      q12_gate: '',
-      q13_interest: [], q13_other: '',
-      q14_experience: [], q14_other: '',
-      q15_level: '',
-      q16_role: [], q16_other: '',
-      q17_combo: '',
-      q18_range: [], q18_other: '',
-      q19a: [], q19b: [], q19c: [], q19d: [], q19e: [],
-      q19f: [], q19f_other: '',
-      q20_conditions: [], q20_other: '',
-      q21_visit: '',
-      q22_schedule: [], q22_other: '',
-      q23_price: '',
-      q24_intent: '',
-      q25_format: [], q25_other: '',
-      q26_message: ''
+      q4_interest: '',
+      q5_enjoy: [], q5_other: '',
+      q6_role: [], q6_other: '',
+      q6a_involvement: [], q6a_other: '',
+      q7_sports: [], q7_other: '',
+      q8_exercise: '', q8_other: '',
+      q9_gym: '', q9_other: '',
+      q10_motivation: [], q10_other: '',
+      q11_uniform: [], q11_other: '',
+      q12_favorite: '',
+      q13_enjoy: [], q13_other: '',
+      q13a_wear_self: [],
+      q13b_wear_others: [],
+      q14a_self: [], q14a_other: '',
+      q14b_pref: [], q14b_other: '',
+      q15_gate: '',
+      q16_interest: [], q16_other: '',
+      q17_experience: [], q17_other: '',
+      q18_combo: '',
+      q19_range: [], q19_other: '',
+      q20a: [], q20b: [], q20c: [],
+      q20d: [], q20d_other: '',
+      q21_conditions: [], q21_other: '',
+      q22_visit: '',
+      q23_schedule: [], q23_other: '',
+      q24_price: '',
+      q25_intent: '',
+      q26_format: [], q26_other: '',
+      q27_message: ''
     };
   }
 
@@ -333,18 +395,12 @@ window.__Survey = {};
     } else {
       next = STEPS.filter(function (s) { return s.visible(answers); });
     }
-    /* Q9/Q10サブ設問: Q8の選択肢が変わって候補から外れた値を除去する */
-    var validQ9 = S.helpers.q8DerivedOptions(answers);
-    if (answers.q9_favorite && validQ9.indexOf(answers.q9_favorite) === -1) answers.q9_favorite = '';
-    if (validQ9.length === 1 && !answers.q9_favorite) answers.q9_favorite = validQ9[0];
-    answers.q10_wear_self = (answers.q10_wear_self || []).filter(function (v) { return validQ9.indexOf(v) !== -1; });
-    answers.q10_wear_others = (answers.q10_wear_others || []).filter(function (v) { return validQ9.indexOf(v) !== -1; });
-
-    /* Q12を「興味はない」に変更した後（戻って変更した場合を含む）、
-       Q13で以前選んでいたロープ撮影・緊縛撮影が候補から消えても回答値に
-       残らないよう、候補外の選択値を除去する。 */
-    var validQ13 = S.helpers.q13Options(answers);
-    answers.q13_interest = (answers.q13_interest || []).filter(function (v) { return validQ13.indexOf(v) !== -1; });
+    /* Q12/Q13-A/Q13-B: Q11の選択肢が変わって候補から外れた値を除去する */
+    var validQ12 = S.helpers.q11DerivedOptions(answers);
+    if (answers.q12_favorite && validQ12.indexOf(answers.q12_favorite) === -1) answers.q12_favorite = '';
+    if (validQ12.length === 1 && !answers.q12_favorite) answers.q12_favorite = validQ12[0];
+    answers.q13a_wear_self = (answers.q13a_wear_self || []).filter(function (v) { return validQ12.indexOf(v) !== -1; });
+    answers.q13b_wear_others = (answers.q13b_wear_others || []).filter(function (v) { return validQ12.indexOf(v) !== -1; });
 
     var nextIds = next.map(function (s) { return s.id; });
     prevIds.forEach(function (id) {
@@ -424,6 +480,7 @@ window.__Survey = {};
   function renderRadio(step) {
     var panel = h('div');
     panel.appendChild(h('p', { class: 'q-title' }, step.title, badge(step.required)));
+    if (step.notice) panel.appendChild(h('div', { class: 'notice-box' }, h('p', { text: step.notice })));
     if (step.hint) panel.appendChild(h('p', { class: 'q-hint', text: step.hint }));
     var errEl = makeErrorEl();
     var optGroup = h('div', { class: 'opt-group' });
@@ -490,22 +547,22 @@ window.__Survey = {};
     };
   }
 
-  var Q19_GROUP_FIELDS = ['q19a', 'q19b', 'q19c', 'q19d', 'q19e', 'q19f'];
-  var Q19_EXCLUSIVE_VALUES = ['まだ分からない', '回答しない'];
+  var Q20_GROUP_FIELDS = ['q20a', 'q20b', 'q20c', 'q20d'];
+  var Q20_EXCLUSIVE_VALUES = ['まだ分からない', '回答しない'];
 
-  /* Q19は6画面（A〜F）に分けて表示しているが、設問としては1つ。
-     Fの「まだ分からない」「回答しない」は、A〜Eを含むQ19全体の他の選択肢と
-     同時選択できないようにする（Issueの受入条件）。 */
-  function enforceQ19CrossExclusive(changedField) {
-    var fHasExclusive = (answers.q19f || []).some(function (v) { return Q19_EXCLUSIVE_VALUES.indexOf(v) !== -1; });
-    if (changedField === 'q19f') {
-      if (fHasExclusive) {
-        Q19_GROUP_FIELDS.forEach(function (f) { if (f !== 'q19f') answers[f] = []; });
+  /* Q20はA〜D（4画面）に分けて表示しているが、設問としては1つ。
+     Dの「まだ分からない」「回答しない」は、A〜Cを含むQ20全体の他の選択肢と
+     同時選択できないようにする（Issue #107の受入条件）。 */
+  function enforceQ20CrossExclusive(changedField) {
+    var dHasExclusive = (answers.q20d || []).some(function (v) { return Q20_EXCLUSIVE_VALUES.indexOf(v) !== -1; });
+    if (changedField === 'q20d') {
+      if (dHasExclusive) {
+        Q20_GROUP_FIELDS.forEach(function (f) { if (f !== 'q20d') answers[f] = []; });
       }
       return;
     }
-    if ((answers[changedField] || []).length > 0 && fHasExclusive) {
-      answers.q19f = answers.q19f.filter(function (v) { return Q19_EXCLUSIVE_VALUES.indexOf(v) === -1; });
+    if ((answers[changedField] || []).length > 0 && dHasExclusive) {
+      answers.q20d = answers.q20d.filter(function (v) { return Q20_EXCLUSIVE_VALUES.indexOf(v) === -1; });
     }
   }
 
@@ -546,6 +603,22 @@ window.__Survey = {};
       checks.forEach(function (c) { c.checked = arr.indexOf(c.value) !== -1; });
     }
 
+    /* 特定の選択肢同士だけを排他にする（例: Q6「縛る・縛られる両方」は
+       「縛られる側」「縛る側」と同時選択できない）。exclusiveのような全体排他とは異なり、
+       ペア単位で衝突する組合せだけを解除する。 */
+    function applyConflictPairs(changedValue, isChecked) {
+      if (!step.conflictPairs || !isChecked) return;
+      var toRemove = [];
+      step.conflictPairs.forEach(function (pair) {
+        if (pair[0] === changedValue) toRemove.push(pair[1]);
+        else if (pair[1] === changedValue) toRemove.push(pair[0]);
+      });
+      if (!toRemove.length) return;
+      var arr = currentArr().filter(function (v) { return toRemove.indexOf(v) === -1; });
+      answers[step.field] = arr;
+      checks.forEach(function (c) { c.checked = arr.indexOf(c.value) !== -1; });
+    }
+
     var options = E.stepOptions(step);
     options.forEach(function (opt, i) {
       var id = step.id + '-opt-' + i;
@@ -558,7 +631,8 @@ window.__Survey = {};
         answers[step.field] = arr;
         E.markFormStarted();
         applyExclusive(opt, input.checked);
-        if (step.crossExclusive === 'q19') enforceQ19CrossExclusive(step.field);
+        applyConflictPairs(opt, input.checked);
+        if (step.crossExclusive === 'q20') enforceQ20CrossExclusive(step.field);
         clearError(errEl);
         syncOther();
       });
@@ -595,7 +669,7 @@ window.__Survey = {};
     var panel = h('div');
     panel.appendChild(h('p', { class: 'q-title' }, step.title, badge(step.required)));
     if (step.hint) panel.appendChild(h('p', { class: 'q-hint', text: step.hint }));
-    var ta = h('textarea', { class: 'q26', 'aria-label': step.title });
+    var ta = h('textarea', { class: 'q27', 'aria-label': step.title });
     ta.value = answers[step.field] || '';
     ta.addEventListener('input', function () { answers[step.field] = ta.value; E.markFormStarted(); });
     panel.appendChild(ta);
@@ -667,9 +741,9 @@ window.__Survey = {};
     progressCount.textContent = 'ステップ ' + (idx + 1) + ' / ' + plan.length;
     progressFill.style.width = Math.round(((idx + 1) / plan.length) * 100) + '%';
 
-    if (step.q19group) {
+    if (step.q20Group) {
       subprogress.hidden = false;
-      subprogress.textContent = 'Q19（' + step.q19group + '/6グループ）';
+      subprogress.textContent = 'Q20（' + step.q20Group + '/4グループ）';
     } else {
       subprogress.hidden = true;
     }
@@ -759,32 +833,41 @@ window.__Survey = {};
     return fd;
   }
 
+  /* 内部トリアージ用スコア。新Q番号の保存キーのみを参照する（旧保存キーは参照しない）。
+     配列フィールドは `|| []` で必ず配列化してから .indexOf() を呼び、
+     undefined.indexOf() のような例外を起こさない。 */
   function computeScore(a) {
     var score = 0;
     var youngAges = ['18〜24歳', '25〜29歳', '30〜34歳', '35〜39歳'];
+    var q14a = a.q14a_self || [];
+    var q14b = a.q14b_pref || [];
+    var q13a = a.q13a_wear_self || [];
+    var q11 = a.q11_uniform || [];
+    var q13 = a.q13_enjoy || [];
+    var q6 = a.q6_role || [];
+
     if (youngAges.indexOf(a.q1_age) !== -1) score += 2;
-    if (a.q5_exercise === '定期的にスポーツをしている' || a.q5_exercise === 'スポーツとトレーニングの両方をしている') score += 2;
-    if (a.q6_gym === '週4回以上') score += 3;
-    else if (a.q6_gym === '週2〜3回') score += 2;
-    if (a.q11a_self.indexOf('筋肉質だと思う') !== -1 || a.q11a_self.indexOf('がっしりした体格だと思う') !== -1) score += 2;
-    if (a.q11a_self.indexOf('自分が短髪・ベリーショート') !== -1) score += 1;
-    if (a.q11b_pref.indexOf('短髪・坊主・スポーツ刈りの男性が好き') !== -1 || a.q11b_pref.indexOf('短髪の男性を見たい') !== -1 || a.q11b_pref.indexOf('短髪の男性を撮影したい') !== -1) score += 1;
-    if (a.q12_gate === 'はい') score += 2;
-    else if (a.q12_gate === '内容による') score += 1;
-    if (a.q11a_self.indexOf('体育会系の雰囲気だと言われる') !== -1) score += 1;
-    if (a.q9_favorite === '野球') score += 3;
-    /* 「野球ユニを着たい／撮られたい」は自分で着たい（Q10-A）と、
-       野球が関心対象（Q8/Q9）かつユニフォーム姿で撮られたい（Q10）の両方を拾う。 */
-    var baseballWear = a.q10_wear_self.indexOf('野球') !== -1;
-    var baseballPortrait = (a.q8_uniform.indexOf('野球') !== -1 || a.q9_favorite === '野球') &&
-      a.q10_enjoy.indexOf('ユニフォーム姿で撮られたい') !== -1;
+    if (a.q8_exercise === '定期的にスポーツをしている' || a.q8_exercise === 'スポーツとトレーニングの両方をしている') score += 2;
+    if (a.q9_gym === '週4回以上') score += 3;
+    else if (a.q9_gym === '週2〜3回') score += 2;
+    if (q14a.indexOf('筋肉質だと思う') !== -1 || q14a.indexOf('がっしりした体格だと思う') !== -1) score += 2;
+    if (q14a.indexOf('自分が短髪・ベリーショート') !== -1) score += 1;
+    if (q14b.indexOf('短髪・坊主・スポーツ刈りの男性が好き') !== -1 || q14b.indexOf('短髪の男性を見たい') !== -1 || q14b.indexOf('短髪の男性を撮影したい') !== -1) score += 1;
+    if (a.q15_gate === 'はい') score += 2;
+    else if (a.q15_gate === '内容による') score += 1;
+    if (q14a.indexOf('体育会系の雰囲気だと言われる') !== -1) score += 1;
+    if (a.q12_favorite === '野球') score += 3;
+    /* 「野球ユニを着たい／撮られたい」は自分で着たい（Q13-A）と、
+       野球が関心対象（Q11/Q12）かつユニフォーム姿で撮られたい（Q13）の両方を拾う。 */
+    var baseballWear = q13a.indexOf('野球') !== -1;
+    var baseballPortrait = (q11.indexOf('野球') !== -1 || a.q12_favorite === '野球') && q13.indexOf('ユニフォーム姿で撮られたい') !== -1;
     if (baseballWear || baseballPortrait) score += 2;
-    if (a.q15_level === 'とても好き' || a.q15_level === '興味がある') score += 3;
-    if (a.q16_role.indexOf('縛られてみたい') !== -1 || a.q16_role.indexOf('縛る・縛られる両方に興味がある') !== -1) score += 2;
+    if (a.q4_interest === 'とても好き' || a.q4_interest === '興味がある') score += 3;
+    if (q6.indexOf('縛られる側に興味がある') !== -1 || q6.indexOf('縛る・縛られる両方に興味がある') !== -1) score += 2;
     var visitOk = ['日程が合えば', '内容が合えば', '参加者や雰囲気を確認できれば', '友人と一緒なら', '宿泊を伴っても'];
-    if (visitOk.indexOf(a.q21_visit) !== -1) score += 3;
-    if (a.q24_intent === '東京・大阪など遠方からでも内容次第で参加したい') score += 2;
-    if (a.q24_intent === '日程が合えば参加したい' || a.q24_intent === '東京・大阪など遠方からでも内容次第で参加したい') score += 3;
+    if (visitOk.indexOf(a.q22_visit) !== -1) score += 3;
+    if (a.q25_intent === '東京・大阪など遠方からでも内容次第で参加したい') score += 2;
+    if (a.q25_intent === '日程が合えば参加したい' || a.q25_intent === '東京・大阪など遠方からでも内容次第で参加したい') score += 3;
     return score;
   }
 
@@ -795,17 +878,28 @@ window.__Survey = {};
     return '一般回答';
   }
 
+  /* スコア計算は送信補助情報であり、必須条件ではない。例外が起きても
+     回答送信そのものは止めない（呼び出し側でnullを返し、以降はスコアなしで進める）。 */
+  function safeComputeScore(a) {
+    try { return computeScore(a); } catch (e) { return null; }
+  }
+  function safeRankFromScore(score) {
+    if (score === null || score === undefined) return null;
+    try { return rankFromScore(score); } catch (e) { return null; }
+  }
+
   /* 連絡先フォーム側（別モジュール）から、連絡希望+3の加点後スコアを再計算できるよう公開する。
      回答者の画面には一切表示しない（管理側のメール本文にのみ含める）。 */
-  S.scoring = { computeScore: computeScore, rankFromScore: rankFromScore };
+  S.scoring = { computeScore: computeScore, rankFromScore: rankFromScore, safeComputeScore: safeComputeScore, safeRankFromScore: safeRankFromScore };
 
   function branchLabel(a) {
     if (a.q1_age === '17歳以下') return 'underage';
     if (a.q2_gender === '女性' || a.q2_gender === 'その他') return 'female_other';
     if (a.q2_gender === '男性') {
-      if (a.q12_gate === '興味はない') return 'male_gate_no';
-      if (a.q15_level === 'あまり興味はない' || a.q15_level === '苦手') return 'male_low_interest';
-      return 'male_full';
+      if (a.q15_gate === '興味はない') return 'male_gate_no';
+      if (S.helpers.isLowInterest(a)) return 'male_low_interest';
+      if (S.helpers.gatePassed(a)) return 'male_full';
+      return 'male_no_gate_answer';
     }
     return 'unknown';
   }
@@ -821,7 +915,9 @@ window.__Survey = {};
     var plan = E.recomputePlan();
     var fd = collectFieldsForPlan(plan);
     var rid = E.getResponseId();
-    var score = computeScore(answers);
+    /* スコア計算で例外が発生しても送信データ自体は組み立てを継続する（#12） */
+    var score = safeComputeScore(answers);
+    var rank = safeRankFromScore(score);
     fd.append('_subject', '【アタル】アンケート回答');
     fd.append('_template', 'table');
     fd.append('_captcha', 'false');
@@ -829,8 +925,8 @@ window.__Survey = {};
     fd.append('response_id', rid);
     fd.append('送信日時', new Date().toISOString());
     fd.append('到達分岐', branchLabel(answers));
-    fd.append('内部スコア', String(score));
-    fd.append('内部判定', rankFromScore(score));
+    if (score !== null) fd.append('内部スコア', String(score));
+    if (rank !== null) fd.append('内部判定', rank);
 
     fetch(FORM_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
       .then(function (res) {
@@ -927,9 +1023,11 @@ window.__Survey = {};
 
     /* Issueのスコア定義「連絡希望＋連絡先送信：+3」。アンケート送信時点のスコアは
        確定済みで書き換えられないため、この連絡先メール側にのみ加点後の最終スコアを
-       含める（response_idでアンケート側のメールと突き合わせられる）。回答者には非表示。 */
-    var baseScore = S.scoring.computeScore(E.answers);
-    var finalScore = baseScore + 3;
+       含める（response_idでアンケート側のメールと突き合わせられる）。回答者には非表示。
+       スコア計算例外時（safeComputeScoreがnullを返す場合）は加点後スコアも送らない。 */
+    var baseScore = S.scoring.safeComputeScore(E.answers);
+    var finalScore = baseScore === null ? null : baseScore + 3;
+    var finalRank = S.scoring.safeRankFromScore(finalScore);
 
     var fd = new FormData();
     fd.append('_subject', '【アタル】アンケート回答者からの連絡先希望');
@@ -939,8 +1037,8 @@ window.__Survey = {};
     if (xVal) fd.append('Xアカウント', xVal);
     if (emailVal) fd.append('メールアドレス', emailVal);
     fd.append('希望内容', reqType);
-    fd.append('内部スコア_連絡先加点後', String(finalScore));
-    fd.append('内部判定_連絡先加点後', S.scoring.rankFromScore(finalScore));
+    if (finalScore !== null) fd.append('内部スコア_連絡先加点後', String(finalScore));
+    if (finalRank !== null) fd.append('内部判定_連絡先加点後', finalRank);
 
     leadSubmissionSeq += 1;
     var submissionToken = 'survey_lead_' + leadSubmissionSeq;
