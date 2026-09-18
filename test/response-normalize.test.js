@@ -238,14 +238,36 @@ test('Q11の候補が2件以上あるのにQ12が未回答だとmissingRequired�
   assert.ok(res.missingRequired.indexOf('Q12') !== -1, JSON.stringify(res.missingRequired));
 });
 
-test('Q11の候補が1件のみならQ12は必須にならない（クライアントの自動補完と同じ挙動）', function () {
+test('Q11の候補が1件のみならQ12は必須にならず、サーバー側でもその1件へ自動補完して保存する（PR #110レビュー対応）', function () {
   var raw = {
     q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
     q7_sports: ['野球・ソフトボール'], q8_exercise: '定期的にスポーツをしている', q9_gym: '週2〜3回',
     q11_uniform: ['野球'], q15_gate: '興味はない'
+    /* q12_favorite未送信 */
   };
   var res = norm.buildStorageRow(schema, raw);
   assert.ok(res.missingRequired.indexOf('Q12') === -1, JSON.stringify(res.missingRequired));
+  assert.strictEqual(res.row.q12_favorite, '野球', 'survey.jsのrecomputePlan()と同じ自動補完をサーバー側でも行う（公開集計のQ12割合が実回答とずれないように）');
+});
+
+test('Q11の候補が1件のみでも、クライアントが明示的にその値をQ12として送ってきた場合は当然そのまま保存される', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q7_sports: ['野球・ソフトボール'], q8_exercise: '定期的にスポーツをしている', q9_gym: '週2〜3回',
+    q11_uniform: ['野球'], q15_gate: '興味はない', q12_favorite: '野球'
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.row.q12_favorite, '野球');
+});
+
+test('Q12自動補完はQ11の「その他」自由記述込みラベルにも対応する', function () {
+  var raw = {
+    q1_age: '25〜29歳', q2_gender: '男性', q3_region: '東京都', q4_interest: '興味がある',
+    q7_sports: ['野球・ソフトボール'], q8_exercise: '定期的にスポーツをしている', q9_gym: '週2〜3回',
+    q11_uniform: ['その他'], q11_other: 'カヌー部の服', q15_gate: '興味はない'
+  };
+  var res = norm.buildStorageRow(schema, raw);
+  assert.strictEqual(res.row.q12_favorite, 'その他：カヌー部の服');
 });
 
 /* ── Q12/Q13-A/Q13-B: Q11由来の動的許可リストでの検証（PR #110レビュー対応） ── */

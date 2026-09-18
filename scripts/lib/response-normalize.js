@@ -160,6 +160,17 @@ function buildStorageRow(schema, rawAnswers) {
 
     var dynamicAllowed = q.optionsSource === 'dynamic:Q11' ? q11DerivedOptions(row) : null;
     var value = normalizeQuestionValue(q, safeRaw, dynamicAllowed);
+
+    /* survey.jsのrecomputePlan()は、Q11由来の候補がちょうど1件のとき、Q12のステップ自体を
+       計画に出さずに answers.q12_favorite へその1件を自動補完する
+       （`if (validQ12.length === 1 && !answers.q12_favorite) answers.q12_favorite = validQ12[0];`）。
+       GAS側で同じ補完をしないと、匿名直POSTでQ12を空欄のまま保存でき、Q12のtargetCount
+       （male_only）はそのまま母数に入るのに選択肢のどれにも計上されず、公開集計の
+       割合が実際のフォーム回答からずれてしまう。ここでフロントと同じ補完を行う。 */
+    if (q.id === 'Q12' && dynamicAllowed.length === 1 && !value) {
+      value = dynamicAllowed[0];
+    }
+
     row[q.storageField] = value;
     (q.freeTextFields || []).forEach(function (ft) {
       var triggered = q.type === 'multi' ? (Array.isArray(value) && value.indexOf(ft.trigger) !== -1) : value === ft.trigger;

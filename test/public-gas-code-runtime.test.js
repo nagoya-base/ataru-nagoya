@@ -230,6 +230,23 @@ test('Q11の候補が2件以上あり、Q12にQ11由来の値を回答すれば�
   assert.strictEqual(json.ok, true, JSON.stringify(json));
 });
 
+/* ── レビュー対応その3：Q11候補1件時のQ12サーバー側自動補完 ── */
+
+test('Q11の候補が1件だけならQ12未送信でも保存され、サーバー側でその1件へ自動補完される（公開集計のQ12割合が実回答とずれないように）', function () {
+  var ctx = loadCodeGsSandbox();
+  var out = ctx.sandbox.doPost(makePostEvent({
+    action: 'save_response',
+    answers: maleGateNoAnswers({ q11_uniform: ['野球'] }) /* q12_favorite未送信 */
+  }));
+  var json = JSON.parse(out.getContent());
+  assert.strictEqual(json.ok, true, JSON.stringify(json));
+
+  var sheet = ctx.spreadsheet.getSheetByName('responses');
+  var header = sheet._rows[0];
+  var dataRow = sheet._rows[1];
+  assert.strictEqual(dataRow[header.indexOf('q12_favorite')], '野球', 'Q11の唯一の候補へサーバー側でも自動補完される');
+});
+
 test('Q12にQ11で選んでいない値を注入しても保存されない（Q11由来の動的許可リストで検証）', function () {
   var ctx = loadCodeGsSandbox();
   var out = ctx.sandbox.doPost(makePostEvent({
