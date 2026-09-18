@@ -76,7 +76,7 @@ window.__Survey = {};
      デプロイ後に実際のURLへ置き換えること（手動設定が必要。README.md参照）。
      回答保存・リード保存の正本はこのGASであり、FORM_ENDPOINTは通知補助に過ぎない
      （Issue #104 追加指示5）。 */
-  var GAS_ENDPOINT = 'https://script.google.com/macros/s/REPLACE_WITH_DEPLOYED_ATARU_SURVEY_PUBLIC_ID/exec';
+  var GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx4AZkbIbJwpMUeraaKQGOtbd7dEYGWjXAgSlkAd-AR1f39XMxVCxaXSVfm6wEWl7qy2Q/exec';
 
   /* GASへのPOSTは text/plain でJSON文字列を送る（Content-Type: application/jsonにすると
      クロスオリジンPOSTがプリフライト(OPTIONS)を要求し、GAS Web Appは安定して応答できない。
