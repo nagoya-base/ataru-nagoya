@@ -815,7 +815,7 @@
 
       <div id="ef-success" class="cf-result cf-result--success" role="status" aria-live="polite" tabindex="-1" hidden>
         <p><strong>送信を受け付けました。</strong></p>
-        <p>この時点では参加は確定していません（縛り手希望の方は特に事前承認が必要です）。内容を確認し、通常24時間以内に希望した方法でご連絡します。</p>
+        <p>この時点では参加は確定していません（縛り手希望の方は特に事前承認が必要です）。内容を確認し、希望した方法で順次ご連絡します。開催日が近いイベントのため、返信までのお日にちには余裕を持ってお待ちください。</p>
         <p>返信がない場合は、迷惑メールフォルダやDM受信設定をご確認のうえ、<a href="https://x.com/ataru_nawa2020" target="_blank" rel="noopener noreferrer">X（@ataru_nawa2020）</a>のDMでもご連絡ください。</p>
       </div>
 
@@ -928,13 +928,13 @@
             <p class="cf-error" id="ef-agree-condition-error" hidden></p>
           </div>
           <div class="cf-field">
-            <label class="cf-checkbox-option"><input type="checkbox" id="ef-agree-privacy" name="プライバシーの確認" value="確認した" required> 撮影の同意とSNS掲載・第三者共有の同意は別であり、いただいた情報は参加調整のみに使用し、無断公開・共有しないことに同意します。</label>
+            <label class="cf-checkbox-option"><input type="checkbox" id="ef-agree-privacy" name="プライバシーの確認" value="確認した" required> 撮影の同意とSNS掲載・第三者共有の同意は別であること、この申込みフォームの送信には送信代行サービス「FormSubmit」を利用しており入力内容がそのシステムを経由して主催者に届くこと、主催者はいただいた情報を参加調整以外の目的に使用せず本人の許可なく公開・共有しないことに同意します。</label>
             <p class="cf-error" id="ef-agree-privacy-error" hidden></p>
           </div>
         </fieldset>
 
         <button type="submit" class="btn btn-primary cf-submit" id="ef-submit-btn">この内容で参加を申し込む</button>
-        <p class="cf-privacy-note">お名前はニックネーム可。いただいた情報は本イベントの参加調整のみに使用し、第三者への提供や無断公開は一切行いません。フォーム送信にはFormSubmitを利用します。</p>
+        <p class="cf-privacy-note">お名前はニックネーム可。このフォームの送信には送信代行サービス「FormSubmit」を利用しており、入力内容は主催者へ届けるためにFormSubmitを経由します。主催者は、いただいた情報を本イベントの参加調整以外の目的に使用せず、本人の許可なく外部に公開・共有しません。</p>
       </form>
     </div>
   </div>
@@ -1098,12 +1098,20 @@
       headers: { Accept: 'application/json' }
     })
       .then(function (response) {
-        if (!response.ok) {
-          var err = new Error('送信に失敗しました');
-          err.errorType = 'server';
-          throw err;
-        }
-        return response.json();
+        /* HTTPステータスだけでなく、FormSubmitのレスポンス本文(success)を見て
+           実際に受付できたかどうかを判定する。JSONとして解釈できない場合や
+           success が true/"true" 以外の場合は失敗として扱う。 */
+        return response.json()
+          .catch(function () {
+            throw Object.assign(new Error('サーバーからの応答を解釈できませんでした'), { errorType: 'server' });
+          })
+          .then(function (data) {
+            var accepted = response.ok && data && (data.success === true || data.success === 'true');
+            if (!accepted) {
+              throw Object.assign(new Error('送信は受け付けられませんでした'), { errorType: 'server' });
+            }
+            return data;
+          });
       })
       .then(function () {
         if (!leadSent) {
