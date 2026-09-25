@@ -228,9 +228,22 @@
 
 <script>
   (function () {
+    /* ?next= で遷移先を指定できる（例：イベント特設ページから来た場合はそのページへ戻す）。
+       外部URL・パストラバーサルは許可せず、安全な相対パスのみ受け付ける。未指定・不正な値は
+       従来どおり main.html にフォールバックする。 */
+    function getRedirectTarget() {
+      var params = new URLSearchParams(window.location.search);
+      var next = params.get('next');
+      if (next && /^[A-Za-z0-9_\-.\/]+$/.test(next) && next.indexOf('..') === -1 && next.indexOf('//') !== 0) {
+        return next;
+      }
+      return 'main.html';
+    }
+    var redirectTarget = getRedirectTarget();
+
     // すでに同意済みなら本ページにリダイレクト
     if (sessionStorage.getItem('ataru_age_verified')) {
-      location.replace('main.html');
+      location.replace(redirectTarget);
     }
 
     document.getElementById('btn-enter').addEventListener('click', function () {
@@ -238,7 +251,7 @@
       /* 年齢確認を通過した数（分析用イベント）。gtag は sendBeacon で送るため
          直後に遷移しても送信される。送信可否に関わらず遷移は必ず実行する。 */
       if (window.AtaruAnalytics) window.AtaruAnalytics.track('cta_click', { cta_name: 'age_verified', cta_location: 'age_gate' });
-      location.replace('main.html');
+      location.replace(redirectTarget);
     });
   })();
 </script>
