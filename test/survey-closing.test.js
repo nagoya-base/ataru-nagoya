@@ -139,3 +139,16 @@ test('締切日時は survey.js の1か所だけで管理され、HTMLに重複�
   assert.equal(js.split('2026-10-05T00:00:00+09:00').length - 1, 1);
   assert.equal(html.indexOf('2026-10-05'), -1);
 });
+
+test('H2. 回答済みCookie/localStorageを持つブラウザでも、締切後の新規ロードは screen-closed', function () {
+  var cookieOnly = dom.loadSurvey({ now: AFTER, cookie: 'ataru_survey_v1_answered=1' });
+  assert.equal(cookieOnly.S.dedup.isAlreadyAnswered(), true, '前提: 回答済みと判定される');
+  assert.deepEqual(screens(cookieOnly), { intro: false, survey: false, complete: false, closed: true });
+
+  var lsOnly = dom.loadSurvey({ now: AFTER, localStorage: { ataru_survey_v1: JSON.stringify({ answered: true }) } });
+  assert.deepEqual(screens(lsOnly), { intro: false, survey: false, complete: false, closed: true });
+
+  /* 締切前なら従来どおり回答済み完了画面 */
+  var before = dom.loadSurvey({ now: BEFORE, cookie: 'ataru_survey_v1_answered=1' });
+  assert.deepEqual(screens(before), { intro: false, survey: false, complete: true, closed: false });
+});

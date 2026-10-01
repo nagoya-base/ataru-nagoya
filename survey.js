@@ -941,14 +941,15 @@ window.__Survey = {};
   /* 再訪時：Cookie/localStorageのどちらかで回答済みと判定できれば、通常フォームを一切
      開始させず、完了画面（回答済みメッセージ・結果を見る・開催案内/相談導線）を表示する
      （Issue #104 1章「再訪時」。通常利用者向けの「もう一度回答する」ボタンは設置しない）。 */
-  if (S.dedup.isAlreadyAnswered()) {
+  /* 締切後の初期表示は回答済みかどうかより締切判定を優先する（Issue #119）。 */
+  if (S.closing.isClosed()) {
+    showOnly(screenClosed);
+  } else if (S.dedup.isAlreadyAnswered()) {
     var heading = document.getElementById('complete-heading');
     var body = document.getElementById('complete-body');
     if (heading) heading.textContent = 'このブラウザではすでに回答済みです。';
     if (body) body.textContent = 'ご協力ありがとうございました。下の「結果を見る」から現在の集計結果をご覧いただけます。開催案内・個別相談をご希望の場合は「開催案内・個別相談を希望する」からご連絡先をお送りください。';
     showOnly(screenComplete);
-  } else if (S.closing.isClosed()) {
-    showOnly(screenClosed);
   }
 
   /* 締切到来時の再判定。まだ screen-survey に入っていない開きっぱなしタブ
