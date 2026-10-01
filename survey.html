@@ -190,6 +190,18 @@ textarea.q27 { width: 100%; padding: 0.8rem; border: 1px solid var(--border); bo
       <div id="lead-result" hidden></div>
     </div>
   </section>
+
+  <!-- ── CLOSED（回答受付終了。締切時刻は survey.js の SURVEY_CLOSE_AT で一元管理） ── -->
+  <section id="screen-closed" class="card" hidden>
+    <h1>回答受付は終了しました</h1>
+    <div class="notice-box">
+      <p>たくさんのご回答ありがとうございました。</p>
+      <p>集計結果は結果ページからご覧いただけます。</p>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="survey-results.html" data-ga-event="cta_click" data-ga-location="survey_closed" data-ga-type="results_link">アンケート結果を見る</a>
+    </div>
+  </section>
 </div>
 
 <script src="analytics.js"></script>

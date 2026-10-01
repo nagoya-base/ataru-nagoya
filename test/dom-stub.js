@@ -81,7 +81,7 @@ function createDocument() {
       if (!idMap[id]) {
         idMap[id] = createElement('div');
         idMap[id].id = id;
-        if (id === 'screen-underage' || id === 'screen-survey' || id === 'screen-complete') {
+        if (id === 'screen-underage' || id === 'screen-survey' || id === 'screen-complete' || id === 'screen-closed') {
           idMap[id].hidden = true;
         }
       }
@@ -93,7 +93,12 @@ function createDocument() {
       if (selector === 'input[name="lead-request"]') return leadRequestRadios;
       return [];
     },
-    addEventListener: function () {},
+    _listeners: {},
+    addEventListener: function (type, fn) {
+      if (!doc._listeners[type]) doc._listeners[type] = [];
+      doc._listeners[type].push(fn);
+    },
+    visibilityState: 'visible',
     body: createElement('body')
   };
   return doc;
@@ -127,10 +132,26 @@ function loadSurvey(opts) {
      プロトタイプになる。ここで外側realmのArrayを渡してしまうと、
      survey.js内で作られる配列は依然としてvm自身のArray.prototypeを使うため、
      テスト側からのプロトタイプ操作（breakArrayIndexOf等）が効かなくなる。 */
+  /* 現在時刻を固定・操作できるDateを注入する（Issue #119 仮締めの境界テスト用）。
+     opts.now を省略した場合は締切前（2026-09-01 JST）に固定し、実際の時計が締切を
+     過ぎても既存テストが締切表示に変わらないようにする。 */
+  var nowMs = opts.now !== undefined ? opts.now : Date.parse('2026-09-01T00:00:00+09:00');
+  var RealDate = Date;
+  function FakeDate() {
+    if (!(this instanceof FakeDate)) return new RealDate(nowMs).toString();
+    var args = Array.prototype.slice.call(arguments);
+    return args.length ? new (Function.prototype.bind.apply(RealDate, [null].concat(args)))() : new RealDate(nowMs);
+  }
+  FakeDate.now = function () { return nowMs; };
+  FakeDate.parse = RealDate.parse;
+  FakeDate.UTC = RealDate.UTC;
+  FakeDate.prototype = RealDate.prototype;
+
   var sandbox = {
     document: document,
     console: console,
-    setTimeout: setTimeout
+    setTimeout: setTimeout,
+    Date: FakeDate
   };
   sandbox.window = sandbox;
   sandbox.window.crypto = { randomUUID: function () { return 'test-uuid-0000-0000'; } };
@@ -170,6 +191,7 @@ function loadSurvey(opts) {
     S: sandbox.window.__Survey,
     fetchCalls: fetchCalls,
     setFetchImpl: function (fn) { fetchImpl = fn; },
+    setNow: function (ms) { nowMs = ms; },
     setAnalyticsSpy: function (calls) {
       sandbox.window.AtaruAnalytics = {
         track: function (name, params) { calls.push({ name: name, params: params || {} }); },

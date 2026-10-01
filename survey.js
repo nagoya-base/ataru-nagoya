@@ -812,6 +812,25 @@ window.__Survey = {};
   S.renderStep = renderStep;
 })();
 
+/* ── 回答受付の仮締め（Issue #119 PR A） ──
+   締切日時はここ1か所だけで管理する（JST固定のオフセット付きISO文字列なので端末のTZに依存しない）。
+   10/4いっぱい受付、10/5 0:00 JST で終了。GAS側の save_response は止めない（本締めは別PR）。 */
+(function () {
+  'use strict';
+  var SURVEY_CLOSE_AT = '2026-10-05T00:00:00+09:00';
+  var CLOSE_AT_MS = Date.parse(SURVEY_CLOSE_AT);
+
+  /* nowMs を引数で注入できる純関数。境界ちょうど（nowMs === 締切）は終了扱い。 */
+  function isSurveyClosed(nowMs) { return nowMs >= CLOSE_AT_MS; }
+
+  window.__Survey.closing = {
+    SURVEY_CLOSE_AT: SURVEY_CLOSE_AT,
+    CLOSE_AT_MS: CLOSE_AT_MS,
+    isSurveyClosed: isSurveyClosed,
+    isClosed: function () { return isSurveyClosed(Date.now()); }
+  };
+})();
+
 /* ── ナビゲーション制御 ── */
 (function () {
   'use strict';
@@ -823,6 +842,7 @@ window.__Survey = {};
   var screenUnderage = document.getElementById('screen-underage');
   var screenSurvey = document.getElementById('screen-survey');
   var screenComplete = document.getElementById('screen-complete');
+  var screenClosed = document.getElementById('screen-closed');
   var stepPanel = document.getElementById('step-panel');
   var btnBack = document.getElementById('btn-back');
   var btnNext = document.getElementById('btn-next');
@@ -832,9 +852,13 @@ window.__Survey = {};
   var subprogress = document.getElementById('subprogress');
 
   var currentValidate = null;
+  var answeringInThisTab = false;
 
   function showOnly(el) {
-    [screenIntro, screenUnderage, screenSurvey, screenComplete].forEach(function (s) { s.hidden = (s !== el); });
+    [screenIntro, screenUnderage, screenSurvey, screenComplete, screenClosed].forEach(function (s) { s.hidden = (s !== el); });
+    /* 入力中の権利はこのタブのメモリ上だけに持つ（永続保存しない）。screen-survey に
+       到達した時点で立て、再読み込み・再訪・別タブでは当然リセットされる。 */
+    if (el === screenSurvey) answeringInThisTab = true;
   }
 
   function renderCurrent() {
@@ -900,6 +924,8 @@ window.__Survey = {};
   }
 
   document.getElementById('btn-start').addEventListener('click', function () {
+    /* 締切後にタイマー/visibilitychange 前の開きっぱなしタブから開始されても終了画面にする */
+    if (S.closing.isClosed()) { showOnly(screenClosed); return; }
     E.setSurveyStarted(true);
     E.setCurrentIndex(0);
     renderCurrent();
@@ -921,7 +947,31 @@ window.__Survey = {};
     if (heading) heading.textContent = 'このブラウザではすでに回答済みです。';
     if (body) body.textContent = 'ご協力ありがとうございました。下の「結果を見る」から現在の集計結果をご覧いただけます。開催案内・個別相談をご希望の場合は「開催案内・個別相談を希望する」からご連絡先をお送りください。';
     showOnly(screenComplete);
+  } else if (S.closing.isClosed()) {
+    showOnly(screenClosed);
   }
+
+  /* 締切到来時の再判定。まだ screen-survey に入っていない開きっぱなしタブ
+     （screen-intro 表示中）だけを終了画面へ切り替える。入力中のタブ・送信完了後の
+     画面（complete/underage）は触らない。 */
+  function enforceClosing() {
+    if (!S.closing.isClosed() || answeringInThisTab) return;
+    if (!screenIntro.hidden) showOnly(screenClosed);
+  }
+  S.closing.enforce = enforceClosing;
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'hidden') enforceClosing();
+  });
+
+  /* 低頻度のタイマー（締切までの残り時間で1回だけ。長い場合は1時間ごとに張り直す）。 */
+  function armClosingTimer() {
+    var remain = S.closing.CLOSE_AT_MS - Date.now();
+    if (remain <= 0) { enforceClosing(); return; }
+    var t = setTimeout(armClosingTimer, Math.min(remain + 50, 60 * 60 * 1000));
+    if (t && typeof t.unref === 'function') t.unref();
+  }
+  armClosingTimer();
 })();
 
 /* ── 回答送信 ── */
