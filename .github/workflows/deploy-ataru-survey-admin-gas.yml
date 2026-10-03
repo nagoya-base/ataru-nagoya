@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CLASP_VERSION: '2.4.2'
+  CLASP_VERSION: '3.4.1'
 
 jobs:
   deploy:

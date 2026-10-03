@@ -68,7 +68,7 @@ Webアプリとしてデプロイする際は、必ず次の設定にするこ�
 管理GASを自動で更新する（Issue #123）。PRでは実行されず、GASは更新されない。
 
 - 対象: `gas/ataru_survey_admin/**` / `survey-schema.json` / `scripts/sync-survey-schema.js`
-- 流れ: スキーマ同期チェック → `node --test` → `clasp push` → **既存deploymentを更新**
+- 流れ: スキーマ同期チェック → `node --test` → `clasp push` → **既存deploymentを更新**（clasp `3.4.1` 固定）
 - 新規Web Appは作らないため、`/exec` URL と「Execute as: Me / Only myself」は維持される
 - GASへ送るのは `Code.gs` / `SurveySchema.gs` / `Dashboard*.html` / `appsscript.json` のみ
 - Actionsの「Run workflow」（`workflow_dispatch`）から手動再実行もできる
