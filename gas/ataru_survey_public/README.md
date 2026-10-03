@@ -54,6 +54,16 @@ Issue #104 で追加する、`survey.html` / `survey.js` のPOST先となる**�
 6. デプロイ後のWeb App URLを `survey.js` の `GAS_ENDPOINT` 定数、
    `survey-results.js` の `GAS_RESULTS_ENDPOINT` 定数へ設定する。
 
+## 自動デプロイ（GitHub Actions）
+
+`main` へ公開GAS関連ファイルの変更が入ると、`.github/workflows/deploy-ataru-survey-public-gas.yml` が
+**既存のWeb App deploymentを更新**する（新規deploymentは作らない。`/exec` URLとアクセス設定は維持）。
+PRでは実行されない。Actionsの「Run workflow」から手動実行も可能。
+
+- 流れ: スキーマ同期チェック → `node --test` → `clasp push` → `clasp deploy --deploymentId` → 本番APIの `overview.Q1` 検証
+- 必要なSecrets: `CLASPRC_JSON` / `ATARU_SURVEY_PUBLIC_SCRIPT_ID` / `ATARU_SURVEY_PUBLIC_DEPLOYMENT_ID`
+- Secretの値はGit・Issue・PR・チャットへ貼らないこと。
+
 ## API仕様
 
 ### `GET ?action=results`
