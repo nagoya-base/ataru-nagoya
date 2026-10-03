@@ -62,6 +62,33 @@ Webアプリとしてデプロイする際は、必ず次の設定にするこ�
 
 4. Webアプリとして新規デプロイし、上記の「デプロイ設定」の通りに設定する。
 
+## 自動デプロイ（GitHub Actions）
+
+`main` へ次のファイルの変更が入ると、`.github/workflows/deploy-ataru-survey-admin-gas.yml` が
+管理GASを自動で更新する（Issue #123）。PRでは実行されず、GASは更新されない。
+
+- 対象: `gas/ataru_survey_admin/**` / `survey-schema.json` / `scripts/sync-survey-schema.js`
+- 流れ: スキーマ同期チェック → `node --test` → `clasp push` → **既存deploymentを更新**
+- 新規Web Appは作らないため、`/exec` URL と「Execute as: Me / Only myself」は維持される
+- GASへ送るのは `Code.gs` / `SurveySchema.gs` / `Dashboard*.html` / `appsscript.json` のみ
+- Actionsの「Run workflow」（`workflow_dispatch`）から手動再実行もできる
+- 公開アンケートGASは対象外
+
+### 初回のみ：GitHub Actions Secretsの登録
+
+リポジトリの Settings → Secrets and variables → Actions に次の3つを登録する。
+未設定の場合、workflowは明示的にfailし、GASは更新されない。
+
+| Secret名 | 内容 |
+| --- | --- |
+| `CLASPRC_JSON` | `clasp login` で生成される `~/.clasprc.json` の中身 |
+| `ATARU_SURVEY_ADMIN_SCRIPT_ID` | 既存の管理GASのscriptId |
+| `ATARU_SURVEY_ADMIN_DEPLOYMENT_ID` | 現在の管理Web AppのdeploymentId |
+
+登録後、`workflow_dispatch` で1回実行し、既存の `/exec` URLで表示を確認すること。
+
+> **注意**: Secretの値はGit・Issue・PR・チャットへ貼らないこと。
+
 ## 読み取り専用であることの保証
 
 - `Code.gs` は `SpreadsheetApp` の読み取り系メソッド

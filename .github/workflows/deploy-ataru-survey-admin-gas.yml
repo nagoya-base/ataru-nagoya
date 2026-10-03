@@ -1,0 +1,98 @@
+name: deploy-ataru-survey-admin-gas
+
+# 管理者GAS（gas/ataru_survey_admin）を、mainへのマージ後に既存のWeb Appへ自動反映する。
+# - PRでは実行しない（GASを更新しない）
+# - 新規deploymentは作らず、既存deploymentを更新して /exec URL とアクセス設定を維持する
+# - 公開アンケートGAS（gas/ataru_survey_public）は対象外
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'gas/ataru_survey_admin/**'
+      - 'survey-schema.json'
+      - 'scripts/sync-survey-schema.js'
+      - '.github/workflows/deploy-ataru-survey-admin-gas.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-ataru-survey-admin-gas
+  cancel-in-progress: false
+
+env:
+  CLASP_VERSION: '2.4.2'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify survey-schema.json generates no diff (sync check)
+        run: node scripts/sync-survey-schema.js --check
+
+      - name: Run tests
+        run: node --test
+
+      - name: Verify required secrets are set
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.ATARU_SURVEY_ADMIN_SCRIPT_ID }}
+          DEPLOYMENT_ID: ${{ secrets.ATARU_SURVEY_ADMIN_DEPLOYMENT_ID }}
+        run: |
+          missing=0
+          for name in CLASPRC_JSON SCRIPT_ID DEPLOYMENT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret for ${name} is not set (see gas/ataru_survey_admin/README.md)"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Stage GAS files
+        run: |
+          set -euo pipefail
+          src=gas/ataru_survey_admin
+          dist="$RUNNER_TEMP/ataru_survey_admin_dist"
+          mkdir -p "$dist"
+          for f in Code.gs SurveySchema.gs Dashboard.html DashboardStyles.html DashboardScript.html appsscript.json; do
+            cp "$src/$f" "$dist/$f"
+          done
+          echo "GAS_DIST=$dist" >> "$GITHUB_ENV"
+
+      - name: Configure clasp
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.ATARU_SURVEY_ADMIN_SCRIPT_ID }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$SCRIPT_ID"
+          umask 077
+          printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
+          printf '{"scriptId":"%s","rootDir":"."}\n' "$SCRIPT_ID" > "$GAS_DIST/.clasp.json"
+
+      - name: Install clasp
+        run: npm install --global "@google/clasp@${CLASP_VERSION}"
+
+      - name: clasp push
+        working-directory: ${{ env.GAS_DIST }}
+        run: clasp push --force
+
+      - name: Update existing deployment
+        working-directory: ${{ env.GAS_DIST }}
+        env:
+          DEPLOYMENT_ID: ${{ secrets.ATARU_SURVEY_ADMIN_DEPLOYMENT_ID }}
+        run: |
+          echo "::add-mask::$DEPLOYMENT_ID"
+          clasp deploy --deploymentId "$DEPLOYMENT_ID" --description "ataru-survey-admin ${GITHUB_SHA}"
+
+      - name: Remove clasp credentials
+        if: always()
+        run: rm -f "$HOME/.clasprc.json" "$GAS_DIST/.clasp.json"
