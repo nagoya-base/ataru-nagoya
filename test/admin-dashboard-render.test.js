@@ -159,3 +159,26 @@ test('スタイル: スマホ用メディアクエリと横スクロール維持
   assert.ok(/\.cross-table-wrap \{[^}]*overflow-x: auto/.test(css));
   assert.ok(/\.bar-fill/.test(css));
 });
+
+function labels(card) {
+  return byClass(card, 'bar-item').map(function (i) { return text(byClass(i, 'bar-label')[0]); });
+}
+
+test('単純集計: 回答人数の降順・同数は元順維持・0件も残る (Q1〜Q26)', function () {
+  var d = baseData();
+  d.simpleAggregates.Q1 = { targetCount: 120, counts: { A: 10, B: 50, C: 30, D: 30, E: 0 } };
+  var r = loadDashboard(d);
+  var card = byClass(r.ids['simple-cards'], 'q-card')[0];
+  assert.deepStrictEqual(labels(card), ['B', 'C', 'D', 'A', 'E']);
+  var values = byClass(card, 'bar-value').map(text);
+  assert.deepStrictEqual(values.slice(0, 2), ['50人 / 41.7%', '30人 / 25%']);
+  assert.strictEqual(values[4], '0人 / 0%');
+  assert.strictEqual(width(byClass(card, 'bar-fill')[0]), 'width:41.7%');
+});
+
+test('日別回答数は件数順に並べ替えず日付昇順のまま', function () {
+  var d = baseData();
+  d.simpleAggregates.Q1 = { targetCount: 10, counts: { A: 1, B: 9 } };
+  var r = loadDashboard(d);
+  assert.deepStrictEqual(labels(r.ids['stage-counts']), ['2026-09-22', '2026-09-23', '2026-09-24']);
+});
