@@ -69,6 +69,14 @@
       stageBox.appendChild(dateBars);
     }
 
+    /* 単純集計の選択肢を回答人数の降順に並べる。同数は元の選択肢順を維持し、0件も残す。 */
+    function optionsByCountDesc(counts) {
+      return Object.keys(counts).map(function (opt, i) {
+        return { opt: opt, count: Number(counts[opt]) || 0, index: i };
+      }).sort(function (a, b) { return (b.count - a.count) || (a.index - b.index); })
+        .map(function (x) { return x.opt; });
+    }
+
     function renderSimpleAggregates(simpleAggregates, questions) {
       var container = document.getElementById('simple-cards');
       questions.forEach(function (q) {
@@ -81,7 +89,7 @@
         card.appendChild(title);
         card.appendChild(el('div', { class: 'target', text: '対象回答者数（targetCount）: ' + agg.targetCount + '人' }));
         var list = el('div', { class: 'bar-list' });
-        Object.keys(agg.counts).forEach(function (opt) {
+        optionsByCountDesc(agg.counts).forEach(function (opt) {
           var count = agg.counts[opt];
           var pct = agg.targetCount ? Math.round((count / agg.targetCount) * 1000) / 10 : 0;
           list.appendChild(barItem(opt, count + '人 / ' + pct + '%', barPercent(count, agg.targetCount)));
