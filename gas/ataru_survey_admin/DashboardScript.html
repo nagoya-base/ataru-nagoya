@@ -24,6 +24,23 @@
       return el('span', { class: 'badge ' + m[0], text: m[1] });
     }
 
+    /* 横棒グラフ用の幅(%)。0〜100に丸め、NaN/Infinityは0にする。 */
+    function barPercent(value, total) {
+      var v = Number(value);
+      var t = Number(total);
+      if (!isFinite(v) || !isFinite(t) || t <= 0 || v <= 0) return 0;
+      return Math.min(100, Math.round((v / t) * 1000) / 10);
+    }
+
+    function barItem(label, valueText, widthPct) {
+      return el('div', { class: 'bar-item' },
+        el('div', { class: 'bar-meta' },
+          el('span', { class: 'bar-label', text: label }),
+          el('span', { class: 'bar-value', text: valueText })),
+        el('div', { class: 'bar-track', 'aria-hidden': 'true' },
+          el('div', { class: 'bar-fill', style: 'width:' + widthPct + '%' })));
+    }
+
     function renderSummary(summary) {
       var row = document.getElementById('stat-row');
       [
@@ -42,11 +59,14 @@
       });
       stageBox.appendChild(table);
 
-      var dateTable = el('table', { class: 'agg-table' }, el('tr', {}, el('th', { text: '日付' }), el('th', { text: '回答数' })));
-      Object.keys(summary.byDate).sort().forEach(function (d) {
-        dateTable.appendChild(el('tr', {}, el('td', { text: d }), el('td', { text: String(summary.byDate[d]) })));
+      var dates = Object.keys(summary.byDate).sort();
+      var maxCount = 0;
+      dates.forEach(function (d) { if (Number(summary.byDate[d]) > maxCount) maxCount = Number(summary.byDate[d]); });
+      var dateBars = el('div', { class: 'bar-list date-bars' }, el('h3', { text: '日別回答数' }));
+      dates.forEach(function (d) {
+        dateBars.appendChild(barItem(d, String(summary.byDate[d]) + '件', barPercent(summary.byDate[d], maxCount)));
       });
-      stageBox.appendChild(dateTable);
+      stageBox.appendChild(dateBars);
     }
 
     function renderSimpleAggregates(simpleAggregates, questions) {
@@ -60,13 +80,13 @@
         if (badge) title.appendChild(badge);
         card.appendChild(title);
         card.appendChild(el('div', { class: 'target', text: '対象回答者数（targetCount）: ' + agg.targetCount + '人' }));
-        var table = el('table', { class: 'agg-table' }, el('tr', {}, el('th', { text: '選択肢' }), el('th', { text: '人数' }), el('th', { text: '割合' })));
+        var list = el('div', { class: 'bar-list' });
         Object.keys(agg.counts).forEach(function (opt) {
           var count = agg.counts[opt];
           var pct = agg.targetCount ? Math.round((count / agg.targetCount) * 1000) / 10 : 0;
-          table.appendChild(el('tr', {}, el('td', { text: opt }), el('td', { text: String(count) }), el('td', { text: pct + '%' })));
+          list.appendChild(barItem(opt, count + '人 / ' + pct + '%', barPercent(count, agg.targetCount)));
         });
-        card.appendChild(table);
+        card.appendChild(list);
         container.appendChild(card);
       });
     }
@@ -77,7 +97,7 @@
       var colKeys = {};
       Object.keys(cells).forEach(function (a) { Object.keys(cells[a]).forEach(function (b) { colKeys[b] = true; }); });
       var cols = Object.keys(colKeys);
-      var table = el('table', { class: 'agg-table' });
+      var table = el('table', { class: 'agg-table cross-table' });
       var headRow = el('tr', {}, el('th', { text: '' }));
       cols.forEach(function (c) { headRow.appendChild(el('th', { text: c })); });
       table.appendChild(headRow);
