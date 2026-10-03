@@ -167,3 +167,69 @@ test('APIレスポンスを正常取得した場合、init()経由でresult-root
     } catch (e) { done(e); }
   }, 10);
 });
+
+/* ---- 棒グラフ＋人数降順表示 ---- */
+function renderBlocks(overviewQ1, extra) {
+  var ctx = loadResultsScript(fakeFetchOk({}));
+  var root = ctx.document.getElementById('result-root');
+  var hid = { hidden: true, targetCount: 3 };
+  ctx.R.renderResultData(root, Object.assign({
+    effectiveCount: 200, gateOpen: false, overviewLowN: false,
+    overview: { Q1: overviewQ1, Q3: hid, Q4: hid }, suppressionApplied: false
+  }, extra || {}));
+  return root;
+}
+function cls(el, c) { return !!el.className && el.className.split(' ').indexOf(c) >= 0; }
+function rows(root) { return findAll(root, function (e) { return cls(e, 'opt-row'); }); }
+function rowName(r) { return textOf(findAll(r, function (e) { return cls(e, 'opt-name'); })[0]); }
+function rowNum(r) { return textOf(findAll(r, function (e) { return cls(e, 'opt-num'); })[0]); }
+function rowWidth(r) { return findAll(r, function (e) { return cls(e, 'result-bar-fill'); })[0].attributes.style; }
+function opts(list) { return list.map(function (x) { return { value: x[0], count: x[1], pct: x[2] }; }); }
+
+test('options: count降順・同数は元順維持・0件も残り・元配列は不変', function () {
+  var options = opts([['A', 10, 0.1], ['B', 50, 0.5], ['C', 30, 0.3], ['D', 30, 0.3], ['E', 0, 0]]);
+  var root = renderBlocks({ hidden: false, targetCount: 100, options: options, otherSmall: null });
+  assert.deepStrictEqual(rows(root).map(rowName), ['B', 'C', 'D', 'A', 'E']);
+  assert.deepStrictEqual(options.map(function (o) { return o.value; }), ['A', 'B', 'C', 'D', 'E']);
+});
+
+test('棒: pct=0.5→50%、pct=0→0%、異常値でも0〜100%、人数・割合テキストも残る', function () {
+  var root = renderBlocks({ hidden: false, targetCount: 100, otherSmall: null,
+    options: opts([['半分', 50, 0.5], ['ゼロ', 0, 0], ['超過', 40, 1.7], ['非数', 1, NaN], ['無限', 1, Infinity], ['負', 1, -0.2]]) });
+  var byName = {};
+  rows(root).forEach(function (r) { byName[rowName(r)] = r; });
+  assert.strictEqual(rowWidth(byName['半分']), 'width:50%');
+  assert.strictEqual(rowWidth(byName['ゼロ']), 'width:0%');
+  assert.strictEqual(rowWidth(byName['超過']), 'width:100%');
+  assert.strictEqual(rowWidth(byName['非数']), 'width:0%');
+  assert.strictEqual(rowWidth(byName['無限']), 'width:0%');
+  assert.strictEqual(rowWidth(byName['負']), 'width:0%');
+  assert.strictEqual(rowNum(byName['半分']), '50人（50%）');
+  findAll(root, function (e) { return cls(e, 'result-bar-track'); }).forEach(function (t) {
+    assert.strictEqual(t.attributes['aria-hidden'], 'true');
+  });
+  assert.ok(!/NaN|Infinity/.test(textOf(root)));
+});
+
+test('otherSmallは人数が最大でも末尾固定で、棒も出る', function () {
+  var root = renderBlocks({ hidden: false, targetCount: 100,
+    options: opts([['A', 5, 0.05], ['B', 20, 0.2]]), otherSmall: { count: 60, pct: 0.6 } });
+  var r = rows(root);
+  assert.deepStrictEqual(r.map(rowName), ['B', 'A', 'その他少数']);
+  assert.strictEqual(rowNum(r[2]), '60人（60%）');
+  assert.strictEqual(rowWidth(r[2]), 'width:60%');
+});
+
+test('hidden blockは棒を生成しない', function () {
+  var root = renderBlocks({ hidden: true, targetCount: 3 });
+  assert.strictEqual(rows(root).length, 0);
+  assert.strictEqual(findAll(root, function (e) { return cls(e, 'result-bar-fill'); }).length, 0);
+});
+
+test('detailブロックも降順で棒表示される', function () {
+  var root = renderBlocks({ hidden: true, targetCount: 3 }, {
+    gateOpen: true,
+    detail: { Q7: { hidden: false, targetCount: 60, label: 'L', otherSmall: null, options: opts([['x', 1, 0.1], ['y', 9, 0.9]]) } }
+  });
+  assert.deepStrictEqual(rows(root).map(rowName), ['y', 'x']);
+});

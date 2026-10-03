@@ -48,24 +48,44 @@ window.__SurveyResults = {};
   }
 
   function pctText(pct) {
-    return Math.round((pct || 0) * 1000) / 10 + '%';
+    var v = Number(pct);
+    return Math.round((isFinite(v) ? v : 0) * 1000) / 10 + '%';
+  }
+
+  /* 公開APIが返したpct（0〜1の比率）を棒幅(%)へ。NaN/Infinity/負値は0、100%超は100にクランプ。 */
+  function barWidth(pct) {
+    var v = Number(pct);
+    if (!isFinite(v) || v <= 0) return 0;
+    return Math.min(100, Math.round(v * 1000) / 10);
+  }
+
+  function optionRow(name, count, pct) {
+    return h('div', { class: 'opt-row' },
+      h('div', { class: 'opt-meta' },
+        h('span', { class: 'opt-name', text: name }),
+        h('span', { class: 'opt-num', text: count + '人（' + pctText(pct) + '）' })),
+      h('div', { class: 'result-bar-track', 'aria-hidden': 'true' },
+        h('div', { class: 'result-bar-fill', style: 'width:' + barWidth(pct) + '%' })));
+  }
+
+  /* 公開済みoptionsを人数の降順に並べる。同数はAPIが返した元順を維持し、元配列は変更しない。 */
+  function optionsByCountDesc(options) {
+    return (options || []).map(function (o, i) {
+      return { o: o, i: i, c: Number(o.count) || 0 };
+    }).sort(function (a, b) { return (b.c - a.c) || (a.i - b.i); })
+      .map(function (x) { return x.o; });
   }
 
   function renderOptionList(block) {
     var wrap = h('div');
-    (block.options || []).forEach(function (o) {
-      wrap.appendChild(h('div', { class: 'opt-row' },
-        h('span', { class: 'opt-name', text: o.value }),
-        h('span', { class: 'opt-num', text: o.count + '人（' + pctText(o.pct) + '）' })
-      ));
+    optionsByCountDesc(block.options).forEach(function (o) {
+      wrap.appendChild(optionRow(o.value, o.count, o.pct));
     });
+    /* otherSmallは少数カテゴリをまとめたプライバシー保護用バケットなので、順位に混ぜず常に末尾。 */
     if (block.otherSmall) {
-      wrap.appendChild(h('div', { class: 'opt-row' },
-        h('span', { class: 'opt-name', text: 'その他少数' }),
-        h('span', { class: 'opt-num', text: block.otherSmall.count + '人（' + pctText(block.otherSmall.pct) + '）' })
-      ));
+      wrap.appendChild(optionRow('その他少数', block.otherSmall.count, block.otherSmall.pct));
     }
-    if (!block.options.length && !block.otherSmall) {
+    if (!(block.options || []).length && !block.otherSmall) {
       wrap.appendChild(h('p', { class: 'hidden-note', text: 'まだ回答数が少ないため、内訳は表示していません。' }));
     }
     return wrap;
