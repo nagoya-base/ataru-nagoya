@@ -167,9 +167,9 @@ test('excluded=trueの行は有効回答数・公開集計から除外される'
 
 /* ── Q1/Q3の公開表示バケット化 ── */
 
-test('Q1は50〜59歳・60歳以上を「50歳以上」へ統合して公開する', function () {
+test('Q1は50〜59歳・60歳以上を分離して公開する', function () {
   /* 他の年代バケットにも十分な人数（>=5）を割り当て、0件バケットの追加抑制に
-     巻き込まれず「50歳以上」バケットがそのまま公開されることを検証する。 */
+     巻き込まれず各バケットがそのまま公開されることを検証する。 */
   var rows = rowsOf(60, { q1_age: '50〜59歳' })
     .concat(rowsOf(50, { q1_age: '60歳以上' }))
     .concat(rowsOf(10, { q1_age: '18〜24歳' }))
@@ -179,11 +179,28 @@ test('Q1は50〜59歳・60歳以上を「50歳以上」へ統合して公開す�
     .concat(rowsOf(10, { q1_age: '40〜49歳' }))
     .concat(rowsOf(10, { q1_age: '回答しない' }));
   var result = pub.buildPublicResult(rows, schema);
+  var opts = result.overview.Q1.options;
+  var values = opts.map(function (o) { return o.value; });
+  assert.ok(values.indexOf('50歳以上') === -1);
+  var a = opts.filter(function (o) { return o.value === '50〜59歳'; })[0];
+  var b = opts.filter(function (o) { return o.value === '60歳以上'; })[0];
+  assert.strictEqual(a.count, 60);
+  assert.strictEqual(b.count, 50);
+});
+
+test('Q1の60歳以上が5人未満なら単独では公開されずマスキングされる', function () {
+  var rows = rowsOf(60, { q1_age: '50〜59歳' })
+    .concat(rowsOf(3, { q1_age: '60歳以上' }))
+    .concat(rowsOf(10, { q1_age: '18〜24歳' }))
+    .concat(rowsOf(10, { q1_age: '25〜29歳' }))
+    .concat(rowsOf(10, { q1_age: '30〜34歳' }))
+    .concat(rowsOf(10, { q1_age: '35〜39歳' }))
+    .concat(rowsOf(10, { q1_age: '40〜49歳' }))
+    .concat(rowsOf(10, { q1_age: '回答しない' }));
+  var result = pub.buildPublicResult(rows, schema);
   var values = result.overview.Q1.options.map(function (o) { return o.value; });
-  assert.ok(values.indexOf('50歳以上') !== -1);
-  assert.ok(values.indexOf('50〜59歳') === -1 && values.indexOf('60歳以上') === -1);
-  var bucket = result.overview.Q1.options.filter(function (o) { return o.value === '50歳以上'; })[0];
-  assert.strictEqual(bucket.count, 110);
+  assert.ok(values.indexOf('60歳以上') === -1);
+  assert.ok(result.overview.Q1.otherSmall);
 });
 
 test('Q3は大分類（東海/関東/関西/その他国内/海外）へ丸めて公開し、自由記述地域名は含まれない', function () {
