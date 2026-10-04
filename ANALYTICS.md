@@ -47,6 +47,7 @@ GA4 管理画面 →「管理」→「データの表示」→「イベント」
 | `outbound_contact_click`（`channel: x`） | X のリンクをクリックした時（補助成果）。送信エラー時の最終手段リンクも含む |
 | `cta_click`（`cta_name: age_verified`） | 年齢確認ページで「入る」を押した時 |
 | `cta_click`（`cta_name: contact_form`） | ヒーロー・料金・FAQ等の「予約・相談する」系CTAをクリックした時 |
+| `cta_click`（`cta_name: survey_results`, `cta_location: contents`） | 「読みもの / Contents」（`#contents`）の「アンケート結果を読む →」をクリックした時 |
 | `form_start`（`form_name: ataru_contact`） | フォームの最初の入力・選択をした時、1 回 |
 | `form_error`（`form_name: ataru_contact`） | フォーム送信のバリデーションエラー時（`error_type: required`）・送信失敗時（`server` / `network`） |
 
