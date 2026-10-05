@@ -54,6 +54,25 @@ Issue #104 で追加する、`survey.html` / `survey.js` のPOST先となる**�
 6. デプロイ後のWeb App URLを `survey.js` の `GAS_ENDPOINT` 定数、
    `survey-results.js` の `GAS_RESULTS_ENDPOINT` 定数へ設定する。
 
+## 本締め（受付停止）手順（Issue #119）
+
+回答の受付だけを止める。コードの再デプロイ・新規deployment・`/exec` URLの変更は不要
+（Script Propertiesは保存した時点で既存deploymentへ反映される）。
+
+1. Apps Script
+2. → プロジェクトの設定
+3. → スクリプト プロパティ
+4. → `SURVEY_CLOSED` = `true` を追加（または更新）して保存
+
+| `SURVEY_CLOSED` | `save_response` | `save_lead` | `GET ?action=results` |
+| --- | --- | --- | --- |
+| `true`（文字列の完全一致） | **拒否** `{ "ok": false, "error": "survey_closed" }` | 受付 | 利用可 |
+| `false` / 未設定 / その他の値 | 受付 | 受付 | 利用可 |
+
+- 拒否は保存処理（回答検証・シート書き込み）へ入る前に行う。
+- 受付を再開する場合は `SURVEY_CLOSED` を `false` にするか、プロパティを削除する。
+- 本締めの確定順序（フロント側の表示切替など）は別PRで扱う。このフラグはGAS側の受付停止機構のみ。
+
 ## 自動デプロイ（GitHub Actions）
 
 `main` へ公開GAS関連ファイルの変更が入ると、`.github/workflows/deploy-ataru-survey-public-gas.yml` が
@@ -99,6 +118,8 @@ PRでは実行されない。Actionsの「Run workflow」から手動実行も�
 - Q12 / Q13-A / Q13-B（`optionsSource: "dynamic:Q11"`）は、固定の許可リストではなく
   「その回答者が実際にQ11で選んだ値（＋「その他」の自由記述込み表示ラベル）」だけを
   許可値として検証する（survey.jsの`q11DerivedOptions()`と同じ導出ロジックをGAS側でも使う）。
+
+`SURVEY_CLOSED=true` の間は上記の検証より前に `{ "ok": false, "error": "survey_closed" }` を返す（「本締め」節参照）。
 
 成功時の戻り値：`{ "ok": true, "response_id": "...", "saved_at": "...", "completion_stage": "...", "excluded": false }`
 

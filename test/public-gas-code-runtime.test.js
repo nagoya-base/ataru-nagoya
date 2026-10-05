@@ -64,7 +64,7 @@ function createFakeSpreadsheet() {
   };
 }
 
-function loadCodeGsSandbox() {
+function loadCodeGsSandbox(extraProps) {
   var ss = createFakeSpreadsheet();
   var uuidSeq = 0;
 
@@ -72,7 +72,10 @@ function loadCodeGsSandbox() {
     console: console,
     PropertiesService: {
       getScriptProperties: function () {
-        return { getProperty: function (key) { return key === 'SPREADSHEET_ID' ? 'FAKE_SPREADSHEET_ID' : null; } };
+        return { getProperty: function (key) {
+            if (key === 'SPREADSHEET_ID') return 'FAKE_SPREADSHEET_ID';
+            return extraProps && Object.prototype.hasOwnProperty.call(extraProps, key) ? extraProps[key] : null;
+          } };
       }
     },
     SpreadsheetApp: { openById: function () { return ss; } },
@@ -415,4 +418,47 @@ test('未知のactionはエラーJSONを返す', function () {
   var out = ctx.sandbox.doPost(makePostEvent({ action: 'delete_everything' }));
   var json = JSON.parse(out.getContent());
   assert.strictEqual(json.ok, false);
+});
+
+/* ── 本締め（Issue #119 B1）：Script Properties の SURVEY_CLOSED ── */
+test('SURVEY_CLOSED=true なら save_response は保存前に survey_closed で拒否される', function () {
+  var ctx = loadCodeGsSandbox({ SURVEY_CLOSED: 'true' });
+  var out = ctx.sandbox.doPost(makePostEvent({ action: 'save_response', answers: femaleAnswers() }));
+  assert.deepEqual(JSON.parse(out.getContent()), { ok: false, error: 'survey_closed' });
+  assert.strictEqual(ctx.spreadsheet.getSheetByName('responses'), null, 'シートの作成・書き込みも行わない');
+});
+
+test('SURVEY_CLOSED=true なら不正な回答でも検証より先に survey_closed が返る', function () {
+  var ctx = loadCodeGsSandbox({ SURVEY_CLOSED: 'true' });
+  var out = ctx.sandbox.doPost(makePostEvent({ action: 'save_response', answers: {} }));
+  assert.strictEqual(JSON.parse(out.getContent()).error, 'survey_closed');
+});
+
+test('SURVEY_CLOSED=false なら save_response は従来どおり保存できる', function () {
+  var ctx = loadCodeGsSandbox({ SURVEY_CLOSED: 'false' });
+  var json = JSON.parse(ctx.sandbox.doPost(makePostEvent({ action: 'save_response', answers: femaleAnswers() })).getContent());
+  assert.strictEqual(json.ok, true);
+  assert.strictEqual(ctx.spreadsheet.getSheetByName('responses')._rows.length, 2);
+});
+
+test('SURVEY_CLOSED 未設定なら save_response は従来どおり保存できる', function () {
+  var ctx = loadCodeGsSandbox();
+  var json = JSON.parse(ctx.sandbox.doPost(makePostEvent({ action: 'save_response', answers: femaleAnswers() })).getContent());
+  assert.strictEqual(json.ok, true);
+});
+
+test('SURVEY_CLOSED=true でも save_lead は拒否されず保存される', function () {
+  var ctx = loadCodeGsSandbox({ SURVEY_CLOSED: 'true' });
+  var json = JSON.parse(ctx.sandbox.doPost(makePostEvent({ action: 'save_lead', x_account: '@example', requested_content: '開催案内' })).getContent());
+  assert.strictEqual(json.ok, true);
+  assert.strictEqual(ctx.spreadsheet.getSheetByName('leads')._rows.length, 2);
+});
+
+test('SURVEY_CLOSED=true でも GET results は利用できる', function () {
+  var ctx = loadCodeGsSandbox({ SURVEY_CLOSED: 'true' });
+  var json = JSON.parse(ctx.sandbox.doGet({ parameter: { action: 'results' } }).getContent());
+  assert.notStrictEqual(json.error, 'survey_closed');
+  assert.ok(json.overview, 'overviewを含む公開集計が返る');
+  var json2 = JSON.parse(ctx.sandbox.doGet({}).getContent());
+  assert.ok(json2.overview);
 });
