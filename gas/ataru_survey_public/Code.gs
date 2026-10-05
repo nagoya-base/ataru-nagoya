@@ -92,6 +92,13 @@ function rowArrayFromObject_(headers, dataObj, delimiter) {
   });
 }
 
+/* 本締め（Issue #119）：Script Properties の SURVEY_CLOSED が文字列 "true" のときだけ
+   save_response を受け付けない。未設定・"false"・その他の値は従来どおり受け付ける。
+   save_lead と GET results はこのフラグの影響を受けない。 */
+function isSurveyClosed_() {
+  return PropertiesService.getScriptProperties().getProperty('SURVEY_CLOSED') === 'true';
+}
+
 function jsonOutput_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -237,6 +244,7 @@ function doPost(e) {
 
   try {
     if (payload.action === 'save_response') {
+      if (isSurveyClosed_()) return jsonOutput_({ ok: false, error: 'survey_closed' });
       return jsonOutput_(saveResponse_(payload));
     }
     if (payload.action === 'save_lead') {
