@@ -73,6 +73,33 @@ Issue #104 で追加する、`survey.html` / `survey.js` のPOST先となる**�
 - 受付を再開する場合は `SURVEY_CLOSED` を `false` にするか、プロパティを削除する。
 - 本締めの確定順序（フロント側の表示切替など）は別PRで扱う。このフラグはGAS側の受付停止機構のみ。
 
+## 本締め後の最終JSON固定手順（Issue #119）
+
+本締めでは、**先にGASの回答受付を停止してから**公開集計を固定する。順序を逆にすると、
+スナップショット取得後に回答が追加される可能性があるため禁止する。
+
+1. Script Propertiesで `SURVEY_CLOSED=true` を保存する。
+2. 本番Web Appへ `save_response` をPOSTし、`{ "ok": false, "error": "survey_closed" }` を確認する。
+3. 同じ本番Web Appの `GET ?action=results` を取得する。
+4. 取得した公開集計JSONを、再集計・補正せず `data/survey-results-final.json` として保存する。
+5. トップレベル構造は維持し、`result` でラップしない。追加メタ情報は `snapshot` のみとする。
+6. `survey-results.js` は `data/survey-results-final.json` を最優先で取得し、404またはfetch自体の失敗時だけGASへフォールバックする。
+7. 最終JSON追加後は、GAS側の回答数が変化しても公開ページの表示値は固定JSONにより変化しない。
+
+2026年10月5日の確定スナップショットは以下を使用する。
+
+```json
+"snapshot": {
+  "closed_at": "2026-10-05T14:47:46+09:00",
+  "source": "ataru_survey_public?action=results"
+}
+```
+
+最終JSONには、公開集計APIが返した範囲以外の値を追加しない。特に `leads`、Xアカウント、
+メールアドレス、個票の `response_id`、admin_only / never_public、自由記述本文、responsesシートの
+生データを含めないこと。`test/survey-results-final.test.js` でトップレベルのホワイトリストと
+代表的な非公開キーの混入を検査する。
+
 ## 自動デプロイ（GitHub Actions）
 
 `main` へ公開GAS関連ファイルの変更が入ると、`.github/workflows/deploy-ataru-survey-public-gas.yml` が
@@ -167,6 +194,7 @@ node --test test/
   `buildPublicResult` / `buildStorageRow` がReferenceErrorなく動作することを検証
 - `test/public-gas-privacy.test.js` — 公開集計コードパスがleads・admin_onlyへ
   一切アクセスしないことの静的・実行検証
+- `test/survey-results-final.test.js` — 最終JSON優先・GASフォールバック条件・スナップショットと公開キーの検証
 
 ## デプロイ後の手動確認（実Spreadsheet・実デプロイが前提のため、コードレビュー時点では確認不能）
 
